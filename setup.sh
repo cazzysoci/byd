@@ -305,7 +305,7 @@ var (
 		{"Sec-CH-UA-Platform-Version": `"15.0.0"`},
 		{"Sec-CH-UA-WoW64": "?0"},
 		{"Sec-GPC": "1"},
-		{"SourceMap": ""https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/react.js.map""},
+		{"SourceMap": "https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/react.js.map"},
 		{"Accept-Push-Policy": "no-push"},
 		{"Accept-Signature": "sig1"},
 		{"P3P": "CP=\"This is not a P3P policy!\""},
