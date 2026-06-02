@@ -694,7 +694,7 @@ func generateCacheBust() string {
 
 func generatePath() string {
 	paths := []string{
-		"/", "/index.html", "/home", "/main", "/default", "/welcome",
+		"/", "/index.html", "/home", "/main", "/default", "/welcome", "/about", "/news", "/#", "/opinion",
 		"/api/v1/users", "/api/v1/data", "/api/v2/info", "/api/v3/status",
 		"/api/v4/health", "/api/v5/metrics", "/api/v6/events",
 		"/wp-admin", "/admin", "/login", "/dashboard", "/control-panel",
