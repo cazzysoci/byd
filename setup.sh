@@ -644,7 +644,7 @@ func randomReferer() string {
 	
 	paths := []string{
 		"/", "/search", "/results", "/page", "/home", "/explore", "/trending",
-		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed",
+		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed", "/about", "/#",
 		"/discover", "/top", "/latest", "/random", "/featured", "/viral",
 	}
 	
