@@ -33,7 +33,6 @@ import (
 	"bufio"
 	"crypto/rand"
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"math/big"
