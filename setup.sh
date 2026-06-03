@@ -34,11 +34,9 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"compress/gzip"
 	"context"
 	"crypto/rand"
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"math/big"
@@ -48,7 +46,6 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -967,7 +964,6 @@ echo
 # Download dependencies
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
 go get golang.org/x/net@v0.24.0 > /dev/null 2>&1
-go get golang.org/x/crypto@v0.22.0 > /dev/null 2>&1
 echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
 echo
 
