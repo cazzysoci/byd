@@ -610,7 +610,6 @@ func generateRandomUA() string {
 	// Firefox versions (2025-2026)
 	firefoxMajor := randInt(135, 165)
 	firefoxMinor := randInt(0, 9)
-	firefoxPatch := randInt(0, 99)
 	firefoxVersion := fmt.Sprintf("%d.%d", firefoxMajor, firefoxMinor)
 	
 	// Edge versions (2025-2026)
