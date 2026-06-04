@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ----------------------------------------
-# GO DOS TOOL - ULTIMATE BYPASS (FULLY FIXED)
+# GO DOS TOOL - ULTIMATE BYPASS (WORKING)
 # ----------------------------------------
 
 RED='\033[0;31m'
@@ -23,7 +23,7 @@ echo
 
 rm -f main.go
 
-echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with MAXIMUM bypass features...${NC}"
+echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go...${NC}"
 
 cat > main.go << 'EOF'
 package main
@@ -1016,10 +1016,10 @@ go mod init main > /dev/null 2>&1
 echo -e " ${GREEN}✓ Module initialized${NC}"
 echo
 
-# Download dependencies
+# Download dependencies with proper versions
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
-go get -u golang.org/x/net 2>&1 | grep -v "go: downloading" || true
-go get -u github.com/chromedp/chromedp 2>&1 | grep -v "go: downloading" || true
+go get golang.org/x/net@v0.24.0 2>&1 | grep -v "go: downloading" || true
+go get github.com/chromedp/chromedp@v0.9.5 2>&1 | grep -v "go: downloading" || true
 echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
 echo
 
@@ -1073,8 +1073,8 @@ else
     echo -e " ${YELLOW}➤${NC} ${YELLOW}Run these commands manually:${NC}"
     echo
     echo -e "   ${BLUE}1.${NC} go mod init main"
-    echo -e "   ${BLUE}2.${NC} go get -u golang.org/x/net"
-    echo -e "   ${BLUE}3.${NC} go get -u github.com/chromedp/chromedp"
+    echo -e "   ${BLUE}2.${NC} go get golang.org/x/net@v0.24.0"
+    echo -e "   ${BLUE}3.${NC} go get github.com/chromedp/chromedp@v0.9.5"
     echo -e "   ${BLUE}4.${NC} go mod tidy"
     echo -e "   ${BLUE}5.${NC} go build -o main main.go"
     echo
