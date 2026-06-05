@@ -872,6 +872,7 @@ echo
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
 go get -u golang.org/x/net@v0.24.0
 go get -u golang.org/x/text@v0.14.0
+go get -u golang.org/x/crypto@v0.22.0
 echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
 echo
 
@@ -892,16 +893,22 @@ go mod download
 echo -e " ${GREEN}✓ Dependencies verified${NC}"
 echo
 
+# Verify go.sum exists and has entries
+if [ ! -f "go.sum" ]; then
+    echo -e " ${YELLOW}➤${NC} ${YELLOW}go.sum missing, running go get again...${NC}"
+    go get -u all
+fi
+
 # Compile
 echo -e " ${YELLOW}➤${NC} ${GREEN}Compiling...${NC}"
-go build -o main main.go
+go build -v -o main main.go
 
 if [ $? -eq 0 ]; then
     chmod +x main
     echo -e " ${GREEN}✓ Compilation successful!${NC}"
     echo
     
-    # Cleanup
+    # Cleanup source file (keep binary)
     echo -e " ${YELLOW}➤${NC} ${GREEN}Cleaning up...${NC}"
     rm -f main.go
     echo -e " ${GREEN}✓ Cleanup complete${NC}"        
@@ -935,14 +942,20 @@ if [ $? -eq 0 ]; then
 else
     echo -e " ${RED}✗ Compilation failed${NC}"
     echo
+    echo -e " ${YELLOW}➤${NC} ${YELLOW}Diagnostic information:${NC}"
+    echo -e "   Go version: $(go version)"
+    echo -e "   Module file contents:"
+    cat go.mod 2>/dev/null || echo "   No go.mod file"
+    echo
     echo -e " ${YELLOW}➤${NC} ${GREEN}Try running these commands manually:${NC}"
     echo
     echo -e "   ${BLUE}1.${NC} go mod init main"
     echo -e "   ${BLUE}2.${NC} go get -u golang.org/x/net@v0.24.0"
     echo -e "   ${BLUE}3.${NC} go get -u golang.org/x/text@v0.14.0"
-    echo -e "   ${BLUE}4.${NC} go mod tidy"
-    echo -e "   ${BLUE}5.${NC} go mod download"
-    echo -e "   ${BLUE}6.${NC} go build -o main main.go"
+    echo -e "   ${BLUE}4.${NC} go get -u golang.org/x/crypto@v0.22.0"
+    echo -e "   ${BLUE}5.${NC} go mod tidy"
+    echo -e "   ${BLUE}6.${NC} go mod download"
+    echo -e "   ${BLUE}7.${NC} go build -v -o main main.go"
     echo
     rm -f main.go
     exit 1
