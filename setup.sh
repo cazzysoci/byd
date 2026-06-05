@@ -219,7 +219,7 @@ var (
 	"xh-ZA,xh;q=0.8",
 	"yo-NG,yo;q=0.8",
 	"zgh-MA,zgh;q=0.8",
-	"zu-ZA,zu;q=0.8",
+	"zu-ZA,zu;q=0.8,
 	}
 
 	acceptHeaders = []string{
@@ -1048,10 +1048,15 @@ go mod init main > /dev/null 2>&1
 echo -e " ${GREEN}✓ Module initialized${NC}"
 echo
 
-# Download dependencies
+# Download dependencies with proper handling
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
-go get golang.org/x/net@v0.24.0 > /dev/null 2>&1
-echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
+go get -v golang.org/x/net@v0.24.0 > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
+else
+    echo -e " ${YELLOW}⚠ Trying fallback method...${NC}"
+    go get -u golang.org/x/net > /dev/null 2>&1
+fi
 echo
 
 # Tidy up
@@ -1060,6 +1065,12 @@ go mod tidy > /dev/null 2>&1
 echo -e " ${GREEN}✓ Tidy complete${NC}"
 echo
 
+# Verify module files exist
+if [ ! -f "go.mod" ]; then
+    echo -e " ${RED}✗ go.mod not found${NC}"
+    exit 1
+fi
+
 echo -e "${CYAN}${SEP}${NC}"
 echo -e "${WHITE}  COMPILATION PROCESS${NC}"
 echo -e "${CYAN}${SEP}${NC}"
@@ -1067,7 +1078,7 @@ echo
 
 # Compile
 echo -e " ${YELLOW}➤${NC} ${GREEN}Compiling...${NC}"
-go build -o main main.go
+go build -v -o main main.go
 
 if [ $? -eq 0 ]; then
     chmod +x main
@@ -1105,4 +1116,4 @@ else
     echo
     rm -f main.go
     exit 1
-fi 
+fi
