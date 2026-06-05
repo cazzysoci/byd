@@ -34,11 +34,8 @@ cat > main.go << 'EOF'
 package main
 
 import (
-	"bytes"
-	"compress/gzip"
 	"crypto/rand"
 	"crypto/tls"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"math/big"
@@ -306,7 +303,7 @@ func (p *ConnectionPool) createClient() *http.Client {
 					DisableCompression:  false,
 				}
 				http2.ConfigureTransport(transport)
-				return &http.Client{Transport: transport, Timeout: 30 * time.Second, Jar: jar, CheckRedirect: nil}
+				return &http.Client{Transport: transport, Timeout: 30 * time.Second, Jar: jar}
 			}
 		}
 	}
@@ -321,10 +318,9 @@ func (p *ConnectionPool) createClient() *http.Client {
 		DisableCompression:     false,
 		ResponseHeaderTimeout:  10 * time.Second,
 		ExpectContinueTimeout:  1 * time.Second,
-		TLSNextProto:           make(map[string]func(authority string, c *tls.Conn) http.RoundTripper),
 	}
 	http2.ConfigureTransport(transport)
-	return &http.Client{Transport: transport, Timeout: 30 * time.Second, Jar: jar, CheckRedirect: nil}
+	return &http.Client{Transport: transport, Timeout: 30 * time.Second, Jar: jar}
 }
 
 func (p *ConnectionPool) GetClient() *http.Client {
@@ -872,21 +868,28 @@ go mod init main > /dev/null 2>&1
 echo -e " ${GREEN}✓ Module initialized${NC}"
 echo
 
-# Download dependencies
+# Download dependencies with proper module resolution
 echo -e " ${YELLOW}➤${NC} ${GREEN}Downloading dependencies...${NC}"
-go get golang.org/x/net@v0.24.0 > /dev/null 2>&1
+go get -u golang.org/x/net@v0.24.0
+go get -u golang.org/x/text@v0.14.0
 echo -e " ${GREEN}✓ Dependencies downloaded${NC}"
 echo
 
-# Tidy up
+# Tidy up and verify
 echo -e " ${YELLOW}➤${NC} ${GREEN}Running go mod tidy...${NC}"
-go mod tidy > /dev/null 2>&1
+go mod tidy
 echo -e " ${GREEN}✓ Tidy complete${NC}"
 echo
 
 echo -e "${CYAN}${SEP}${NC}"
 echo -e "${WHITE}  COMPILATION PROCESS${NC}"
 echo -e "${CYAN}${SEP}${NC}"
+echo
+
+# Download missing dependencies explicitly
+echo -e " ${YELLOW}➤${NC} ${GREEN}Ensuring all dependencies are downloaded...${NC}"
+go mod download
+echo -e " ${GREEN}✓ Dependencies verified${NC}"
 echo
 
 # Compile
@@ -900,7 +903,7 @@ if [ $? -eq 0 ]; then
     
     # Cleanup
     echo -e " ${YELLOW}➤${NC} ${GREEN}Cleaning up...${NC}"
-    rm -f main.go go.mod go.sum
+    rm -f main.go
     echo -e " ${GREEN}✓ Cleanup complete${NC}"        
     echo
     echo -e "${CYAN}${SEP}${NC}"
@@ -935,9 +938,11 @@ else
     echo -e " ${YELLOW}➤${NC} ${GREEN}Try running these commands manually:${NC}"
     echo
     echo -e "   ${BLUE}1.${NC} go mod init main"
-    echo -e "   ${BLUE}2.${NC} go get golang.org/x/net@v0.24.0"
-    echo -e "   ${BLUE}3.${NC} go mod tidy"
-    echo -e "   ${BLUE}4.${NC} go build -o main main.go"
+    echo -e "   ${BLUE}2.${NC} go get -u golang.org/x/net@v0.24.0"
+    echo -e "   ${BLUE}3.${NC} go get -u golang.org/x/text@v0.14.0"
+    echo -e "   ${BLUE}4.${NC} go mod tidy"
+    echo -e "   ${BLUE}5.${NC} go mod download"
+    echo -e "   ${BLUE}6.${NC} go build -o main main.go"
     echo
     rm -f main.go
     exit 1
